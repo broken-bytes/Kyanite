@@ -125,7 +125,7 @@ target_include_directories(Rendering PUBLIC internal)
 
 target_link_libraries(
     Rendering
-    PRIVATE
+    PUBLIC
     glm::glm
 )
 

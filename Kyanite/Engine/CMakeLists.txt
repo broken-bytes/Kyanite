@@ -12,6 +12,8 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(glm CONFIG REQUIRED)
+
 add_library(
     Kyanite-Runtime
     SHARED
@@ -23,10 +25,12 @@ target_include_directories(
     ${SDL_INCLUDE_DIRS}
 )
 
+target_link_libraries(Kyanite-Runtime PUBLIC glm::glm)
+
 target_include_directories(Kyanite-Runtime PUBLIC include/Engine)
 
 target_include_directories(Kyanite-Runtime PRIVATE
-  ${CMAKE_SOURCE_DIR}/Kyanite/internal/Rendering/include
+  ${CMAKE_SOURCE_DIR}/Kyanite/Rendering/include
 )
 
 target_include_directories(Kyanite-Runtime PRIVATE

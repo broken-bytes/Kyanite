@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <memory>
-#include <CommandQueue.hxx>
-#include <RenderTarget.hxx>
+#include "CommandQueue.hxx"
+#include "RenderTarget.hxx"
 
 namespace Renderer {
     class SwapChain {

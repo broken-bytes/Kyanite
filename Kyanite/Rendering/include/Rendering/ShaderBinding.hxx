@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <GraphicsPipelineState.hxx>
-#include <Shader.hxx>
+#include "GraphicsPipelineState.hxx"
+#include "Shader.hxx"
 
 namespace Renderer {
     class GraphicsShaderBinding {

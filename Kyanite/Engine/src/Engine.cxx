@@ -1,4 +1,5 @@
 #include "Engine.hxx"
+#include "Rendering/Interface.hxx"
 
 // --- Reference Functions ---
  void AddRef(NativeRef* objc) {}
