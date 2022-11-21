@@ -1,28 +1,30 @@
 cmake_minimum_required(VERSION 3.20)
 
+if (MSVC_VERSION GREATER_EQUAL "1900")
+    include(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("/std:c++20" _cpp_latest_flag_supported)
+    if (_cpp_latest_flag_supported)
+        add_compile_options("/std:c++latest")
+    endif()
+endif()
+
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 add_executable(
     Kyanite
     Main.cxx
 )
 
-target_include_directories(Kyanite PUBLIC ${SDL2_INCLUDE_DIRS})
+find_package(SDL2 CONFIG REQUIRED)
+message(STATUS "SDL found")
 
-if(WIN32)
-target_link_directories(Kyanite PUBLIC ${SDL2_LIBRARY_DIRS})
 target_link_libraries(
     Kyanite
     PRIVATE
-    SDL2
-    SDL2main
-)
-# Add Renderdoc on Windows so we can easily debug rendering
-target_include_directories(Kyanite PRIVATE ${Renderdoc_DIR})
-else()
-find_package(SDL2 REQUIRED)
-target_link_libraries(
-    Kyanite
-    PUBLIC
     SDL2::SDL2
+    SDL2::SDL2main
 )
 
 target_include_directories(
@@ -30,14 +32,4 @@ target_include_directories(
     PUBLIC
     ${SDL_INCLUDE_DIRS}
 )
-endif()
 
-# For now directly include Core, later will be moved to dll loading
-target_include_directories(Kyanite PRIVATE
-  ${CMAKE_SOURCE_DIR}/Kyanite/Core/include
-)
-
-# For now directly include Rendering, later will be moved to dll loading
-target_include_directories(Kyanite PRIVATE
-  ${CMAKE_SOURCE_DIR}/Kyanite/Rendering/include
-)
