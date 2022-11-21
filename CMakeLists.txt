@@ -15,8 +15,6 @@ project(Kyanite)
 
 # Shared across modules
 #add_subdirectory(Kyanite/Core)
-# Utils
-add_subdirectory(Kyanite/Utils)
 # Input and Event system
 #add_subdirectory(Kyanite/Input)
 # Physics System

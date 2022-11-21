@@ -12,6 +12,7 @@ let package = Package(
         ),
         .library(
             name: "Kyanite",
+            type: .static,
             targets: ["Audio", "CBindings", "EntityComponentSystem", "Runtime", "Rendering"]
         )
     ],
@@ -36,7 +37,7 @@ let package = Package(
             name: "CBindings",
             path: "./Kyanite/Scripting/CBindings"
         ),
-        
+    
         .target(
             name: "EntityComponentSystem",
             dependencies: ["Audio", "CBindings", "Physics", "Rendering"],
