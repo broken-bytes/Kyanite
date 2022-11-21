@@ -119,7 +119,8 @@ struct NativeRef {
 
 #ifdef __cplusplus
 }
-#endif #ifdef __cplusplus
+#endif 
+#ifdef __cplusplus
 extern "C" {
 #endif
  void InitCBindings();

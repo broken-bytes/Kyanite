@@ -12,7 +12,7 @@ let package = Package(
         ),
         .library(
             name: "Kyanite",
-            targets: ["Runtime"]
+            targets: ["Audio", "CBindings", "EntityComponentSystem", "Runtime", "Rendering"]
         )
     ],
     dependencies: [
@@ -27,11 +27,39 @@ let package = Package(
             path: "./Kyanite/Scripting/Generator"
         ),
 
+         .target(
+            name: "Audio",
+            path: "./Kyanite/Scripting/Audio"
+        ),
+
         .target(
             name: "CBindings",
             path: "./Kyanite/Scripting/CBindings"
         ),
         
+        .target(
+            name: "EntityComponentSystem",
+            dependencies: ["Audio", "CBindings", "Physics", "Rendering"],
+            path: "./Kyanite/Scripting/EntityComponentSystem"    
+        ),
+
+        .target(
+            name: "Math",
+            path: "./Kyanite/Scripting/Math"    
+        ),
+
+        .target(
+            name: "Physics",
+            dependencies: ["CBindings", "Math"],
+            path: "./Kyanite/Scripting/Physics"    
+        ),
+
+        .target(
+            name: "Rendering",
+            dependencies: ["CBindings"],
+            path: "./Kyanite/Scripting/Rendering"
+        ),
+
         .target(
             name: "Runtime",
             dependencies: ["CBindings"],

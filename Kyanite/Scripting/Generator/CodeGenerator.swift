@@ -63,7 +63,7 @@ class CodeGenerator {
         }
 
         for function in outFuncs {
-            outSource.append("T\(function.name)* _\(function.name);\n".data(using: .utf8)!)
+            outSource.append("T\(function.name) _\(function.name);\n".data(using: .utf8)!)
         }
 
         outSource.append("void InitCBindings() {\n".data(using: .utf8)!);
@@ -75,7 +75,7 @@ class CodeGenerator {
     outFuncs.forEach { 
         outSource.append(
 """
-    _\($0.name) = (T\($0.name)*)GetProcAddress(lib, \"\($0.name)\");\n
+    _\($0.name) = (T\($0.name))GetProcAddress(lib, \"\($0.name)\");\n
 """
 .data(using: .utf8)!)
     }
@@ -98,7 +98,7 @@ outSource.append("\n}\n".data(using: .utf8)!);
 
 
         
-        outHeader.append("#ifdef __cplusplus\nextern \"C\" {\n#endif\n void InitCBindings();\n#ifdef __cplusplus\n}\n#endif\n".data(using: .utf8)!)
+        outHeader.append("\n#ifdef __cplusplus\nextern \"C\" {\n#endif\n void InitCBindings();\n#ifdef __cplusplus\n}\n#endif\n".data(using: .utf8)!)
 
 
         FileManager.default.createFile(atPath: path.appending("Kyanite/Scripting/CBindings/include/Kyanite-Swift.h"), contents: outHeader)
