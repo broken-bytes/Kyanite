@@ -15,12 +15,14 @@ project(Kyanite)
 
 # Shared across modules
 #add_subdirectory(Kyanite/Core)
+# Utils
+add_subdirectory(Kyanite/Utils)
 # Input and Event system
 #add_subdirectory(Kyanite/Input)
 # Physics System
 #add_subdirectory(Kyanite/Physics)
 # Rendering Backends
-#add_subdirectory(Kyanite/Rendering)
+add_subdirectory(Kyanite/Rendering)
 # Engine-Runtime, pre-compiled, loads dynamic lib
 add_subdirectory(Kyanite/Runtime)
 # Editor code
