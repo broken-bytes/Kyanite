@@ -1,4 +1,5 @@
 #include "Kyanite-Swift.h"
+#include <Windows.h>
 typedef void(*TAddRef)(NativeRef* objc);
 typedef void(*TRemoveRef)(NativeRef* objc);
 typedef NativeRef*(*TLoadMeshGPU)(const char* path);
@@ -72,7 +73,7 @@ TTranslateMesh _TranslateMesh;
 TScaleMesh _ScaleMesh;
 TRotateMesh _RotateMesh;
 void InitCBindings() {
-    auto lib = LoadLibrary("./Kyanite-Runtime.dll");
+    HANDLE lib = LoadLibrary("./Kyanite-Runtime.dll");
     _AddRef = (TAddRef)GetProcAddress(lib, "AddRef");
     _RemoveRef = (TRemoveRef)GetProcAddress(lib, "RemoveRef");
     _LoadMeshGPU = (TLoadMeshGPU)GetProcAddress(lib, "LoadMeshGPU");

@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(Kyanite)
 
 # Shared across modules
-#add_subdirectory(Kyanite/Core)
+add_subdirectory(Kyanite/Core)
 # Input and Event system
 #add_subdirectory(Kyanite/Input)
 # Physics System
@@ -23,5 +23,8 @@ project(Kyanite)
 add_subdirectory(Kyanite/Rendering)
 # Engine-Runtime, pre-compiled, loads dynamic lib
 add_subdirectory(Kyanite/Runtime)
+# Game Engine library
+add_subdirectory(Kyanite/Engine) 
+
 # Editor code
 #add_subdirectory(Kyanite/Editor)

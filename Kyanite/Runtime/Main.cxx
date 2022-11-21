@@ -64,7 +64,6 @@ auto Tick() -> void
 	
 	auto end = std::chrono::high_resolution_clock::now();
 	frametime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	printf("Frametime: %f\n", frametime);
 
 	ticks++;
 }

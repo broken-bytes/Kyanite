@@ -1,6 +1,8 @@
 // #SwiftImport
 #pragma once
 
+#include <cstdint>
+
 #ifdef _WIN32
 #define DLL_EXPORT __declspec(dllexport)
 #else

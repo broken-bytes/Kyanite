@@ -1,15 +1,17 @@
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <SDL.h>
-
-
-((*Func1)auto AddRef(NativeRef* objc) -> void));
-
-
 namespace Renderer {
-    auto Init(uint32_t width, uint32_t height) -> void;
-    auto Resize(uint32_t width, uint32_t height) -> void;
-    auto UploadMeshData(Mesh* mesh) -> void;
+    enum TextureFormat {
+        RGBA = 0
+    };
+
+    enum class ResourceState {
+        COMMON = 0,
+        PRESENT = 0,
+        VERTEX_CONST_BUFFER = 1,
+        RENDER_TARGET = 0x4,
+        PIXEL_SHADER = 0x80,
+        COPY_DEST = 1024
+
+    };
 }

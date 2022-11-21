@@ -6,6 +6,7 @@
   "dependencies": [
     "bullet3",
     "cereal",
+    "d3dx12",
     "directx-dxc",
     "directx-headers",
     "freeimage",

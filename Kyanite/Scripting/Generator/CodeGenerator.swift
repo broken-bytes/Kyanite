@@ -58,6 +58,8 @@ class CodeGenerator {
             }
         }
 
+        outSource.append("#include <Windows.h>\n".data(using: .utf8)!)
+
         for function in outFuncs {
             outSource.append("typedef \(function.returnType)(*T\(function.name))(\(function.params));\n".data(using: .utf8)!)
         }
@@ -69,7 +71,7 @@ class CodeGenerator {
         outSource.append("void InitCBindings() {\n".data(using: .utf8)!);
         outSource.append(
 """
-    auto lib = LoadLibrary("./Kyanite-Runtime.dll");\n
+    HANDLE lib = LoadLibrary("./Kyanite-Runtime.dll");\n
 """.data(using: .utf8)!)
 
     outFuncs.forEach { 

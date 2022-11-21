@@ -12,7 +12,7 @@ let package = Package(
         ),
         .library(
             name: "Kyanite",
-            type: .static,
+            type: .dynamic,
             targets: ["Audio", "CBindings", "EntityComponentSystem", "Runtime", "Rendering"]
         )
     ],
