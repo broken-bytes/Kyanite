@@ -33,6 +33,7 @@
 namespace Renderer {
     constexpr uint8_t FRAME_COUNT = 2;
 	
+	typedef uint32_t Index;
 	enum RenderBackendAPI {
 		DirectX12 = 0,
 		OpenGL = 1
@@ -47,7 +48,7 @@ namespace Renderer {
 		auto EndFrame() -> void;
 		auto Update() -> void;
 		auto Resize(std::uint32_t width, std::uint32_t height) -> void;
-		auto UploadMeshData(float* vertices, std::size_t vCount, std::uint32_t* indices, std::size_t iCount) -> std::uint64_t;
+		auto UploadMeshData(Vertex* vertices, size_t vCount, Index* indices, size_t iCount) -> std::uint64_t;
 		auto UploadTextureData(std::uint8_t* data, std::uint16_t width, std::uint16_t height, std::uint8_t channels) -> std::uint64_t;
 		auto UploadShaderData(const char* data)->std::uint64_t;
 		auto DrawMesh(std::uint64_t id, std::uint64_t shaderId, uint64_t textureId, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation) -> void;

@@ -1,40 +1,128 @@
+#include <algorithm>
+#include <memory>
+#include <SDL2/SDL.h>
+#include <string.h>
 #include "Engine.hxx"
 #include "Rendering/Interface.hxx"
+#include "Core/AssetLoader.hxx"
+
+
+
+
+std::vector<NativeRef*> _nativeRefs = {};
+std::unique_ptr<Renderer::Interface> Interface;
 
 // --- Reference Functions ---
- void AddRef(NativeRef* objc) {}
- void RemoveRef(NativeRef* objc) {}
+ void AddRef(NativeRef* objc) {
+    objc->RefCount++;
+ }
+
+ void RemoveRef(NativeRef* objc) {
+    objc->RefCount--;
+
+    if(objc->Type != DYNAMIC) {
+        // We only want to clear dynamic references. Others stay in memory
+        return;
+    }
+    auto deleter = std::find_if(_nativeRefs.begin(), _nativeRefs.end(), [objc](NativeRef* e) { return strcmp(e->UUID, objc->UUID);});
+
+    if(deleter != _nativeRefs.end()) {
+        auto deleteFunc = (void (*)(const char*))objc->Deleter;
+        deleteFunc(objc->UUID);
+        _nativeRefs.erase(deleter);
+    }
+ }
 
 // --- Create Functions ---
 
 // --- Load Functions ---
 // Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
- NativeRef* LoadMeshGPU(const char* path) {return nullptr;}
-// Loads a mesh into CPU memory (RAM)
- NativeRef* LoadMeshCPU(
-    const char* path,
-    float* vertices, 
-    size_t vertCount, 
-    float* indices, 
-    size_t indCount) {return nullptr;}
+DLL_EXPORT NativeRef* LoadMeshGPU(
+    Renderer::Vertex* vertices,
+    size_t vertCount,  
+    Renderer::Index* indices, 
+    size_t indCount
+    ) {
+        auto mesh = Interface->UploadMeshData(vertices, vertCount, indices, indCount);
+    }
+
+DLL_EXPORT ModelInfo LoadModelCPU(const char* path) {
+    auto model = AssetLoader::LoadModel(path);
+
+	ModelInfo info;
+
+	MeshInfo* m = new MeshInfo[model.Meshes.size()];
+	for (int x = 0; x < model.Meshes.size(); x++) {
+		MeshInfo mesh = {};
+		mesh.Vertices = new float[model.Meshes[x].Vertices.size()];
+		for (int y = 0; y < model.Meshes[x].Vertices.size(); y++) {
+			mesh.Vertices[y] = model.Meshes[x].Vertices[y];
+		}
+		mesh.VerticesCount = model.Meshes[x].Vertices.size();
+
+		mesh.Indices = new uint32_t[model.Meshes[x].Indicies.size()];
+		for (int y = 0; y < model.Meshes[x].Indicies.size(); y++) {
+			mesh.Indices[y] = model.Meshes[x].Indicies[y];
+		}
+		mesh.IndicesCount = model.Meshes[x].Indicies.size();
+		m[x] = mesh;
+	}
+	info.Meshes = m;
+	info.MeshCount = model.Meshes.size();
+
+	return info;
+}
+
+DLL_EXPORT void FreeModelCPU(ModelInfo& info) {
+    delete[] info.Meshes;
+}
+
 // Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
- NativeRef* LoadTextureGPU(const char* path) {return nullptr;}
-// Loads a texture into CPU memory (RAM)
- NativeRef* LoadTextureCPU(
+DLL_EXPORT NativeRef* LoadTextureGPU(
     const char* path,
     uint8_t* pixels, 
     size_t pixelCount, 
     uint8_t* channels
-    ) {return nullptr;}
+) {
+
+}
+
+// Loads a texture into CPU memory (RAM)
+DLL_EXPORT TextureInfo LoadTextureCPU(const char* path) {
+    auto texture = AssetLoader::LoadTexture(path);
+
+	TextureInfo info;
+	info.LevelCount = texture.Levels.size();
+	info.Levels = new TextureLevelInfo[info.LevelCount];
+	info.Channels = texture.Channels;
+	for (int x = 0; x < info.LevelCount; x++) {
+		// Always assume 4 bytes per pixel for now
+		size_t bytes = texture.Levels[x].Width * texture.Levels[x].Height * 4;
+		info.Levels[x].Data = texture.Levels[x].Data;
+		info.Levels[x].Width = texture.Levels[x].Width;
+		info.Levels[x].Height = texture.Levels[x].Height;
+	}
+
+	return info;
+}
+DLL_EXPORT void FreeTextureCPU(TextureInfo& info) {
+    for (int x = 0; x < info.LevelCount; x++) {
+		delete[] info.Levels[x].Data;
+	}
+	delete[] info.Levels;
+}
 // Loads a shader and compiles it 
- NativeRef* LoadShader(
+DLL_EXPORT NativeRef* LoadShaderGPU(
     const char* path
-    ) {
-        return nullptr;
-    }
+) {
+    auto shader = AssetLoader::LoadShader(path);
+    Interface->UploadShaderData(shader.Code);
+}
 
 // --- Commands ---
- void Init(uint32_t resolutionX, uint32_t resolutionY) {}
+ void Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
+    Interface = std::make_unique<Renderer::Interface>(resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
+ }
  void Shutdown() {}
  void SetMaxFrameRate(uint16_t maxFramerate) {}
  void SetVSync(bool enabled) {}

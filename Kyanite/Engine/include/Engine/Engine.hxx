@@ -13,12 +13,57 @@
 extern "C" {
 #endif 
 
+enum RefType {
+    STATIC,
+    DYNAMIC,
+};
+
 struct NativeRef {
-    uint32_t RefID;
+    const char* UUID;
     uint16_t RefCount;
     void* Data;
+    RefType Type;
+    // Function pointer to function called upon delete of this Pointer
+    void* Deleter;
+
 } typedef NativeRef;
 
+
+namespace Renderer {
+    struct Vertex;
+    typedef uint32_t Index;
+}
+
+struct MeshInfo {
+		float* Vertices;
+		int VerticesCount;
+		std::uint32_t* Indices;
+		int IndicesCount;
+	} typedef MeshInfo;
+
+
+	struct ModelInfo {
+		MeshInfo* Meshes;
+		int MeshCount;
+	} typedef ModelInfo;
+
+    struct TextureLevelInfo {
+		uint8_t* Data;
+		uint16_t Width;
+        uint16_t Height;
+	} typedef TextureLevelInfo;
+
+
+	struct TextureInfo {
+		TextureLevelInfo* Levels;
+		uint8_t LevelCount;
+		uint8_t Channels;
+	} typedef TextureInfo;
+
+    struct ShaderInfo {
+		const char* Code;
+        std::uint32_t Size; 
+	} typedef ShaderInfo;
 
 // --- Reference Functions ---
 DLL_EXPORT void AddRef(NativeRef* objc);
@@ -28,30 +73,33 @@ DLL_EXPORT void RemoveRef(NativeRef* objc);
 
 // --- Load Functions ---
 // Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
-DLL_EXPORT NativeRef* LoadMeshGPU(const char* path);
+DLL_EXPORT NativeRef* LoadMeshGPU(
+    Renderer::Vertex* vertices,
+    size_t vertCount,  
+    Renderer::Index* indices, 
+    size_t indCount
+    );
 // Loads a mesh into CPU memory (RAM)
-DLL_EXPORT NativeRef* LoadMeshCPU(
-    const char* path,
-    float* vertices, 
-    size_t vertCount, 
-    float* indices, 
-    size_t indCount);
+DLL_EXPORT ModelInfo LoadModelCPU(const char* path);
+DLL_EXPORT void FreeModelCPU(ModelInfo& info);
 // Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
-DLL_EXPORT NativeRef* LoadTextureGPU(const char* path);
-// Loads a texture into CPU memory (RAM)
-DLL_EXPORT NativeRef* LoadTextureCPU(
+DLL_EXPORT NativeRef* LoadTextureGPU(
     const char* path,
     uint8_t* pixels, 
     size_t pixelCount, 
     uint8_t* channels
-    );
+);
+// Loads a texture into CPU memory (RAM)
+DLL_EXPORT TextureInfo LoadTextureCPU(const char* path);
+DLL_EXPORT void FreeTextureCPU(TextureInfo& info);
+
 // Loads a shader and compiles it 
-DLL_EXPORT NativeRef* LoadShader(
+DLL_EXPORT NativeRef* LoadShaderGPU(
     const char* path
-    );
+);
 
 // --- Commands ---
-DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY);
+DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void* window);
 DLL_EXPORT void Shutdown();
 DLL_EXPORT void SetMaxFrameRate(uint16_t maxFramerate);
 DLL_EXPORT void SetVSync(bool enabled);

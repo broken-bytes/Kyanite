@@ -1,4 +1,5 @@
 #include "Interface.hxx"
+#include "Vertex.hxx"
 #include "Viewport.hxx"
 #include "Rect.hxx"
 
@@ -288,19 +289,16 @@ namespace Renderer
 	{
 	}
 
-	auto Interface::UploadMeshData(float* vertices, size_t vCount, uint32_t* indices, size_t iCount) -> uint64_t
+	auto Interface::UploadMeshData(Vertex* vertices, size_t vCount, Index* indices, size_t iCount) -> uint64_t
 	{
 		std::vector<Vertex> vertBuffer = {};
 
 		// 9 floats = 1 vert
 		for (int x = 0; x < vCount; x += 9) {
-			Vertex v = {};
-			std::vector<float> Position = {vertices[x], vertices[x + 1], vertices[x + 2], vertices[x + 3]};
-			std::vector<float> Normal = {vertices[x + 4], vertices[x + 5], vertices[x + 6]};
-			std::vector<float> UV = {vertices[x + 7], vertices[x + 8]};
-			std::memcpy(v.Position, Position.data(), 4 * sizeof(float));
-			std::memcpy(v.Normal, Normal.data(), 3 * sizeof(float));
-			std::memcpy(v.UV, UV.data(), 2 * sizeof(float));
+			Vertex v {};
+			std::memcpy(v.Position, vertices[x].Position, 4 * sizeof(float));
+			std::memcpy(v.Normal, vertices[x].Normal, 3 * sizeof(float));
+			std::memcpy(v.UV, vertices[x].UV, 2 * sizeof(float));
 			vertBuffer.push_back(v);
 		}
 
@@ -373,23 +371,60 @@ namespace Renderer
 		compiledShader->ShaderIndex = _shaders.size();
 		GraphicsRootSignatureDescription desc = {};
 		desc.Parameters = {};
-		// MVP Matrix
+                // MVP Matrix
 
-		auto sizes = { sizeof(MVPCBuffer) /4, sizeof(MaterialBuffer) / 4, sizeof(LightBuffer) /4 };
+                auto sizes = {sizeof(MVPCBuffer) / 4,
+                              sizeof(MaterialBuffer) / 4,
+                              sizeof(LightBuffer) / 4};
 
-		// MVP
-		desc.Parameters.emplace_back(0, sizeof(MVPCBuffer) / 4,     0, 0, GraphicsShaderVisibility::VERTEX, GraphicsRootSignatureParameterType::CONSTANT, GraphicsDescriptorRangeType::CBV);
-		// Diffuse
-		desc.Parameters.emplace_back(1, 1,                          0, 0, GraphicsShaderVisibility::PIXEL,  GraphicsRootSignatureParameterType::TABLE,    GraphicsDescriptorRangeType::SRV);
-		// Normal
-		desc.Parameters.emplace_back(2, 1,                          1, 0, GraphicsShaderVisibility::PIXEL,  GraphicsRootSignatureParameterType::TABLE,    GraphicsDescriptorRangeType::SRV);
-		// Material
-		desc.Parameters.emplace_back(3, sizeof(MaterialBuffer) / 4, 2, 0, GraphicsShaderVisibility::VERTEX,  GraphicsRootSignatureParameterType::CONSTANT, GraphicsDescriptorRangeType::CBV);
-		// Lights
-		desc.Parameters.emplace_back(4, 1, 3, 0, GraphicsShaderVisibility::ALL,  GraphicsRootSignatureParameterType::TABLE, GraphicsDescriptorRangeType::CBV);
+                // MVP
+                GraphicsRootSignatureParameter param = {
+                    0,
+                    sizeof(MVPCBuffer) / 4,
+                    0,
+                    0,
+                    GraphicsShaderVisibility::VERTEX,
+                    GraphicsRootSignatureParameterType::CONSTANT,
+                    GraphicsDescriptorRangeType::CBV};
+                desc.Parameters.push_back(param);
+                // Diffuse
+                param = {1,
+                         1,
+                         0,
+                         0,
+                         GraphicsShaderVisibility::PIXEL,
+                         GraphicsRootSignatureParameterType::TABLE,
+                         GraphicsDescriptorRangeType::SRV};
+                desc.Parameters.push_back(param);
+                // Normal
+                param = {2,
+                         1,
+                         1,
+                         0,
+                         GraphicsShaderVisibility::PIXEL,
+                         GraphicsRootSignatureParameterType::TABLE,
+                         GraphicsDescriptorRangeType::SRV};
+                desc.Parameters.push_back(param);
+                // Material
+                param = {2,
+                         1,
+                         1,
+                         0,
+                         GraphicsShaderVisibility::PIXEL,
+                         GraphicsRootSignatureParameterType::TABLE,
+                         GraphicsDescriptorRangeType::SRV};
+                desc.Parameters.push_back(param);
+                // Lights
+                param = {3,
+                         sizeof(MaterialBuffer) / 4,
+                         2,
+                         0,
+                         GraphicsShaderVisibility::VERTEX,
+                         GraphicsRootSignatureParameterType::CONSTANT,
+                         GraphicsDescriptorRangeType::CBV};
+                desc.Parameters.push_back(param);
 
-
-		auto signature = _device->CreateGraphicsRootSignature(desc);
+                auto signature = _device->CreateGraphicsRootSignature(desc);
 
 		std::vector<GraphicsPipelineInputElement> inputElements = {
 			{ "POSITION", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 0, GraphicsPipelineClassification::VERTEX, 0 },
@@ -499,7 +534,7 @@ namespace Renderer
 
 		_uploadFenceValue = 0;
 		_uploadFence = _device->CreateFence(_uploadFenceValue);
-#if WIN32
+#if _WIN32
 		_uploadFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 		if (_uploadFenceEvent == nullptr)
 		{
@@ -513,7 +548,7 @@ namespace Renderer
 
 		_computeFenceValue = 0;
 		_computeFence = _device->CreateFence(_computeFenceValue);
-#if WIN32
+#if _WIN32
 		_computeFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 		if (_computeFenceEvent == nullptr)
 		{

@@ -99,7 +99,9 @@ namespace AssetLoader {
 					verts.push_back(u);
 					verts.push_back(v);
 				}
-				meshes.emplace_back(mesh.name, verts, inds);
+
+				ModelSubMesh subMesh = {mesh.name, verts, inds};
+				meshes.push_back(subMesh);
 			}
 		}
 		return { path, meshes };
