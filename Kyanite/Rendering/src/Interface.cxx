@@ -11,6 +11,7 @@
 #include "glm/geometric.hpp"
 #include "glm/trigonometric.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include <SDL_syswm.h>
 
 #ifdef __APPLE__
 #include "backends/opengl/OpenGLDevice.hxx"
@@ -73,11 +74,15 @@ namespace Renderer
 
 	Interface::Interface(uint32_t width, uint32_t height, void* window, RenderBackendAPI type)
 	{
+		SDL_SysWMinfo wmInfo;
+			SDL_VERSION(&wmInfo.version);
+			SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window*>(window), &wmInfo);
+			HWND hwnd = wmInfo.info.win.window;
 		_windowDimension = { (float)width, (float)height };
 		switch (type)
 		{
 		case DirectX12:
-			_device = static_pointer_cast<Device>(std::make_shared<D3D12Device>(reinterpret_cast<HWND>(window)));
+			_device = static_pointer_cast<Device>(std::make_shared<D3D12Device>(hwnd));
 			break;
 #ifdef __APPLE__
 		case OpenGL:
@@ -85,6 +90,7 @@ namespace Renderer
 			break;
 #endif // __APPLE__
 		default:
+		_device = static_pointer_cast<Device>(std::make_shared<D3D12Device>(reinterpret_cast<HWND>(window)));
 			break;
 		}
 		setlocale(LC_ALL, "en_US.utf8");

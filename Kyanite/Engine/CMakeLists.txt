@@ -17,7 +17,7 @@ find_package(stduuid CONFIG REQUIRED)
 
 add_library(
     Kyanite-Runtime
-    SHARED
+    STATIC
     src/Engine.cxx
 )
 target_include_directories(

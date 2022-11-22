@@ -7,6 +7,8 @@
 #include <SDL_vulkan.h>
 #endif
 
+#include "Engine.hxx"
+
 #include <thread>
 #include <filesystem>
 #include <memory>
@@ -66,6 +68,7 @@ auto Tick() -> void
 	frametime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
 	ticks++;
+	Update(frametime);
 }
 
 
@@ -84,6 +87,8 @@ int main(int argc, char* argv[]) {
 		SDL_WINDOW_SHOWN
 #endif
 	);
+
+	Init(1024, 768, (void*)GlobalInstance.Window);
 
 	SDL_Event event;
 

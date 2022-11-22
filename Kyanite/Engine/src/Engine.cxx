@@ -145,7 +145,11 @@ DLL_EXPORT NativeRef* LoadShaderGPU(
  void Shutdown() {}
  void SetMaxFrameRate(uint16_t maxFramerate) {}
  void SetVSync(bool enabled) {}
- void Update(float frameTime) {}
+ void Update(float frameTime) {
+    Interface->Update();
+    Interface->StartFrame();
+    Interface->EndFrame();
+ }
  void PhysicsUpdate(float frameTime) {}
  void DrawMesh(
     NativeRef* mesh,
@@ -161,7 +165,9 @@ DLL_EXPORT NativeRef* LoadShaderGPU(
     float zRotation
     ) {}
 
- void SetClearColor(float r, float g, float b, float a) {}
+ void SetClearColor(float r, float g, float b, float a) {
+    
+ }
  void SetFogColor(float r, float g, float b, float a) {}
  void SetFogIntensity(float intensity) {}
  void SetFogMinDistance(float distance) {}
