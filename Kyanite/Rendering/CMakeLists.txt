@@ -146,9 +146,6 @@ target_link_libraries(
     dxgi.lib
     dxguid.lib
     dxcompiler.lib
-    WinPixEventRuntime.lib
-    dstorage.lib
-    DirectXTK12.lib
     Microsoft::DirectXShaderCompiler
     Microsoft::DirectX-Guids
     Microsoft::DirectX-Headers

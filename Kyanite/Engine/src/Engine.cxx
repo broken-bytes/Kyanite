@@ -1,16 +1,19 @@
 #include <algorithm>
 #include <memory>
 #include <SDL2/SDL.h>
+#include <stduuid/uuid.h>
 #include <string.h>
 #include "Engine.hxx"
 #include "Rendering/Interface.hxx"
+#include "Rendering/Vertex.hxx"
 #include "Core/AssetLoader.hxx"
-
 
 
 
 std::vector<NativeRef*> _nativeRefs = {};
 std::unique_ptr<Renderer::Interface> Interface;
+
+// Internal Helpers
 
 // --- Reference Functions ---
  void AddRef(NativeRef* objc) {
@@ -36,16 +39,6 @@ std::unique_ptr<Renderer::Interface> Interface;
 // --- Create Functions ---
 
 // --- Load Functions ---
-// Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
-DLL_EXPORT NativeRef* LoadMeshGPU(
-    Renderer::Vertex* vertices,
-    size_t vertCount,  
-    Renderer::Index* indices, 
-    size_t indCount
-    ) {
-        auto mesh = Interface->UploadMeshData(vertices, vertCount, indices, indCount);
-    }
-
 DLL_EXPORT ModelInfo LoadModelCPU(const char* path) {
     auto model = AssetLoader::LoadModel(path);
 
@@ -78,13 +71,23 @@ DLL_EXPORT void FreeModelCPU(ModelInfo& info) {
 }
 
 // Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
-DLL_EXPORT NativeRef* LoadTextureGPU(
-    const char* path,
-    uint8_t* pixels, 
-    size_t pixelCount, 
-    uint8_t* channels
-) {
+DLL_EXPORT NativeRef* LoadMeshGPU(MeshInfo& info) {
+    auto index = Interface->UploadMeshData((Vertex*)info.Vertices, info.VerticesCount / sizeof(Vertex), info.Indices, info.IndicesCount);
+    auto ref = new NativeRef();
+    ref->Data = nullptr;
+    ref->RefCount = 1;
+    ref->Type = STATIC;
+    ref->Deleter = nullptr;
+   std::random_device rd;
+    auto seed_data = std::array<int, std::mt19937::state_size> {};
+    std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+    std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+    std::mt19937 generator(seq);
+    uuids::uuid_random_generator gen{generator};
+    auto id = gen();
+    ref->UUID = uuids::to_string(id).c_str();
 
+    return ref;
 }
 
 // Loads a texture into CPU memory (RAM)
@@ -117,6 +120,22 @@ DLL_EXPORT NativeRef* LoadShaderGPU(
 ) {
     auto shader = AssetLoader::LoadShader(path);
     Interface->UploadShaderData(shader.Code);
+
+        auto ref = new NativeRef();
+    ref->Data = nullptr;
+    ref->RefCount = 1;
+    ref->Type = STATIC;
+    ref->Deleter = nullptr;
+   std::random_device rd;
+    auto seed_data = std::array<int, std::mt19937::state_size> {};
+    std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+    std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+    std::mt19937 generator(seq);
+    uuids::uuid_random_generator gen{generator};
+    auto id = gen();
+    ref->UUID = uuids::to_string(id).c_str();
+
+    return ref;
 }
 
 // --- Commands ---

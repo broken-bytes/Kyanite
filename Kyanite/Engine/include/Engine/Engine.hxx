@@ -29,11 +29,6 @@ struct NativeRef {
 } typedef NativeRef;
 
 
-namespace Renderer {
-    struct Vertex;
-    typedef uint32_t Index;
-}
-
 struct MeshInfo {
 		float* Vertices;
 		int VerticesCount;
@@ -73,12 +68,7 @@ DLL_EXPORT void RemoveRef(NativeRef* objc);
 
 // --- Load Functions ---
 // Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
-DLL_EXPORT NativeRef* LoadMeshGPU(
-    Renderer::Vertex* vertices,
-    size_t vertCount,  
-    Renderer::Index* indices, 
-    size_t indCount
-    );
+DLL_EXPORT NativeRef* LoadMeshGPU(MeshInfo& info);
 // Loads a mesh into CPU memory (RAM)
 DLL_EXPORT ModelInfo LoadModelCPU(const char* path);
 DLL_EXPORT void FreeModelCPU(ModelInfo& info);

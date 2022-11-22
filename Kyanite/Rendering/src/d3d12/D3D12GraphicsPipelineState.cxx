@@ -32,7 +32,8 @@ namespace Renderer {
 		std::vector<D3D12_INPUT_ELEMENT_DESC> layout = {};
 
 		for (const auto& item : inputLayout) {
-			layout.emplace_back(item.SemanticName, item.SemanticIndex, DXGI_FORMAT(item.Format), item.InputSlot, item.AlignedByteOffset, D3D12_INPUT_CLASSIFICATION(item.Classification), item.InstanceDataStepRate);
+			D3D12_INPUT_ELEMENT_DESC desc = {item.SemanticName, item.SemanticIndex, DXGI_FORMAT(item.Format), item.InputSlot, item.AlignedByteOffset, D3D12_INPUT_CLASSIFICATION(item.Classification), item.InstanceDataStepRate};
+			layout.push_back(desc);
 		}
 
 		auto d3d312Shader = *static_pointer_cast<D3D12GraphicsShaderBinding>(shaderBinding);
