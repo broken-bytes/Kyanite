@@ -7,6 +7,7 @@
 #include "Rendering/Interface.hxx"
 #include "Rendering/Vertex.hxx"
 #include "Core/AssetLoader.hxx"
+#include "Core/NativeRef.hxx"
 
 
 
@@ -72,9 +73,9 @@ DLL_EXPORT void FreeModelCPU(ModelInfo& info) {
 
 // Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
 DLL_EXPORT NativeRef* LoadMeshGPU(MeshInfo& info) {
-    auto index = Interface->UploadMeshData((Vertex*)info.Vertices, info.VerticesCount / sizeof(Vertex), info.Indices, info.IndicesCount);
+    auto index = Interface->UploadMeshData((Vertex*)info.Vertices, info.VerticesCount / 9, info.Indices, info.IndicesCount);
     auto ref = new NativeRef();
-    ref->Data = nullptr;
+    ref->Identifier = index;
     ref->RefCount = 1;
     ref->Type = STATIC;
     ref->Deleter = nullptr;
@@ -108,21 +109,11 @@ DLL_EXPORT TextureInfo LoadTextureCPU(const char* path) {
 
 	return info;
 }
-DLL_EXPORT void FreeTextureCPU(TextureInfo& info) {
-    for (int x = 0; x < info.LevelCount; x++) {
-		delete[] info.Levels[x].Data;
-	}
-	delete[] info.Levels;
-}
-// Loads a shader and compiles it 
-DLL_EXPORT NativeRef* LoadShaderGPU(
-    const char* path
-) {
-    auto shader = AssetLoader::LoadShader(path);
-    Interface->UploadShaderData(shader.Code);
 
-        auto ref = new NativeRef();
-    ref->Data = nullptr;
+DLL_EXPORT NativeRef* LoadTextureGPU(TextureInfo& info) {
+    auto data = Interface->UploadTextureData(info.Levels[0].Data, info.Levels[0].Width, info.Levels[0].Height, 4);
+    auto ref = new NativeRef();
+    ref->Identifier = data;
     ref->RefCount = 1;
     ref->Type = STATIC;
     ref->Deleter = nullptr;
@@ -137,6 +128,55 @@ DLL_EXPORT NativeRef* LoadShaderGPU(
 
     return ref;
 }
+
+DLL_EXPORT void FreeTextureCPU(TextureInfo& info) {
+    for (int x = 0; x < info.LevelCount; x++) {
+		delete[] info.Levels[x].Data;
+	}
+	delete[] info.Levels;
+}
+// Loads a shader and compiles it 
+DLL_EXPORT NativeRef* LoadShaderGPU(
+    const char* path
+) {
+    auto shader = AssetLoader::LoadShader(path);
+    auto index = Interface->UploadShaderData(shader.Code);
+
+        auto ref = new NativeRef();
+    ref->Identifier = index;
+    ref->RefCount = 1;
+    ref->Type = STATIC;
+    ref->Deleter = nullptr;
+   std::random_device rd;
+    auto seed_data = std::array<int, std::mt19937::state_size> {};
+    std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+    std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+    std::mt19937 generator(seq);
+    uuids::uuid_random_generator gen{generator};
+    auto id = gen();
+    ref->UUID = uuids::to_string(id).c_str();
+
+    return ref;
+}
+
+// Creates a new material in the renderpipeline and returns its ref
+DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader, NativeRef* textures, size_t textureCount) {
+    std::vector<uint64_t> textureIds = {};
+
+    for(int x = 0; x < textureCount; x++) {
+        textureIds.push_back(textures[x].Identifier);
+    }
+
+    auto index = Interface->CreateMaterial(shader->Identifier, textureIds);
+
+    auto ref = new NativeRef();
+    ref->Identifier = index;
+    ref->RefCount = 1;
+    ref->Type = STATIC;
+
+    return ref;
+}
+
 
 // --- Commands ---
  void Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
@@ -163,7 +203,9 @@ DLL_EXPORT NativeRef* LoadShaderGPU(
     float xRotation,
     float yRotation,
     float zRotation
-    ) {}
+    ) {
+        Interface->DrawMesh(mesh->Identifier, material->Identifier, {xPos, yPos, zPos}, {xScale, yScale, zScale}, {xRotation, yRotation, zRotation});
+    }
 
  void SetClearColor(float r, float g, float b, float a) {
     

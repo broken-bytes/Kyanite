@@ -5,6 +5,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include "Material.hxx"
 #include "glm/glm.hpp"
 #include "Allocator.hxx"
 #include "Buffer.hxx"
@@ -48,10 +49,11 @@ namespace Renderer {
 		auto EndFrame() -> void;
 		auto Update() -> void;
 		auto Resize(std::uint32_t width, std::uint32_t height) -> void;
+		auto CreateMaterial(uint64_t shaderId, std::vector<uint64_t> textureIds) -> uint64_t;
 		auto UploadMeshData(Vertex* vertices, size_t vCount, Index* indices, size_t iCount) -> std::uint64_t;
 		auto UploadTextureData(std::uint8_t* data, std::uint16_t width, std::uint16_t height, std::uint8_t channels) -> std::uint64_t;
 		auto UploadShaderData(const char* data)->std::uint64_t;
-		auto DrawMesh(std::uint64_t id, std::uint64_t shaderId, uint64_t textureId, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation) -> void;
+		auto DrawMesh(uint64_t id, uint64_t materialId, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation) -> void;
 		auto SetMeshProperties() -> void;
 		auto MeshDataFor(const char* uuid) -> std::vector<std::uint64_t>;
 		auto RotateCamera(float rotationX, float rotationY, float rotationZ) -> void;
@@ -118,6 +120,7 @@ namespace Renderer {
 		std::vector<DrawCall> _meshesToDraw = {};
 		std::vector < std::shared_ptr<TextureBuffer>> _textures;
 		std::vector<std::shared_ptr<GraphicsShaderBinding>> _shaders;
+		std::vector<std::shared_ptr<Material>> _materials;
 		std::vector <std::shared_ptr<Buffer>> _constantBuffers = {};
 		std::shared_ptr<Buffer> _depthBuffer;
 		glm::vec3 cameraRotation = {};

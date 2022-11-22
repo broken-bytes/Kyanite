@@ -6,9 +6,9 @@ extern "C" {
 #endif
 
 struct Vertex {
-    float Position[3];
-    float UV[2];
+    float Position[4];
     float Normal[3];
+    float UV[2];
 } typedef Vertex;
 
 #ifdef __cplusplus 

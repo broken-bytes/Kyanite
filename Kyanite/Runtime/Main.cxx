@@ -21,6 +21,10 @@
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#if _DEBUG
+#include "./renderdoc_app.h"
+RENDERDOC_API_1_5_0* rdoc_api = NULL;
+#endif
 #endif
 
 #ifdef __APPLE__
@@ -55,6 +59,12 @@ int ticks = 0;
 
 Instance GlobalInstance = {};
 
+
+std::vector<NativeRef*> Textures = {};
+std::vector<NativeRef*> Meshes = {};
+std::vector<NativeRef*> Shaders = {};
+std::vector<NativeRef*> Materials = {};
+
 auto Tick() -> void
 {
 	auto start = std::chrono::high_resolution_clock::now();
@@ -69,10 +79,23 @@ auto Tick() -> void
 
 	ticks++;
 	Update(frametime);
+
+	DrawMesh(Meshes[0], Materials[0], 0, 0, 10, 1, 1, 1, 0, 0, 0);
 }
 
 
 int main(int argc, char* argv[]) {
+
+	#if _WIN32
+	#if _DEBUG
+	if (HMODULE mod = GetModuleHandleA("renderdoc.dll"))
+	{
+		pRENDERDOC_GetAPI RENDERDOC_GetAPI =
+			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
+		int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_5_0, (void**)&rdoc_api);
+	}
+	#endif
+	#endif
 	
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
 	GlobalInstance.Window = SDL_CreateWindow(
@@ -89,6 +112,21 @@ int main(int argc, char* argv[]) {
 	);
 
 	Init(1024, 768, (void*)GlobalInstance.Window);
+
+	auto textureInfo = LoadTextureCPU("H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/Textures/checker-map_tho.png");
+	auto modelInfo = LoadModelCPU("H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/Models/scrap_box/scene.gltf");
+	auto shaderRef = LoadShaderGPU("H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/Shaders/PBRDefault.hlsl");
+	Shaders.push_back(shaderRef);
+
+	for(int x = 0; x < modelInfo.MeshCount; x++) {
+		Meshes.push_back(LoadMeshGPU(modelInfo.Meshes[x]));
+	}
+
+	auto texRef = LoadTextureGPU(textureInfo);
+	Textures.push_back(texRef);
+
+	auto material = LoadMaterialGPU(shaderRef, texRef, 1);
+	Materials.push_back(material);
 
 	SDL_Event event;
 

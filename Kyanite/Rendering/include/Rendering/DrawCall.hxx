@@ -7,9 +7,7 @@
 namespace Renderer {
     struct DrawCall {
 		std::uint64_t MeshId;
-		std::uint64_t ShaderId;
-		std::uint64_t TextureId;
+		std::uint64_t MaterialId;
 		glm::mat4 Transform;
-		
 	};
 }

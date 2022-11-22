@@ -33,3 +33,10 @@ target_include_directories(
     ${SDL_INCLUDE_DIRS}
 )
 
+
+target_include_directories(
+    Kyanite
+    PUBLIC
+    ./
+)
+

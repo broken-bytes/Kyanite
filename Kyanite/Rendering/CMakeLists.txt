@@ -138,6 +138,10 @@ find_package(directx-dxc CONFIG REQUIRED)
 find_package(directx-headers CONFIG REQUIRED)
 
 target_include_directories(Rendering PRIVATE ${D3DX12_INCLUDE_DIRS})
+target_include_directories(Rendering PRIVATE
+  ${CMAKE_SOURCE_DIR}/Kyanite/Core/include
+)
+
 
 target_link_libraries(
     Rendering
