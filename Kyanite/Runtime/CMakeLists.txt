@@ -18,6 +18,7 @@ add_executable(
 )
 
 find_package(SDL2 CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 message(STATUS "SDL found")
 
 target_link_libraries(
@@ -25,6 +26,7 @@ target_link_libraries(
     PRIVATE
     SDL2::SDL2
     SDL2::SDL2main
+    imgui::imgui
 )
 
 target_include_directories(

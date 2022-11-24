@@ -9,6 +9,10 @@
     "directx-headers",
     "freeimage",
     "glm",
+    {
+      "name": "imgui",
+      "features": ["dx12-binding", "sdl2-binding", "win32-binding"]
+    },
     "jsoncons",
     "sdl2",
     "stduuid",

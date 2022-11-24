@@ -94,6 +94,7 @@ list(APPEND SRC
 endif()
 
 find_package(glm CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 add_library(
     Rendering
@@ -153,6 +154,7 @@ target_link_libraries(
     Microsoft::DirectXShaderCompiler
     Microsoft::DirectX-Guids
     Microsoft::DirectX-Headers
+    imgui::imgui
 )
 endif()
 

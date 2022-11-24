@@ -46,6 +46,7 @@ namespace Renderer {
 		float yOffset = 0;
 
 		auto StartFrame() -> void;
+		auto MidFrame() -> void;
 		auto EndFrame() -> void;
 		auto Update() -> void;
 		auto Resize(std::uint32_t width, std::uint32_t height) -> void;

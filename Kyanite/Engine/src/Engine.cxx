@@ -188,6 +188,7 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader, NativeRef* textures, si
  void Update(float frameTime) {
     Interface->Update();
     Interface->StartFrame();
+    Interface->MidFrame();
     Interface->EndFrame();
  }
  void PhysicsUpdate(float frameTime) {}

@@ -59,7 +59,7 @@ namespace Renderer {
 	}
 
 	auto D3D12SwapChain::Swap() -> void {
-		_swapChain->Present(0, 0);
+		_swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING);
 	}
 
 	auto D3D12SwapChain::CurrentBackBufferIndex() -> const std::uint64_t {

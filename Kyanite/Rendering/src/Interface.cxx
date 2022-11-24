@@ -1,9 +1,10 @@
 #include "Interface.hxx"
+#include "DescriptorHandle.hxx"
 #include "Rect.hxx"
 #include "Vertex.hxx"
 #include "Viewport.hxx"
 
-
+#include "d3d12/D3D12GraphicsCommandList.hxx"
 #include "glm/common.hpp"
 #include "glm/geometric.hpp"
 #include "glm/glm.hpp"
@@ -13,7 +14,17 @@
 #include "glm/trigonometric.hpp"
 #include "glm/vec4.hpp"
 #include <SDL_syswm.h>
+#include <d3d12.h>
+#include <dxgiformat.h>
 
+#include "imgui.h"
+#include "imgui_impl_sdl.h"
+
+#if _WIN32
+#include <imgui_impl_dx12.h>
+#include <imgui_impl_win32.h>
+
+#endif
 
 #ifdef __APPLE__
 #include "backends/opengl/OpenGLDevice.hxx"
@@ -34,9 +45,12 @@
 
 #include "d3d12/D3D12Heap.hxx"
 
-float timeOfDay = 0;
-
-float xPos = -5;
+float xPos = 1;
+float yPos = 1;
+float zPos = 1;
+  glm::vec4 sunColor = {0, 0.1f, 0.4f, 1};
+  glm::vec4 ambientColor = {1, 1, 1, 1};
+float ambientIntensity = 1;
 
 namespace Renderer {
 struct MVPCBuffer {
@@ -56,26 +70,36 @@ struct SunLight {
   uint8_t Padding[15];
 };
 
+struct AmbientLight {
+  glm::vec4 Color;
+  float Intensity;
+  uint8_t Padding[12];
+};
+
 struct PointLight {
   glm::vec4 Color;
   glm::vec4 Position;
   float Radius;
   float Intensity;
   bool Active;
-  uint8_t Padding[4];
+  uint8_t Padding[7];
 };
 
 struct LightBuffer {
   SunLight Sun;
-  glm::vec4 Ambient;
+  AmbientLight Ambient;
   PointLight Lights[16];
 };
+
+  auto light = LightBuffer{};
+
 
 Interface::Interface(uint32_t width, uint32_t height, void *window,
                      RenderBackendAPI type) {
   SDL_SysWMinfo wmInfo;
   SDL_VERSION(&wmInfo.version);
   SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window *>(window), &wmInfo);
+  _window = window;
   HWND hwnd = wmInfo.info.win.window;
   _windowDimension = {(float)width, (float)height};
   switch (type) {
@@ -97,9 +121,19 @@ Interface::Interface(uint32_t width, uint32_t height, void *window,
   CreatePipeline();
 }
 
-Interface::~Interface() {}
+Interface::~Interface() {
+	ImGui_ImplDX12_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+}
 
 auto Interface::StartFrame() -> void {
+#if _WIN32
+
+  ImGui_ImplWin32_NewFrame();
+  ImGui_ImplDX12_NewFrame();
+#endif
+  ImGui::NewFrame();
   // Start Projection
   _uploadFenceValue++;
   _uploadCommandList->Close();
@@ -126,32 +160,65 @@ auto Interface::StartFrame() -> void {
   _commandList->Reset(_frames[_frameIndex]->Allocator(), nullptr);
   _cbAllocator[_frameIndex]->Reset();
   _cbCommandList->Reset(_cbAllocator[_frameIndex], nullptr);
+}
 
+auto Interface::MidFrame() -> void {
   auto rtvHandle = _rtvHeap->CpuHandleFor(_frameIndex);
   auto dsvHandle = _dsvHeap->CpuHandleFor(0);
   _commandList->SetRenderTarget(rtvHandle, dsvHandle);
 
-  timeOfDay += 0.01f;
-
-  if (timeOfDay > 24) {
-    timeOfDay = 0;
-  }
-
-  xPos = (timeOfDay - 12);
-
   _commandList->SetDescriptorHeaps({_srvHeap});
-  auto light = LightBuffer{};
 
-  auto sun =
-      SunLight{{0.4f, 0.4f, 0.4f, 1}, {xPos, cos(timeOfDay), 3, 1}, true};
 
-  light.Ambient = {1, 1, 1, 1};
+
+  ImGui::Begin("Sun Light"); 
+
+  ImGui::End();
+
+  auto sun = SunLight{sunColor, {xPos, yPos, zPos, 1}, true};
+
+  light.Ambient = { ambientColor, ambientIntensity};
 
   light.Sun = sun;
 
-  light.Lights[0] = {{0, 0, 1, 1}, {0, -5.5f, 4, 1}, 20, 5, true};
 
-  light.Lights[1] = {{1, 0, 1, 1}, {4, 3, 4, 1}, 10, 8, true};
+ImGui::Begin("Lights");
+ImGui::PushID(0);
+if(ImGui::CollapsingHeader("Sun")) {
+    ImGui::SliderFloat("X", &xPos, -50.0f, 50.0f); 
+  ImGui::SliderFloat("Y", &yPos, -100.0f, 200.0f); 
+  ImGui::SliderFloat("Z", &zPos, -50.0f, 50.0f); 
+  ImGui::ColorEdit4("Sun Color", (float *)&sunColor);
+}
+ImGui::PopID();
+
+
+ImGui::PushID(1);
+if(ImGui::CollapsingHeader("Ambient")) {
+  ImGui::ColorEdit4("Ambient Color", (float *)&ambientColor);
+  ImGui::SliderFloat("Intensity", &ambientIntensity, 0.0f, 10.0f); 
+}
+ImGui::PopID();
+
+
+
+  for(int x = 0; x < 16; x++) {
+    std::stringstream ss;
+    ss << "Point Lights " << x;
+    
+ImGui::PushID(x + 2);
+ if (ImGui::CollapsingHeader(ss.str().c_str())) { 
+  ImGui::Checkbox("Active", &light.Lights[x].Active);
+  ImGui::SliderFloat("X", &light.Lights[x].Position.x, -50.0f, 50.0f); 
+  ImGui::SliderFloat("Y", &light.Lights[x].Position.y, -100.0f, 200.0f); 
+  ImGui::SliderFloat("Z", &light.Lights[x].Position.z, -50.0f, 50.0f); 
+  ImGui::ColorEdit4("Color", (float *)&light.Lights[x].Color);
+  ImGui::SliderFloat("Intensity", &light.Lights[x].Intensity, 0.0f, 10.0f); 
+  ImGui::SliderFloat("Range", &light.Lights[x].Radius, 0.0f, 25.0f); 
+}
+ImGui::PopID();
+  }
+  ImGui::End();
   _commandList->SetGraphicsRootConstantBuffer(
       _lightDataBuffer[_frameIndex], &light, sizeof(light),
       _lightDataGPUAddress[_frameIndex]);
@@ -190,12 +257,6 @@ auto Interface::StartFrame() -> void {
     modelView = glm::translate(modelView, {0, -6.0f, 4});
     modelView = glm::rotate(modelView, glm::radians(-130.0f),
                             glm::vec3{1.0f, 0.0f, 0.0f});
-
-    yOffset -= 0.001f;
-
-    if (yOffset < -50) {
-      yOffset = 50;
-    }
     //
 
     auto mvp = MVPCBuffer{modelView, _projectionMatrix * _projectionMatrix};
@@ -230,16 +291,18 @@ auto Interface::StartFrame() -> void {
 
     auto len = sizeof(float);
 
-    auto vao = std::find_if(_meshes.begin(), _meshes.end(),
-                            [mesh](std::shared_ptr<VertexArrayObject> vao) {
-                              return vao->Index == mesh.MeshId;
-                            });
-    if (vao != _meshes.end()) {
-      _commandList->SetVertexBuffer(vao->get()->VertexBuffer);
-      _commandList->SetIndexBuffer(vao->get()->IndexBuffer);
-      _commandList->DrawInstanced(vao->get()->IndexBuffer->Size(), 1, 0, 0, 0);
-    }
+    auto vao = _meshes[mesh.MeshId];
+    _commandList->SetVertexBuffer(vao->VertexBuffer);
+    _commandList->SetIndexBuffer(vao->IndexBuffer);
+    _commandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
   }
+
+  ImGui::Render();
+#if _WIN32
+  auto cmdList =
+      static_pointer_cast<D3D12GraphicsCommandList>(_commandList)->Native();
+  ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
+#endif
 
   // Indicate that the back buffer will now be used to present.
   _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
@@ -288,7 +351,7 @@ auto Interface::UploadMeshData(Vertex *vertices, size_t vCount, Index *indices,
   std::vector<Vertex> vertBuffer = {};
 
   // 9 floats = 1 vert
-  for (int x = 0; x < vCount; x ++) {
+  for (int x = 0; x < vCount; x++) {
     Vertex v{};
     std::memcpy(v.Position, vertices[x].Position, 4 * sizeof(float));
     std::memcpy(v.Normal, vertices[x].Normal, 3 * sizeof(float));
@@ -354,7 +417,7 @@ auto Interface::UploadTextureData(uint8_t *data, uint16_t width,
 
   _srvCounter++;
   //_device->CreateMipMaps(texBuff, _computeCommandList, width, height, width /
-  //256);
+  // 256);
 
   _textures.push_back(texBuff);
   _uploadBuffers.push_back(uploadBuffer);
@@ -566,6 +629,25 @@ auto Interface::CreatePipeline() -> void {
 
   WaitForGPU(_mainQueue);
   WaitForGPU(_computeQueue);
+
+#if _WIN32
+  auto device = static_pointer_cast<D3D12Device>(_device)->Native();
+  auto heap = static_pointer_cast<D3D12Heap>(_srvHeap)->Native();
+  SDL_SysWMinfo wmInfo;
+  SDL_VERSION(&wmInfo.version);
+  SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window *>(_window), &wmInfo);
+  HWND hwnd = wmInfo.info.win.window;
+  ImGui_ImplWin32_Init(hwnd);
+  auto cpuHandle =
+      static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(
+          _srvHeap->CpuHandleFor(_srvCounter));
+  auto gpuHandle =
+      static_pointer_cast<DescriptorHandleT<D3D12_GPU_DESCRIPTOR_HANDLE>>(
+          _srvHeap->GpuHandleFor(_srvCounter));
+  ImGui_ImplDX12_Init(device, FRAME_COUNT, DXGI_FORMAT_R8G8B8A8_UNORM, heap,
+                      cpuHandle->Handle(), gpuHandle->Handle());
+  _srvCounter++;
+#endif
 }
 
 auto Interface::RotateCamera(float rotationX, float rotationY, float rotationZ)

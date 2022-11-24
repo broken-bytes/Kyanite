@@ -1,6 +1,7 @@
 ﻿
 #include <d3d12.h>
 #include <dxcapi.h>
+#include <dxgiformat.h>
 #include <wrl.h>
 #include "d3d12/D3D12Device.hxx"
 #include "d3d12/D3D12GraphicsRootSignature.hxx"
@@ -24,6 +25,7 @@
 #include "d3d12/D3D12IndexBuffer.hxx"
 #include "d3d12/D3D12UploadBuffer.hxx"
 #include "d3d12/D3D12TextureBuffer.hxx"
+#include "imgui_impl_dx12.h"
 
 namespace Renderer {
 	D3D12Device::D3D12Device(
@@ -72,7 +74,6 @@ namespace Renderer {
 		else {
 			throw std::runtime_error("Failed creating device");
 		}
-
 	}
 
 	D3D12Device::~D3D12Device() {
