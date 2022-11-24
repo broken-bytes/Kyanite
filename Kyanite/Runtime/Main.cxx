@@ -62,6 +62,9 @@ std::vector<NativeRef *> Meshes = {};
 std::vector<NativeRef *> Shaders = {};
 std::vector<NativeRef *> Materials = {};
 
+constexpr int W = 1600;
+constexpr int H = 800;
+
 auto Tick() -> void {
   auto start = std::chrono::high_resolution_clock::now();
   // Update(frametime);
@@ -106,15 +109,15 @@ int main(int argc, char *argv[]) {
   SDL_DisplayMode mode = {};
   SDL_GetDesktopDisplayMode(0, &mode);
   GlobalInstance.Window = SDL_CreateWindow("SDL2Test", SDL_WINDOWPOS_UNDEFINED,
-                                           SDL_WINDOWPOS_UNDEFINED, mode.w, mode.h,
+                                           SDL_WINDOWPOS_UNDEFINED, W, H,
 #ifdef __APPLE__
                                            SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN
 #else
-                                            SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN
+                                            SDL_WINDOW_SHOWN
 #endif
   );
 
-  Init(1024, 768, (void *)GlobalInstance.Window);
+  Init(W, H, (void *)GlobalInstance.Window);
 
   auto textureInfo = LoadTextureCPU(
       "H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/Models/"
