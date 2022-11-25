@@ -4,6 +4,7 @@
 #include <stduuid/uuid.h>
 #include <string.h>
 #include "Engine.hxx"
+#include "Mesh.hxx"
 #include "Rendering/Interface.hxx"
 #include "Rendering/Vertex.hxx"
 #include "Core/AssetLoader.hxx"
@@ -195,22 +196,13 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader, NativeRef* textures, si
  void DrawMesh(
     NativeRef* mesh,
     NativeRef* material,
-    float xPos, 
-    float yPos, 
-    float zPos, 
-    float xScale, 
-    float yScale, 
-    float zScale,
-    float xRotation,
-    float yRotation,
-    float zRotation
+    MeshDrawInfo info,
+    Transform transform
     ) {
-        Interface->DrawMesh(mesh->Identifier, material->Identifier, {xPos, yPos, zPos}, {xScale, yScale, zScale}, {xRotation, yRotation, zRotation});
+        Interface->DrawMesh(mesh->Identifier, material->Identifier, info, {transform.Position.X, transform.Position.Y, transform.Position.Z}, {transform.Rotation.X, transform.Rotation.Y, transform.Rotation.Z}, {transform.Scale.X, transform.Scale.Y, transform.Scale.Z});
     }
 
- void SetClearColor(float r, float g, float b, float a) {
-    
- }
+ void SetClearColor(float r, float g, float b, float a) {}
  void SetFogColor(float r, float g, float b, float a) {}
  void SetFogIntensity(float intensity) {}
  void SetFogMinDistance(float distance) {}
@@ -220,3 +212,13 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader, NativeRef* textures, si
  void TranslateMesh(NativeRef* mesh, float x, float y, float z) {}
  void ScaleMesh(NativeRef* mesh, float x, float y, float z) {}
  void RotateMesh(NativeRef* mesh, float x, float y, float z) {}
+
+ void SetCamera(    
+	float xPos, 
+    float yPos, 
+    float zPos, 
+    float xRotation,
+    float yRotation,
+    float zRotation) {
+        Interface->SetCamera({xPos, yPos, zPos}, {xRotation, yRotation, zRotation});
+    }

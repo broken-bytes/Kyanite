@@ -15,10 +15,38 @@ struct NativeRef;
 extern "C" {
 #endif 
 
+struct Vector3 {
+    float X;
+    float Y;
+    float Z;
+} typedef Vector3;
+
+struct Vector4 {
+    float X;
+    float Y;
+    float Z;
+    float W;
+} typedef Vector4;
+
+struct Color {
+    float R;
+    float G;
+    float B;
+    float A;
+} typedef Color;
+
+struct MeshDrawInfo;
+
+struct Transform {
+    Vector3 Position;
+    Vector3 Rotation;
+    Vector3 Scale;
+} typedef Transform;
+
 struct MeshInfo {
 		float* Vertices;
 		int VerticesCount;
-		std::uint32_t* Indices;
+		uint32_t* Indices;
 		int IndicesCount;
 	} typedef MeshInfo;
 
@@ -43,7 +71,7 @@ struct MeshInfo {
 
     struct ShaderInfo {
 		const char* Code;
-        std::uint32_t Size; 
+        uint32_t Size; 
 	} typedef ShaderInfo;
 
 // --- Reference Functions ---
@@ -83,16 +111,9 @@ DLL_EXPORT void PhysicsUpdate(float frameTime);
 DLL_EXPORT void DrawMesh(
     NativeRef* mesh,
     NativeRef* material,
-    float xPos, 
-    float yPos, 
-    float zPos, 
-    float xScale, 
-    float yScale, 
-    float zScale,
-    float xRotation,
-    float yRotation,
-    float zRotation
-    );
+    MeshDrawInfo info,
+    Transform transform
+);
 
 DLL_EXPORT void SetClearColor(float r, float g, float b, float a);
 DLL_EXPORT void SetFogColor(float r, float g, float b, float a);
@@ -104,6 +125,13 @@ DLL_EXPORT void SetMeshRotation(NativeRef* ref, float x, float y, float z);
 DLL_EXPORT void TranslateMesh(NativeRef* mesh, float x, float y, float z);
 DLL_EXPORT void ScaleMesh(NativeRef* mesh, float x, float y, float z);
 DLL_EXPORT void RotateMesh(NativeRef* mesh, float x, float y, float z);
+DLL_EXPORT void SetCamera(    
+	float xPos, 
+    float yPos, 
+    float zPos, 
+    float xRotation,
+    float yRotation,
+    float zRotation);
 
 #ifdef __cplusplus
 }

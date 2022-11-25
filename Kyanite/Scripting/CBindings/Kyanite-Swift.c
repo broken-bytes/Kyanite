@@ -2,24 +2,13 @@
 #include <Windows.h>
 typedef void(*TAddRef)(NativeRef* objc);
 typedef void(*TRemoveRef)(NativeRef* objc);
-typedef NativeRef*(*TLoadMeshGPU)(const char* path);
-typedef NativeRef*(*TLoadMeshCPU)(
-    const char* path,
-    float* vertices, 
-    uint64_t vertCount, 
-    float* indices, 
-    uint64_t indCount);
-typedef NativeRef*(*TLoadTextureGPU)(const char* path);
-typedef NativeRef*(*TLoadTextureCPU)(
-    const char* path,
-    uint8_t* pixels, 
-    uint64_t pixelCount, 
-    uint8_t* channels
-    );
-typedef NativeRef*(*TLoadShader)(
+typedef ModelInfo(*TLoadModelCPU)(const char* path);
+typedef TextureInfo(*TLoadTextureCPU)(const char* path);
+typedef NativeRef*(*TLoadShaderGPU)(
     const char* path
-    );
-typedef void(*TInit)(uint32_t resolutionX, uint32_t resolutionY);
+);
+typedef NativeRef*(*TLoadMaterialGPU)(NativeRef* shader, NativeRef* textures, uint64_t textureCount);
+typedef void(*TInit)(uint32_t resolutionX, uint32_t resolutionY, void* window);
 typedef void(*TShutdown)();
 typedef void(*TSetMaxFrameRate)(uint16_t maxFramerate);
 typedef void(*TSetVSync)(bool enabled);
@@ -48,13 +37,19 @@ typedef void(*TSetMeshRotation)(NativeRef* ref, float x, float y, float z);
 typedef void(*TTranslateMesh)(NativeRef* mesh, float x, float y, float z);
 typedef void(*TScaleMesh)(NativeRef* mesh, float x, float y, float z);
 typedef void(*TRotateMesh)(NativeRef* mesh, float x, float y, float z);
+typedef void(*TSetCamera)(    
+	float xPos, 
+    float yPos, 
+    float zPos, 
+    float xRotation,
+    float yRotation,
+    float zRotation);
 TAddRef _AddRef;
 TRemoveRef _RemoveRef;
-TLoadMeshGPU _LoadMeshGPU;
-TLoadMeshCPU _LoadMeshCPU;
-TLoadTextureGPU _LoadTextureGPU;
+TLoadModelCPU _LoadModelCPU;
 TLoadTextureCPU _LoadTextureCPU;
-TLoadShader _LoadShader;
+TLoadShaderGPU _LoadShaderGPU;
+TLoadMaterialGPU _LoadMaterialGPU;
 TInit _Init;
 TShutdown _Shutdown;
 TSetMaxFrameRate _SetMaxFrameRate;
@@ -72,15 +67,15 @@ TSetMeshRotation _SetMeshRotation;
 TTranslateMesh _TranslateMesh;
 TScaleMesh _ScaleMesh;
 TRotateMesh _RotateMesh;
+TSetCamera _SetCamera;
 void InitCBindings() {
     HANDLE lib = LoadLibrary("./Kyanite-Runtime.dll");
     _AddRef = (TAddRef)GetProcAddress(lib, "AddRef");
     _RemoveRef = (TRemoveRef)GetProcAddress(lib, "RemoveRef");
-    _LoadMeshGPU = (TLoadMeshGPU)GetProcAddress(lib, "LoadMeshGPU");
-    _LoadMeshCPU = (TLoadMeshCPU)GetProcAddress(lib, "LoadMeshCPU");
-    _LoadTextureGPU = (TLoadTextureGPU)GetProcAddress(lib, "LoadTextureGPU");
+    _LoadModelCPU = (TLoadModelCPU)GetProcAddress(lib, "LoadModelCPU");
     _LoadTextureCPU = (TLoadTextureCPU)GetProcAddress(lib, "LoadTextureCPU");
-    _LoadShader = (TLoadShader)GetProcAddress(lib, "LoadShader");
+    _LoadShaderGPU = (TLoadShaderGPU)GetProcAddress(lib, "LoadShaderGPU");
+    _LoadMaterialGPU = (TLoadMaterialGPU)GetProcAddress(lib, "LoadMaterialGPU");
     _Init = (TInit)GetProcAddress(lib, "Init");
     _Shutdown = (TShutdown)GetProcAddress(lib, "Shutdown");
     _SetMaxFrameRate = (TSetMaxFrameRate)GetProcAddress(lib, "SetMaxFrameRate");
@@ -98,6 +93,7 @@ void InitCBindings() {
     _TranslateMesh = (TTranslateMesh)GetProcAddress(lib, "TranslateMesh");
     _ScaleMesh = (TScaleMesh)GetProcAddress(lib, "ScaleMesh");
     _RotateMesh = (TRotateMesh)GetProcAddress(lib, "RotateMesh");
+    _SetCamera = (TSetCamera)GetProcAddress(lib, "SetCamera");
 
 }
 void AddRef(NativeRef* objc) {
@@ -106,37 +102,23 @@ void AddRef(NativeRef* objc) {
 void RemoveRef(NativeRef* objc) {
     _RemoveRef(objc);
 }
-NativeRef* LoadMeshGPU(const char* path) {
-    _LoadMeshGPU(path);
+ModelInfo LoadModelCPU(const char* path) {
+    _LoadModelCPU(path);
 }
-NativeRef* LoadMeshCPU(
-    const char* path,
-    float* vertices, 
-    uint64_t vertCount, 
-    float* indices, 
-    uint64_t indCount) {
-    _LoadMeshCPU(path,vertices,vertCount,indices,indCount);
+TextureInfo LoadTextureCPU(const char* path) {
+    _LoadTextureCPU(path);
 }
-NativeRef* LoadTextureGPU(const char* path) {
-    _LoadTextureGPU(path);
-}
-NativeRef* LoadTextureCPU(
-    const char* path,
-    uint8_t* pixels, 
-    uint64_t pixelCount, 
-    uint8_t* channels
-    ) {
-    _LoadTextureCPU(path,pixels,pixelCount,channels
-);
-}
-NativeRef* LoadShader(
+NativeRef* LoadShaderGPU(
     const char* path
-    ) {
-    _LoadShader(path
+) {
+    _LoadShaderGPU(path
 );
 }
-void Init(uint32_t resolutionX, uint32_t resolutionY) {
-    _Init(resolutionX,resolutionY);
+NativeRef* LoadMaterialGPU(NativeRef* shader, NativeRef* textures, uint64_t textureCount) {
+    _LoadMaterialGPU(shader,textures,textureCount);
+}
+void Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
+    _Init(resolutionX,resolutionY,window);
 }
 void Shutdown() {
     _Shutdown();
@@ -198,4 +180,13 @@ void ScaleMesh(NativeRef* mesh, float x, float y, float z) {
 }
 void RotateMesh(NativeRef* mesh, float x, float y, float z) {
     _RotateMesh(mesh,x,y,z);
+}
+void SetCamera(    
+	float xPos, 
+    float yPos, 
+    float zPos, 
+    float xRotation,
+    float yRotation,
+    float zRotation) {
+    _SetCamera(xPos,yPos,zPos,xRotation,yRotation,zRotation);
 }

@@ -1,3 +1,4 @@
+#include "Mesh.hxx"
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <imgui_impl_sdl.h>
@@ -55,6 +56,11 @@ float AInput;
 
 int ticks = 0;
 
+
+float camX = 0;
+float camY = 0;
+float camZ = 0;
+
 Instance GlobalInstance = {};
 
 std::vector<NativeRef *> Textures = {};
@@ -79,8 +85,17 @@ auto Tick() -> void {
   ticks++;
   Update(frametime);
 
+  SetCamera(camX, camY, camZ, 0, 0, 0);
+
   for (int x = 0; x < Meshes.size(); x++) {
-    DrawMesh(Meshes[x], Materials[0], 0, 0, 10, 1, 1, 1, 0, 0, 0);
+    MeshDrawInfo info;
+    info.Flags = MESH_DRAW_INFO_FLAGS_DRAW_OUTLINE;
+    info.OutlineWidth = 2;
+    info.OutlineColor[0] = 1;
+    info.OutlineColor[1] = 0;
+    info.OutlineColor[2] = 1;
+    info.OutlineColor[3] = 1;
+    DrawMesh(Meshes[x], Materials[0], info, {{0, 0, 20}, {0, 0, 0}, {1, 1, 1}});
   }
 }
 
@@ -107,6 +122,8 @@ int main(int argc, char *argv[]) {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO |
            SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
   SDL_DisplayMode mode = {};
+  SDL_ShowCursor(0);      
+  SDL_SetRelativeMouseMode(SDL_TRUE);
   SDL_GetDesktopDisplayMode(0, &mode);
   GlobalInstance.Window = SDL_CreateWindow("SDL2Test", SDL_WINDOWPOS_UNDEFINED,
                                            SDL_WINDOWPOS_UNDEFINED, W, H,
@@ -153,6 +170,7 @@ int main(int argc, char *argv[]) {
         break;
 
       case SDL_KEYDOWN:
+        
         // Handle any key presses here.
         break;
       case SDL_MOUSEBUTTONUP:
@@ -170,8 +188,8 @@ int main(int argc, char *argv[]) {
 
       case SDL_MOUSEMOTION:
         io.AddMousePosEvent(event.motion.x, event.motion.y);
-        XInput = event.motion.x;
-        YInput = event.motion.y;
+        camY = event.motion.xrel;
+        camZ = event.motion.yrel;
       default:
         break;
       } // End switch

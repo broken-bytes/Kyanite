@@ -1,5 +1,6 @@
 #include "Interface.hxx"
 #include "DescriptorHandle.hxx"
+#include "Mesh.hxx"
 #include "Rect.hxx"
 #include "Vertex.hxx"
 #include "Viewport.hxx"
@@ -48,9 +49,12 @@
 float xPos = 1;
 float yPos = 1;
 float zPos = 1;
-  glm::vec4 sunColor = {0, 0.1f, 0.4f, 1};
-  glm::vec4 ambientColor = {1, 1, 1, 1};
+glm::vec4 sunColor = {0, 0.1f, 0.4f, 1};
+glm::vec4 ambientColor = {1, 1, 1, 1};
 float ambientIntensity = 1;
+
+glm::vec3 camPos;
+glm::vec3 camRot;
 
 namespace Renderer {
 struct MVPCBuffer {
@@ -91,8 +95,7 @@ struct LightBuffer {
   PointLight Lights[16];
 };
 
-  auto light = LightBuffer{};
-
+auto light = LightBuffer{};
 
 Interface::Interface(uint32_t width, uint32_t height, void *window,
                      RenderBackendAPI type) {
@@ -122,9 +125,9 @@ Interface::Interface(uint32_t width, uint32_t height, void *window,
 }
 
 Interface::~Interface() {
-	ImGui_ImplDX12_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
+  ImGui_ImplDX12_Shutdown();
+  ImGui_ImplWin32_Shutdown();
+  ImGui::DestroyContext();
 }
 
 auto Interface::StartFrame() -> void {
@@ -169,54 +172,48 @@ auto Interface::MidFrame() -> void {
 
   _commandList->SetDescriptorHeaps({_srvHeap});
 
-
-
-  ImGui::Begin("Sun Light"); 
+  ImGui::Begin("Sun Light");
 
   ImGui::End();
 
   auto sun = SunLight{sunColor, {xPos, yPos, zPos, 1}, true};
 
-  light.Ambient = { ambientColor, ambientIntensity};
+  light.Ambient = {ambientColor, ambientIntensity};
 
   light.Sun = sun;
 
+  ImGui::Begin("Lights");
+  ImGui::PushID(0);
+  if (ImGui::CollapsingHeader("Sun")) {
+    ImGui::SliderFloat("X", &xPos, -50.0f, 50.0f);
+    ImGui::SliderFloat("Y", &yPos, -100.0f, 200.0f);
+    ImGui::SliderFloat("Z", &zPos, -50.0f, 50.0f);
+    ImGui::ColorEdit4("Sun Color", (float *)&sunColor);
+  }
+  ImGui::PopID();
 
-ImGui::Begin("Lights");
-ImGui::PushID(0);
-if(ImGui::CollapsingHeader("Sun")) {
-    ImGui::SliderFloat("X", &xPos, -50.0f, 50.0f); 
-  ImGui::SliderFloat("Y", &yPos, -100.0f, 200.0f); 
-  ImGui::SliderFloat("Z", &zPos, -50.0f, 50.0f); 
-  ImGui::ColorEdit4("Sun Color", (float *)&sunColor);
-}
-ImGui::PopID();
+  ImGui::PushID(1);
+  if (ImGui::CollapsingHeader("Ambient")) {
+    ImGui::ColorEdit4("Ambient Color", (float *)&ambientColor);
+    ImGui::SliderFloat("Intensity", &ambientIntensity, 0.0f, 10.0f);
+  }
+  ImGui::PopID();
 
-
-ImGui::PushID(1);
-if(ImGui::CollapsingHeader("Ambient")) {
-  ImGui::ColorEdit4("Ambient Color", (float *)&ambientColor);
-  ImGui::SliderFloat("Intensity", &ambientIntensity, 0.0f, 10.0f); 
-}
-ImGui::PopID();
-
-
-
-  for(int x = 0; x < 16; x++) {
+  for (int x = 0; x < 16; x++) {
     std::stringstream ss;
     ss << "Point Lights " << x;
-    
-ImGui::PushID(x + 2);
- if (ImGui::CollapsingHeader(ss.str().c_str())) { 
-  ImGui::Checkbox("Active", &light.Lights[x].Active);
-  ImGui::SliderFloat("X", &light.Lights[x].Position.x, -50.0f, 50.0f); 
-  ImGui::SliderFloat("Y", &light.Lights[x].Position.y, -100.0f, 200.0f); 
-  ImGui::SliderFloat("Z", &light.Lights[x].Position.z, -50.0f, 50.0f); 
-  ImGui::ColorEdit4("Color", (float *)&light.Lights[x].Color);
-  ImGui::SliderFloat("Intensity", &light.Lights[x].Intensity, 0.0f, 10.0f); 
-  ImGui::SliderFloat("Range", &light.Lights[x].Radius, 0.0f, 25.0f); 
-}
-ImGui::PopID();
+
+    ImGui::PushID(x + 2);
+    if (ImGui::CollapsingHeader(ss.str().c_str())) {
+      ImGui::Checkbox("Active", &light.Lights[x].Active);
+      ImGui::SliderFloat("X", &light.Lights[x].Position.x, -50.0f, 50.0f);
+      ImGui::SliderFloat("Y", &light.Lights[x].Position.y, -100.0f, 200.0f);
+      ImGui::SliderFloat("Z", &light.Lights[x].Position.z, -50.0f, 50.0f);
+      ImGui::ColorEdit4("Color", (float *)&light.Lights[x].Color);
+      ImGui::SliderFloat("Intensity", &light.Lights[x].Intensity, 0.0f, 10.0f);
+      ImGui::SliderFloat("Range", &light.Lights[x].Radius, 0.0f, 25.0f);
+    }
+    ImGui::PopID();
   }
   ImGui::End();
   _commandList->SetGraphicsRootConstantBuffer(
@@ -235,9 +232,9 @@ ImGui::PopID();
   _commandList->SetViewport(_viewport);
   _commandList->SetScissorRect(_scissorRect);
 
-  glm::vec3 cameraPos = {0, 0, -20};
+  glm::vec3 cameraPos = {camPos.x, camPos.y, camPos.z -20};
   glm::vec3 cameraFront = {0.0f, 0.0f, 1.0f};
-  glm::vec3 cameraLookAt{0, 0, 0};
+  glm::vec3 cameraLookAt = camPos;
   glm::vec3 cameraUp = {0.0f, 1.0f, 0.0f};
 
   _viewMatrix = glm::lookAtLH(cameraPos, cameraLookAt, cameraUp);
@@ -259,7 +256,7 @@ ImGui::PopID();
                             glm::vec3{1.0f, 0.0f, 0.0f});
     //
 
-    auto mvp = MVPCBuffer{modelView, _projectionMatrix * _projectionMatrix};
+    auto mvp = MVPCBuffer{modelView, _projectionMatrix * _viewMatrix};
 
     auto material = _materials[mesh.MaterialId];
     auto shader = material->Shader;
@@ -508,8 +505,9 @@ auto Interface::UploadShaderData(const char *data) -> uint64_t {
   return _shaders.size() - 1;
 }
 
-auto Interface::DrawMesh(uint64_t id, uint64_t materialId, glm::vec3 position,
-                         glm::vec3 scale, glm::vec3 rotation) -> void {
+auto Interface::DrawMesh(uint64_t id, uint64_t materialId, MeshDrawInfo info,
+                         glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
+    -> void {
 
   glm::mat4 transform = glm::mat4(1.0f);
   transform = glm::translate(transform, position);
@@ -518,6 +516,11 @@ auto Interface::DrawMesh(uint64_t id, uint64_t materialId, glm::vec3 position,
 }
 
 auto Interface::SetMeshProperties() -> void {}
+
+auto Interface::SetCamera(glm::vec3 position, glm::vec3 rotation) -> void {
+  camPos = position;
+  camRot = rotation;
+}
 
 auto Interface::MeshDataFor(const char *uuid) -> std::vector<uint64_t> {
   return {};
@@ -648,15 +651,6 @@ auto Interface::CreatePipeline() -> void {
                       cpuHandle->Handle(), gpuHandle->Handle());
   _srvCounter++;
 #endif
-}
-
-auto Interface::RotateCamera(float rotationX, float rotationY, float rotationZ)
-    -> void {
-  // cameraRotation = { rotationX, rotationY, rotationZ };
-}
-
-auto Interface::MoveCamera(float moveX, float moveY, float moveZ) -> void {
-  // cameraMovement = { moveX, moveY, moveZ };
 }
 
 auto Interface::CreateAssets() -> void {}

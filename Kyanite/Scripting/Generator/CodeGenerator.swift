@@ -19,9 +19,9 @@ class CodeGenerator {
 
         FileManager.default.enumerator(atPath: path)?.forEach { currentPath in 
             guard let currentPath = currentPath as? String else { fatalError() }
-            if currentPath.contains(".hxx") {
+            if currentPath.contains(".hxx") && !currentPath.starts(with: ".") {
                 guard let data = FileManager.default.contents(atPath: currentPath) else { fatalError()}
-                
+                print(currentPath)
                 guard let content = String(data: data, encoding: .utf8) else { fatalError()}
                 if content.contains("// #SwiftImport") {
                     var outContent = content

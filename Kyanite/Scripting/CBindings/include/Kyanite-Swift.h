@@ -8,9 +8,9 @@ extern "C" {
 #endif
 
 struct Vertex {
-    float Position[3];
-    float UV[2];
+    float Position[4];
     float Normal[3];
+    float UV[2];
 } typedef Vertex;
 
 #ifdef __cplusplus 
@@ -38,6 +38,10 @@ struct Mesh {
 #endif
 
 
+#include <stdint.h>
+
+struct NativeRef;
+
 #ifdef _WIN32
 
 #else
@@ -48,12 +52,36 @@ struct Mesh {
 extern "C" {
 #endif 
 
-struct NativeRef {
-    uint32_t RefID;
-    uint16_t RefCount;
-    void* Data;
-} typedef NativeRef;
+struct MeshInfo {
+		float* Vertices;
+		int VerticesCount;
+		uint32_t* Indices;
+		int IndicesCount;
+	} typedef MeshInfo;
 
+
+	struct ModelInfo {
+		MeshInfo* Meshes;
+		int MeshCount;
+	} typedef ModelInfo;
+
+    struct TextureLevelInfo {
+		uint8_t* Data;
+		uint16_t Width;
+        uint16_t Height;
+	} typedef TextureLevelInfo;
+
+
+	struct TextureInfo {
+		TextureLevelInfo* Levels;
+		uint8_t LevelCount;
+		uint8_t Channels;
+	} typedef TextureInfo;
+
+    struct ShaderInfo {
+		const char* Code;
+        uint32_t Size; 
+	} typedef ShaderInfo;
 
 // --- Reference Functions ---
  void AddRef(NativeRef* objc);
@@ -63,30 +91,27 @@ struct NativeRef {
 
 // --- Load Functions ---
 // Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
- NativeRef* LoadMeshGPU(const char* path);
+ NativeRef* LoadMeshGPU(MeshInfo& info);
 // Loads a mesh into CPU memory (RAM)
- NativeRef* LoadMeshCPU(
-    const char* path,
-    float* vertices, 
-    uint64_t vertCount, 
-    float* indices, 
-    uint64_t indCount);
+ ModelInfo LoadModelCPU(const char* path);
+ void FreeModelCPU(ModelInfo& info);
 // Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if not supported)
- NativeRef* LoadTextureGPU(const char* path);
+ NativeRef* LoadTextureGPU(TextureInfo& info);
 // Loads a texture into CPU memory (RAM)
- NativeRef* LoadTextureCPU(
-    const char* path,
-    uint8_t* pixels, 
-    uint64_t pixelCount, 
-    uint8_t* channels
-    );
+ TextureInfo LoadTextureCPU(const char* path);
+ void FreeTextureCPU(TextureInfo& info);
+
 // Loads a shader and compiles it 
- NativeRef* LoadShader(
+ NativeRef* LoadShaderGPU(
     const char* path
-    );
+);
+
+// Creates a new material in the renderpipeline and returns its ref
+ NativeRef* LoadMaterialGPU(NativeRef* shader, NativeRef* textures, uint64_t textureCount);
+
 
 // --- Commands ---
- void Init(uint32_t resolutionX, uint32_t resolutionY);
+ void Init(uint32_t resolutionX, uint32_t resolutionY, void* window);
  void Shutdown();
  void SetMaxFrameRate(uint16_t maxFramerate);
  void SetVSync(bool enabled);
@@ -116,10 +141,42 @@ struct NativeRef {
  void TranslateMesh(NativeRef* mesh, float x, float y, float z);
  void ScaleMesh(NativeRef* mesh, float x, float y, float z);
  void RotateMesh(NativeRef* mesh, float x, float y, float z);
+ void SetCamera(    
+	float xPos, 
+    float yPos, 
+    float zPos, 
+    float xRotation,
+    float yRotation,
+    float zRotation);
 
 #ifdef __cplusplus
 }
 #endif 
+
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif 
+enum RefType {
+    STATIC,
+    DYNAMIC,
+};
+
+struct NativeRef {
+    const char* UUID;
+    uint16_t RefCount;
+    uint64_t Identifier;
+    RefType Type;
+    // Function pointer to function called upon delete of this Pointer
+    void* Deleter;
+
+} typedef NativeRef;
+
+#ifdef __cplusplus
+}
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
