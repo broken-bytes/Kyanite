@@ -67,9 +67,48 @@ struct TextureInfo {
   uint8_t Channels;
 } typedef TextureInfo;
 
+enum ShaderJSONDataLightingModel {
+    DEFAULT,
+    UNLIT
+} typedef ShaderJSONDataLightingModel;
+
+enum ShaderJSONDataStageType {
+    VERTEX,
+    PIXEL,
+    MESH
+} typedef ShaderJSONDataStageType;
+
+enum ShaderJSONDataInputPropType {
+    INT,
+    BOOL,
+    FLOAT,
+    FLOAT2,
+    FLOAT3,
+    FLOAT4,
+} typedef ShaderJSONDataInputPropType;
+
+struct ShaderJSONDataInputProp {
+    const char* Name;
+    ShaderJSONDataInputPropType Type;
+    uint8_t Slot;
+};
+
+struct ShaderJSONDataStage {
+    ShaderJSONDataStageType Type;
+    const char* Code;
+};
+// Internal Helpers
+struct ShaderJSONData {
+    const char* Name;
+    ShaderJSONDataLightingModel Lighting;
+    ShaderJSONDataInputProp* Input;
+    size_t InputLen;
+    ShaderJSONDataStage* Stages;
+    size_t StagesLen;
+};
+
 struct ShaderInfo {
-  const char *Code;
-  uint32_t Size;
+  ShaderJSONData Data;
 } typedef ShaderInfo;
 
 // --- Reference Functions ---

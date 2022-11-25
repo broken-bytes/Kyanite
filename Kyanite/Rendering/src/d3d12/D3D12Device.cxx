@@ -1,4 +1,4 @@
-﻿
+
 #include <d3d12.h>
 #include <dxcapi.h>
 #include <dxgiformat.h>

@@ -9,6 +9,7 @@
 #endif
 
 
+
 namespace AssetLoader {
 	struct ModelSubMesh {
 		std::string Name;
@@ -22,7 +23,7 @@ namespace AssetLoader {
 	};
 
 	struct ShaderAsset {
-		char* Code;
+		std::string RawData;
 	};
 
 	struct TextureSubLevel {

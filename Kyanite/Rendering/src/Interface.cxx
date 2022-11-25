@@ -406,9 +406,11 @@ auto Interface::UploadTextureData(uint8_t *data, uint16_t width,
   return _textures.size() - 1;
 }
 
-auto Interface::UploadShaderData(const char *data) -> uint64_t {
-  auto compiledShader = _device->CompileShader(data);
-  compiledShader->ShaderIndex = _shaders.size();
+auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
+      auto compiledShader = _device->CompileShader(shader.Code);
+      compiledShader->ShaderIndex = _shaders.size();
+    
+
   GraphicsRootSignatureDescription desc = {};
   desc.Parameters = {};
   // MVP Matrix

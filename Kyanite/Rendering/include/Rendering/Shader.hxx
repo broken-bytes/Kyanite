@@ -1,9 +1,16 @@
 #pragma once
 
-#include "GraphicsPipelineState.hxx"
+#include <map>
+#include <string>
+#include <vector>
 
 namespace Renderer {
 
+    enum class GraphicsShaderStageType: uint8_t {
+        VERTEX,
+        PIXEL,
+        MESH
+    };
     enum class GraphicsShaderSlotType {
         TEXTURE = 0,
         BOOL    = 1,
@@ -20,8 +27,9 @@ namespace Renderer {
     };
 
     struct GraphicsShader {
-        const char* Name;
+        std::string Name;
         std::vector<GraphicsShaderSlot> Slots;
-        const char* Code;
+        // Name, Code
+        std::string Code;
     };
 }

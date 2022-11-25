@@ -56,7 +56,7 @@ namespace Renderer {
 		auto MaterialPopTexture() -> void;
 		auto UploadMeshData(Vertex* vertices, size_t vCount, Index* indices, size_t iCount) -> std::uint64_t;
 		auto UploadTextureData(std::uint8_t* data, std::uint16_t width, std::uint16_t height, std::uint8_t channels) -> std::uint64_t;
-		auto UploadShaderData(const char* data)->std::uint64_t;
+		auto UploadShaderData(GraphicsShader shader)->std::uint64_t;
 		auto DrawMesh(uint64_t id, uint64_t materialId, MeshDrawInfo info,
                          glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) -> void;
 		auto SetMeshProperties() -> void;

@@ -105,7 +105,7 @@ namespace Renderer {
 		virtual auto CreateShaderResourceView(std::shared_ptr<TextureBuffer> buffer, std::shared_ptr<DescriptorHandle> handle) -> void = 0;
 		virtual auto CreateConstantBufferView(std::shared_ptr<Heap> heap, std::shared_ptr<UploadBuffer> buffer, std::shared_ptr<DescriptorHandle> cpuHandle) -> void = 0;
 		virtual auto CreateMipMaps(std::shared_ptr<TextureBuffer> texture, std::shared_ptr<GraphicsCommandList> commandList, uint16_t width, uint16_t height, uint8_t levels) -> void = 0;
-        [[nodiscard]] virtual auto CompileShader(const char* code) ->std::shared_ptr<GraphicsShaderBinding> = 0;
+        [[nodiscard]] virtual auto CompileShader(std::string code, uint8_t type) ->std::shared_ptr<GraphicsShaderBinding> = 0;
         virtual auto Flush() -> void = 0;
 
 	protected:

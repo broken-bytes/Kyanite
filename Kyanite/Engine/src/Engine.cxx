@@ -139,22 +139,19 @@ DLL_EXPORT void FreeTextureCPU(TextureInfo& info) {
 
 DLL_EXPORT ShaderInfo LoadShaderCPU(const char* path) {
     ShaderInfo info;
-    auto shader = AssetLoader::LoadShader(path);
-    info.Code = shader.Code;
-
-    // TODO: Parse attributes
-    return info;
+        auto shader = AssetLoader::LoadShader(path);
 }
 
 // Loads a shader and compiles it 
 DLL_EXPORT NativeRef* LoadShaderGPU(ShaderInfo& info) {
-    auto index = Interface->UploadShaderData(info.Code);
+    auto index = Interface->UploadShaderData(info.Name, info.);
+
     auto ref = new NativeRef();
     ref->Identifier = index;
     ref->RefCount = 1;
     ref->Type = STATIC;
     ref->Deleter = nullptr;
-    std::random_device rd;
+   std::random_device rd;
     auto seed_data = std::array<int, std::mt19937::state_size> {};
     std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
     std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
