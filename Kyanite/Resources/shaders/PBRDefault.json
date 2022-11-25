@@ -1,6 +1,6 @@
 {
-    "name": "Shader Name",
-    "lighting": "default|unlit",
+    "name": "PBRDefault",
+    "lighting": "default",
     "Input": [
         {
             "name": "IntName",

@@ -3,7 +3,6 @@
 
 #include <cstdint>
 
-struct NativeRef;
 
 #ifdef _WIN32
 #define DLL_EXPORT __declspec(dllexport)
@@ -14,6 +13,8 @@ struct NativeRef;
 #ifdef __cplusplus
 extern "C" {
 #endif 
+
+struct NativeRef;
 
 struct Vector3 {
     float X;
@@ -91,10 +92,10 @@ DLL_EXPORT NativeRef* LoadTextureGPU(TextureInfo& info);
 // Loads a texture into CPU memory (RAM)
 DLL_EXPORT TextureInfo LoadTextureCPU(const char* path);
 DLL_EXPORT void FreeTextureCPU(TextureInfo& info);
-
+DLL_EXPORT ShaderInfo LoadShaderCPU(const char* path);
 // Loads a shader and compiles it 
 DLL_EXPORT NativeRef* LoadShaderGPU(
-    const char* path
+    ShaderInfo& info
 );
 
 // Creates a new material in the renderpipeline and returns its ref

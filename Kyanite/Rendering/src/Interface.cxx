@@ -261,26 +261,15 @@ auto Interface::MidFrame() -> void {
     auto material = _materials[mesh.MaterialId];
     auto shader = material->Shader;
 
-    auto mat = MaterialBuffer{};
-    mat.Emmisive = 0.1f;
-    mat.Specular = 0.5f;
 
     _commandList->SetGraphicsRootSignature(shader->Pipeline->RootSignature());
     _commandList->SetPipelineState(shader->Pipeline);
-    _commandList->SetGraphicsRootConstants(0, sizeof(mvp) / 4, &mvp, 0);
-    //_commandList->SetGraphicsRootConstants(4,
-    // sizeof(LightBuffer) / 4, &light, 0);
-    // FIXME: All buffers should be set before textures, so texture ranges can
-    // be dynamic
-    for (int x = 0; x < material->Textures.size(); x++) {
-      _commandList->SetGraphicsRootDescriptorTable(
-          x + 1, material->Textures[x]->GPUHandle);
-    }
+    _commandList->SetGraphicsRootConstants(0, sizeof(mvp) / 4, &mvp, 0);                  // b0     -> The Model View Projection for this Mesh/Material
+    _commandList->SetGraphicsRootDescriptorTable(1, _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer for this Mesh/Material
 
-    _commandList->SetGraphicsRootConstants(3, sizeof(MaterialBuffer) / 4, &mat,
-                                           0);
-    _commandList->SetGraphicsRootDescriptorTable(
-        4, _srvHeap->GpuHandleFor(_frameIndex));
+    for (auto [it, end, x] = std::tuple{material->Textures.cbegin(), material->Textures.cend(), 0}; it != end; it++, x++){
+       _commandList->SetGraphicsRootDescriptorTable(x + 2, it->second->GPUHandle);
+    }
 
     // 2x Table = 2 | 2
     // 2x SRV = 4   | 4 + 2 = 6
@@ -329,13 +318,8 @@ auto Interface::Update() -> void {}
 
 auto Interface::Resize(uint32_t width, uint32_t height) -> void {}
 
-auto Interface::CreateMaterial(uint64_t shaderId,
-                               std::vector<uint64_t> textureIds) -> uint64_t {
+auto Interface::CreateMaterial(uint64_t shaderId) -> uint64_t {
   auto mat = std::make_shared<Material>();
-  for (auto &index : textureIds) {
-    mat->Textures.push_back(_textures[index]);
-  }
-
   mat->Shader = _shaders[shaderId];
 
   _materials.push_back(mat);
@@ -436,6 +420,8 @@ auto Interface::UploadShaderData(const char *data) -> uint64_t {
   // TODO: Parse shader json and add additional params
 
   GraphicsRootSignatureParameter param = {};
+
+  // --- MVP MATRIX ---
   param.Index = 0;
   param.Size = sizeof(MVPCBuffer) / 4;
   param.ShaderRegister = 0;
@@ -446,7 +432,19 @@ auto Interface::UploadShaderData(const char *data) -> uint64_t {
 
   desc.Parameters.push_back(param);
 
+  // --- USER DEFINED CBV ---
   param.Index = 1;
+  param.Size = 1;
+  param.ShaderRegister = 1;
+  param.RegisterSpace = 0;
+  param.Visibility = GraphicsShaderVisibility::ALL;
+  param.Type = GraphicsRootSignatureParameterType::TABLE;
+  param.RangeType = GraphicsDescriptorRangeType::CBV;
+
+  desc.Parameters.push_back(param);
+
+  // SHADER RESOURCE VIEW FOR CBV
+  param.Index = 2;
   param.Size = 1;
   param.ShaderRegister = 0;
   param.RegisterSpace = 0;
@@ -456,33 +454,14 @@ auto Interface::UploadShaderData(const char *data) -> uint64_t {
 
   desc.Parameters.push_back(param);
 
-  param.Index = 2;
+  // TEXTURE 0 s0
+  param.Index = 3;
   param.Size = 1;
   param.ShaderRegister = 1;
   param.RegisterSpace = 0;
   param.Visibility = GraphicsShaderVisibility::PIXEL;
   param.Type = GraphicsRootSignatureParameterType::TABLE;
   param.RangeType = GraphicsDescriptorRangeType::SRV;
-
-  desc.Parameters.push_back(param);
-
-  param.Index = 3;
-  param.Size = sizeof(MaterialBuffer) / 4;
-  param.ShaderRegister = 2;
-  param.RegisterSpace = 0;
-  param.Visibility = GraphicsShaderVisibility::VERTEX;
-  param.Type = GraphicsRootSignatureParameterType::CONSTANT;
-  param.RangeType = GraphicsDescriptorRangeType::CBV;
-
-  desc.Parameters.push_back(param);
-
-  param.Index = 4;
-  param.Size = 1;
-  param.ShaderRegister = 3;
-  param.RegisterSpace = 0;
-  param.Visibility = GraphicsShaderVisibility::ALL;
-  param.Type = GraphicsRootSignatureParameterType::TABLE;
-  param.RangeType = GraphicsDescriptorRangeType::CBV;
 
   desc.Parameters.push_back(param);
 

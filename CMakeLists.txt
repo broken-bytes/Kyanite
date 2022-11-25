@@ -33,5 +33,5 @@ add_subdirectory(Kyanite/Engine)
 target_link_libraries(Rendering PUBLIC Core)
 
 target_link_libraries(Kyanite-Runtime PUBLIC Core Rendering)
-target_link_libraries(Kyanite PUBLIC Kyanite-Runtime)
+target_link_libraries(Kyanite PUBLIC Kyanite-Runtime Core)
 

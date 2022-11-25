@@ -136,19 +136,25 @@ DLL_EXPORT void FreeTextureCPU(TextureInfo& info) {
 	}
 	delete[] info.Levels;
 }
-// Loads a shader and compiles it 
-DLL_EXPORT NativeRef* LoadShaderGPU(
-    const char* path
-) {
-    auto shader = AssetLoader::LoadShader(path);
-    auto index = Interface->UploadShaderData(shader.Code);
 
-        auto ref = new NativeRef();
+DLL_EXPORT ShaderInfo LoadShaderCPU(const char* path) {
+    ShaderInfo info;
+    auto shader = AssetLoader::LoadShader(path);
+    info.Code = shader.Code;
+
+    // TODO: Parse attributes
+    return info;
+}
+
+// Loads a shader and compiles it 
+DLL_EXPORT NativeRef* LoadShaderGPU(ShaderInfo& info) {
+    auto index = Interface->UploadShaderData(info.Code);
+    auto ref = new NativeRef();
     ref->Identifier = index;
     ref->RefCount = 1;
     ref->Type = STATIC;
     ref->Deleter = nullptr;
-   std::random_device rd;
+    std::random_device rd;
     auto seed_data = std::array<int, std::mt19937::state_size> {};
     std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
     std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
@@ -165,10 +171,10 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader, NativeRef* textures, si
     std::vector<uint64_t> textureIds = {};
 
     for(int x = 0; x < textureCount; x++) {
-        textureIds.push_back(textures[x].Identifier);
+        textureIds.push_back((textures + x)->Identifier);
     }
 
-    auto index = Interface->CreateMaterial(shader->Identifier, textureIds);
+    auto index = Interface->CreateMaterial(shader->Identifier);
 
     auto ref = new NativeRef();
     ref->Identifier = index;

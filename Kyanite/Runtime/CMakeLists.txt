@@ -42,3 +42,8 @@ target_include_directories(
     ./
 )
 
+
+target_include_directories(Kyanite PRIVATE
+  ${CMAKE_SOURCE_DIR}/Kyanite/Core/include
+)
+

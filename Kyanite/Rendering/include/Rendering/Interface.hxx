@@ -51,7 +51,9 @@ namespace Renderer {
 		auto EndFrame() -> void;
 		auto Update() -> void;
 		auto Resize(std::uint32_t width, std::uint32_t height) -> void;
-		auto CreateMaterial(uint64_t shaderId, std::vector<uint64_t> textureIds) -> uint64_t;
+		auto CreateMaterial(uint64_t shaderId) -> uint64_t;
+		auto MaterialPushTexture(uint64_t textureId) -> void;
+		auto MaterialPopTexture() -> void;
 		auto UploadMeshData(Vertex* vertices, size_t vCount, Index* indices, size_t iCount) -> std::uint64_t;
 		auto UploadTextureData(std::uint8_t* data, std::uint16_t width, std::uint16_t height, std::uint8_t channels) -> std::uint64_t;
 		auto UploadShaderData(const char* data)->std::uint64_t;

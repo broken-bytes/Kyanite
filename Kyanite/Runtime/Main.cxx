@@ -13,6 +13,7 @@
 #endif
 
 #include "Engine.hxx"
+#include "Core/NativeRef.hxx"
 
 #include <array>
 #include <filesystem>
@@ -35,9 +36,9 @@ RENDERDOC_API_1_5_0 *rdoc_api = NULL;
 #include <dlfcn.h>
 #endif
 
-std::vector<uint64_t> ShaderIndices;
-std::vector<uint64_t> MeshIndices;
-std::vector<uint64_t> TextureIndices;
+std::vector<uint64_t> ShaderIndices = {};
+std::vector<uint64_t> MeshIndices = {};
+std::vector<uint64_t> TextureIndices = {};
 
 struct Instance {
   SDL_Window *Window;
@@ -122,8 +123,6 @@ int main(int argc, char *argv[]) {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO |
            SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
   SDL_DisplayMode mode = {};
-  SDL_ShowCursor(0);      
-  SDL_SetRelativeMouseMode(SDL_TRUE);
   SDL_GetDesktopDisplayMode(0, &mode);
   GlobalInstance.Window = SDL_CreateWindow("SDL2Test", SDL_WINDOWPOS_UNDEFINED,
                                            SDL_WINDOWPOS_UNDEFINED, W, H,
@@ -151,10 +150,23 @@ int main(int argc, char *argv[]) {
     Meshes.push_back(LoadMeshGPU(modelInfo.Meshes[x]));
   }
 
-  auto texRef = LoadTextureGPU(textureInfo);
-  Textures.push_back(texRef);
 
-  auto material = LoadMaterialGPU(shaderRef, texRef, 1);
+  auto diffuseTexInfo = LoadTextureCPU(
+      "H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/Models/"
+      "rock_terrain_3/textures/Rock_Terrain3_baseColor.png");
+  auto diffuseTex = LoadTextureGPU(diffuseTexInfo);
+  Textures.push_back(diffuseTex);
+  auto normalTexInfo = LoadTextureCPU(
+      "H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/Models/"
+      "rock_terrain_3/textures/Rock_Terrain3_normal.png");
+  auto normalTex = LoadTextureGPU(normalTexInfo);
+  Textures.push_back(normalTex);
+
+  NativeRef* refs = new NativeRef();
+  refs = diffuseTex;
+  (refs + 1) = normalTex;
+
+  auto material = LoadMaterialGPU(shaderRef, refs, 2);
   Materials.push_back(material);
 
   SDL_Event event;
