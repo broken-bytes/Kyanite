@@ -150,11 +150,12 @@ int main(int argc, char *argv[]) {
     Meshes.push_back(LoadMeshGPU(modelInfo.Meshes[x]));
   }
 
-;
   auto diffuseTex = LoadTextureGPU(textureInfo);
   Textures.push_back(diffuseTex);
   auto material = LoadMaterialGPU(shaderRef);
   Materials.push_back(material);
+
+  SetMaterialTexture(material, "Diffuse", diffuseTex);
 
   SDL_Event event;
 

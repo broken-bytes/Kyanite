@@ -21,8 +21,7 @@ namespace Renderer {
     class GraphicsShaderBinding {
     public:
         std::uint64_t ShaderIndex;
-        std::map<std::string, ShaderPropType> Props;
-        std::vector<std::string> Textures;
+        std::vector<GraphicsShaderSlot> Slots;
         std::shared_ptr<GraphicsPipelineState> Pipeline;
     };
 }

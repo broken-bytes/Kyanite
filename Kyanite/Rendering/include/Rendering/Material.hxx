@@ -7,6 +7,7 @@
 #include <vector>
 #include "ShaderBinding.hxx"
 #include "TextureBuffer.hxx"
+#include "UploadBuffer.hxx"
 
 
 namespace Renderer {
@@ -50,6 +51,7 @@ namespace Renderer {
         }
     };
     struct Material {
+        std::shared_ptr<UploadBuffer> ConstantBuffer;
         std::shared_ptr<GraphicsShaderBinding> Shader;
         std::map<std::string, std::shared_ptr<MaterialProp>> Props;
         std::map<std::string, std::shared_ptr<TextureBuffer>> Textures;

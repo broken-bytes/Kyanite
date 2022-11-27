@@ -110,8 +110,16 @@ struct ShaderInfo {
 // --- Reference Functions ---
 DLL_EXPORT void AddRef(NativeRef *objc);
 DLL_EXPORT void RemoveRef(NativeRef *objc);
-DLL_EXPORT void SetRootDir(const char* path);
 // --- Create Functions ---
+
+// --- Setter Functions ---
+DLL_EXPORT void SetRootDir(const char* path);
+DLL_EXPORT void SetMaterialTexture(NativeRef* material, const char* name, NativeRef* texture);
+DLL_EXPORT void SetMaterialPropertyInt(NativeRef* material, const char* name, int value);
+DLL_EXPORT void SetMaterialPropertyFloat(NativeRef* material, const char* name, float value);
+DLL_EXPORT void SetMaterialPropertyVector2(NativeRef* material,const char* name, float* value);
+DLL_EXPORT void SetMaterialPropertyVector3(NativeRef* material, const char* name, float* value);
+DLL_EXPORT void SetMaterialPropertyVector4(NativeRef* material, const char* name, float* value);
 
 // --- Load Functions ---
 // Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if

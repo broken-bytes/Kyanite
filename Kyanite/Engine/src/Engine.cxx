@@ -39,8 +39,32 @@ std::unique_ptr<Renderer::Interface> Interface;
     }
  }
 
-DLL_EXPORT void SetRootDir(const char* path) {
+void SetRootDir(const char* path) {
     AssetLoader::SetRootDir(path);
+}
+
+void SetMaterialTexture(NativeRef* material, const char* name, NativeRef* texture) {
+    Interface->SetMaterialTexture(material->Identifier, name, texture->Identifier);
+}
+
+void SetMaterialPropertyInt(NativeRef* material, const char* name, int value) {
+
+}
+
+void SetMaterialPropertyFloat(NativeRef* material, const char* name, float value) {
+
+}
+
+void SetMaterialPropertyVector2(NativeRef* material, const char* name, float* value) {
+
+}
+
+void SetMaterialPropertyVector3(NativeRef* material, const char* name, float* value) {
+
+}
+
+void SetMaterialPropertyVector4(NativeRef* material, const char* name, float* value) {
+
 }
 
 // --- Create Functions ---

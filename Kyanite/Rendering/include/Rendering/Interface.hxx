@@ -54,6 +54,13 @@ namespace Renderer {
 		auto CreateMaterial(uint64_t shaderId) -> uint64_t;
 		auto MaterialPushTexture(uint64_t textureId) -> void;
 		auto MaterialPopTexture() -> void;
+		auto SetMaterialTexture(uint64_t material, std::string name, uint64_t texture) -> void;
+		auto SetMaterialFloat(uint64_t material, std::string name, float value) -> void;
+		auto SetMaterialVector2(uint64_t material, std::string name, float* value) -> void;
+		auto SetMaterialVector3(uint64_t material, std::string name, float* value) -> void;
+		auto SetMaterialVector4(uint64_t material, std::string name, float* value) -> void;
+		auto SetMaterialInt(uint64_t material, std::string name, int value) -> void;
+		auto SetMaterialBool(uint64_t material, std::string name, bool value) -> void;
 		auto UploadMeshData(Vertex* vertices, size_t vCount, Index* indices, size_t iCount) -> std::uint64_t;
 		auto UploadTextureData(std::uint8_t* data, std::uint16_t width, std::uint16_t height, std::uint8_t channels) -> std::uint64_t;
 		auto UploadShaderData(GraphicsShader shader)->std::uint64_t;

@@ -327,6 +327,24 @@ auto Interface::CreateMaterial(uint64_t shaderId) -> uint64_t {
   return _materials.size() - 1;
 }
 
+auto Interface::SetMaterialTexture(uint64_t material, std::string name,
+                                   uint64_t texture) -> void {
+  _materials[material]->Textures[name] = _textures[texture];
+}
+
+auto Interface::SetMaterialFloat(uint64_t material, std::string name,
+                                 float value) -> void {}
+auto Interface::SetMaterialVector2(uint64_t material, std::string name,
+                                   float *value) -> void {}
+auto Interface::SetMaterialVector3(uint64_t material, std::string name,
+                                   float *value) -> void {}
+auto Interface::SetMaterialVector4(uint64_t material, std::string name,
+                                   float *value) -> void {}
+auto Interface::SetMaterialInt(uint64_t material, std::string name, int value)
+    -> void {}
+auto Interface::SetMaterialBool(uint64_t material, std::string name, bool value)
+    -> void {}
+
 auto Interface::UploadMeshData(Vertex *vertices, size_t vCount, Index *indices,
                                size_t iCount) -> uint64_t {
   std::vector<Vertex> vertBuffer = {};
@@ -434,7 +452,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
 
   desc.Parameters.push_back(param);
 
-  // --- USER DEFINED CBV ---
+  // --- LIGHT DATA CBV ---
   param.Index = 1;
   param.Size = 1;
   param.ShaderRegister = 1;
@@ -445,7 +463,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
 
   desc.Parameters.push_back(param);
 
-  // SHADER RESOURCE VIEW FOR CBV
+  // --- SHADER RESOURCE VIEW FOR LIGHT DATA CBV ---
   param.Index = 2;
   param.Size = 1;
   param.ShaderRegister = 0;
@@ -456,16 +474,20 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
 
   desc.Parameters.push_back(param);
 
-  // TEXTURE 0 s0
-  param.Index = 3;
-  param.Size = 1;
-  param.ShaderRegister = 1;
-  param.RegisterSpace = 0;
-  param.Visibility = GraphicsShaderVisibility::PIXEL;
-  param.Type = GraphicsRootSignatureParameterType::TABLE;
-  param.RangeType = GraphicsDescriptorRangeType::SRV;
+  // --- TEXTURE 0 s0 ---
+  for (auto [it, end, x] =
+           std::tuple{shader.Slots.begin(), shader.Slots.end(), 0};
+       it != end; it++, x++) {
+    param.Index = 3 + x;
+    param.Size = 1;
+    param.ShaderRegister = 1 + x;
+    param.RegisterSpace = 0;
+    param.Visibility = GraphicsShaderVisibility::PIXEL;
+    param.Type = GraphicsRootSignatureParameterType::TABLE;
+    param.RangeType = GraphicsDescriptorRangeType::SRV;
 
-  desc.Parameters.push_back(param);
+    desc.Parameters.push_back(param);
+  }
 
   auto signature = _device->CreateGraphicsRootSignature(desc);
 
@@ -481,6 +503,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
       _device->CreatePipelineState(signature, inputElements, compiledShader);
   compiledShader->Pipeline = pipeline;
 
+  compiledShader->Slots = shader.Slots;
   _shaders.push_back(compiledShader);
 
   return _shaders.size() - 1;
