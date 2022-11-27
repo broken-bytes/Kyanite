@@ -134,39 +134,26 @@ int main(int argc, char *argv[]) {
   );
 
   Init(W, H, (void *)GlobalInstance.Window);
+  SetRootDir(argv[1]);
 
   auto textureInfo = LoadTextureCPU(
-      "H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/Models/"
-      "rock_terrain_3/textures/Rock_Terrain3_baseColor.png");
+      "models/rock_terrain_3/textures/Rock_Terrain3_baseColor.png");
   auto modelInfo =
-      LoadModelCPU("H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/"
-                   "Models/rock_terrain_3/scene.gltf");
+      LoadModelCPU("models/rock_terrain_3/scene.gltf");
+
+  auto shaderInfo = LoadShaderCPU("shaders/PBRDefault.yaml");
   auto shaderRef =
-      LoadShaderGPU("H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/"
-                    "Shaders/PBRDefault.hlsl");
+      LoadShaderGPU(shaderInfo);
   Shaders.push_back(shaderRef);
 
   for (int x = 0; x < modelInfo.MeshCount; x++) {
     Meshes.push_back(LoadMeshGPU(modelInfo.Meshes[x]));
   }
 
-
-  auto diffuseTexInfo = LoadTextureCPU(
-      "H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/Models/"
-      "rock_terrain_3/textures/Rock_Terrain3_baseColor.png");
-  auto diffuseTex = LoadTextureGPU(diffuseTexInfo);
+;
+  auto diffuseTex = LoadTextureGPU(textureInfo);
   Textures.push_back(diffuseTex);
-  auto normalTexInfo = LoadTextureCPU(
-      "H:/Projects/Cyanite-Rewrite/cyanitetestproject/Content/Models/"
-      "rock_terrain_3/textures/Rock_Terrain3_normal.png");
-  auto normalTex = LoadTextureGPU(normalTexInfo);
-  Textures.push_back(normalTex);
-
-  NativeRef* refs = new NativeRef();
-  refs = diffuseTex;
-  (refs + 1) = normalTex;
-
-  auto material = LoadMaterialGPU(shaderRef, refs, 2);
+  auto material = LoadMaterialGPU(shaderRef);
   Materials.push_back(material);
 
   SDL_Event event;

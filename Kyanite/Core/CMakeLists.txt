@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(freeimage CONFIG REQUIRED)
 find_package(jsoncons CONFIG REQUIRED)
+find_package(yaml-cpp CONFIG REQUIRED)
 find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
 
 set(HEADERS 
@@ -33,4 +34,5 @@ target_include_directories(Core PRIVATE include/Core)
 
 target_link_libraries(Core PRIVATE freeimage::FreeImage freeimage::FreeImagePlus)
 target_link_libraries(Core PRIVATE jsoncons)
+target_link_libraries(Core PRIVATE yaml-cpp)
 

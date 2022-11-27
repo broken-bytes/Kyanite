@@ -5,12 +5,6 @@
 #include <vector>
 
 namespace Renderer {
-
-    enum class GraphicsShaderStageType: uint8_t {
-        VERTEX,
-        PIXEL,
-        MESH
-    };
     enum class GraphicsShaderSlotType {
         TEXTURE = 0,
         BOOL    = 1,
@@ -22,8 +16,9 @@ namespace Renderer {
     };
 
     struct GraphicsShaderSlot {
+        std::string Name;
         GraphicsShaderSlotType Type;
-        const char* SlotName;
+        uint8_t Index;
     };
 
     struct GraphicsShader {

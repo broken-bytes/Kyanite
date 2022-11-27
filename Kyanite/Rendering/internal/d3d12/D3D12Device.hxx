@@ -106,7 +106,7 @@ namespace Renderer {
 		virtual auto CreateConstantBufferView(std::shared_ptr<Heap> heap, std::shared_ptr<UploadBuffer> buffer, std::shared_ptr<DescriptorHandle> cpuHandle) -> void;
 
 		virtual auto CreateMipMaps(std::shared_ptr<TextureBuffer> texture, std::shared_ptr<GraphicsCommandList> commandList, uint16_t width, uint16_t height, uint8_t levels) -> void;
-        [[nodiscard]] virtual auto CompileShader(std::string code, uint8_t type) ->std::shared_ptr<GraphicsShaderBinding>;
+        [[nodiscard]] virtual auto CompileShader(std::string code) ->std::shared_ptr<GraphicsShaderBinding>;
         virtual auto Flush() -> void;
 		[[nodiscard]] virtual auto Native() -> ID3D12Device4*;
 

@@ -9,6 +9,7 @@
 #include "Rendering/Vertex.hxx"
 #include "Core/AssetLoader.hxx"
 #include "Core/NativeRef.hxx"
+#include "Shader.hxx"
 
 
 
@@ -37,6 +38,10 @@ std::unique_ptr<Renderer::Interface> Interface;
         _nativeRefs.erase(deleter);
     }
  }
+
+DLL_EXPORT void SetRootDir(const char* path) {
+    AssetLoader::SetRootDir(path);
+}
 
 // --- Create Functions ---
 
@@ -138,39 +143,126 @@ DLL_EXPORT void FreeTextureCPU(TextureInfo& info) {
 }
 
 DLL_EXPORT ShaderInfo LoadShaderCPU(const char* path) {
+    const char* Name;
+    ShaderJSONDataLightingModel Lighting;
+    ShaderJSONDataInputProp* Input;
+    size_t InputLen;
+    const char* Code;
     ShaderInfo info;
-        auto shader = AssetLoader::LoadShader(path);
+    auto shader = AssetLoader::LoadShader(path);
+
+    // Copy code as we cannot pass strings to Swift runtime, so we copy it into char buff
+    auto codeLen = shader.Code.size();
+    auto code = new char[codeLen + 1];
+    shader.Code.copy(code, codeLen);
+    code[codeLen] = '\0';
+    info.Data.Code = code;
+
+    // Only default lighting for now
+    info.Data.Lighting = ShaderJSONDataLightingModel::DEFAULT;
+    
+    info.Data.Input = new ShaderJSONDataInputProp[shader.Description.Props.size()];
+
+    for (auto [it, end, x] = std::tuple{shader.Description.Props.begin(),shader.Description.Props.end(), 0}; it != end; it++, x++){
+        auto item = it;
+        ShaderJSONDataInputPropType type = [&, item]() {
+                  switch (item->Type) {
+                  case AssetLoader::ShaderAssetDescriptionPropType::TEXTURE:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_TEXTURE;
+                  case AssetLoader::ShaderAssetDescriptionPropType::FLOAT:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_FLOAT;
+                  case AssetLoader::ShaderAssetDescriptionPropType::VECTOR2:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_FLOAT2;
+                  case AssetLoader::ShaderAssetDescriptionPropType::VECTOR3:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_FLOAT3;
+                  case AssetLoader::ShaderAssetDescriptionPropType::VECTOR4:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_FLOAT4;
+                  case AssetLoader::ShaderAssetDescriptionPropType::BOOL:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_BOOL;
+                  case AssetLoader::ShaderAssetDescriptionPropType::INT:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_INT;
+                default:
+                    throw std::runtime_error("Unknown shader prop type");
+                  }
+                }();
+        ShaderJSONDataInputProp prop = {};
+        size_t propNameLen = item->Name.length();
+        char* propName = new char[propNameLen + 1];
+        item->Name.copy(propName, propNameLen);
+        propName[propNameLen] = '\0';
+        prop.Name = propName;
+        prop.Type = type;
+        prop.Slot = item->Slot;
+        info.Data.Input[x] = prop;
+    }
+
+    auto nameLen = shader.Name.size();
+    auto name = new char[nameLen + 1];
+    shader.Name.copy(name, nameLen);
+    name[nameLen] = '\0';
+    info.Data.Name = name;
+    info.Data.InputLen = shader.Description.Props.size();
+
+    return info;
 }
 
-// Loads a shader and compiles it 
-DLL_EXPORT NativeRef* LoadShaderGPU(ShaderInfo& info) {
-    auto index = Interface->UploadShaderData(info.Name, info.);
+// Loads a shader and compiles it
+DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info) {
+        Renderer::GraphicsShader shader = {};
+        shader.Code = info.Data.Code;
+        shader.Name = std::string(info.Data.Name);
 
-    auto ref = new NativeRef();
-    ref->Identifier = index;
-    ref->RefCount = 1;
-    ref->Type = STATIC;
-    ref->Deleter = nullptr;
-   std::random_device rd;
-    auto seed_data = std::array<int, std::mt19937::state_size> {};
-    std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
-    std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-    std::mt19937 generator(seq);
-    uuids::uuid_random_generator gen{generator};
-    auto id = gen();
-    ref->UUID = uuids::to_string(id).c_str();
+        shader.Slots = {};
 
-    return ref;
+        for (int x = 0; x < info.Data.InputLen; x++) {
+                Renderer::GraphicsShaderSlotType type = [&]() {
+                  switch (info.Data.Input[x].Type) {
+                  case SHADER_PROP_TEXTURE:
+                    return Renderer::GraphicsShaderSlotType::TEXTURE;
+                  case SHADER_PROP_FLOAT:
+                    return Renderer::GraphicsShaderSlotType::FLOAT;
+                  case SHADER_PROP_FLOAT2:
+                    return Renderer::GraphicsShaderSlotType::VECTOR2;
+                  case SHADER_PROP_FLOAT3:
+                    return Renderer::GraphicsShaderSlotType::VECTOR3;
+                  case SHADER_PROP_FLOAT4:
+                    return Renderer::GraphicsShaderSlotType::VECTOR4;
+                  case SHADER_PROP_INT:
+                    return Renderer::GraphicsShaderSlotType::INT;
+                  case SHADER_PROP_BOOL:
+                    return Renderer::GraphicsShaderSlotType::BOOL;
+                default:
+                    throw std::runtime_error("Unknown shader prop type");
+                  }
+                }();
+                Renderer::GraphicsShaderSlot slot = {};
+                slot.Name = info.Data.Input[x].Name;
+                slot.Index = info.Data.Input[x].Slot;
+                slot.Type = type;
+                shader.Slots.push_back(slot);
+        }
+
+        auto index = Interface->UploadShaderData(shader);
+
+        auto ref = new NativeRef();
+        ref->Identifier = index;
+        ref->RefCount = 1;
+        ref->Type = STATIC;
+        ref->Deleter = nullptr;
+        std::random_device rd;
+        auto seed_data = std::array<int, std::mt19937::state_size>{};
+        std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+        std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+        std::mt19937 generator(seq);
+        uuids::uuid_random_generator gen{generator};
+        auto id = gen();
+        ref->UUID = uuids::to_string(id).c_str();
+
+        return ref;
 }
 
 // Creates a new material in the renderpipeline and returns its ref
-DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader, NativeRef* textures, size_t textureCount) {
-    std::vector<uint64_t> textureIds = {};
-
-    for(int x = 0; x < textureCount; x++) {
-        textureIds.push_back((textures + x)->Identifier);
-    }
-
+DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader) {
     auto index = Interface->CreateMaterial(shader->Identifier);
 
     auto ref = new NativeRef();

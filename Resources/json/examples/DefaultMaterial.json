@@ -1,0 +1,18 @@
+{
+    "name": "Default Material",
+    "shader": "uuid",
+    "values": [
+        {
+            "name": "IntName",
+            "value": 0
+        },
+        {
+            "name": "Vec3Name",
+            "value": "vec3(0, 1, 4)"
+        },
+        {
+            "name": "Diffuse",
+            "value": "uuid"
+        }
+    ]
+}

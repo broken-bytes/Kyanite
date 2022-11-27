@@ -22,8 +22,30 @@ namespace AssetLoader {
 		std::vector<ModelSubMesh> Meshes;
 	};
 
+	enum class ShaderAssetDescriptionPropType {
+		TEXTURE = 0,
+        BOOL    = 1,
+        INT     = 2,
+        FLOAT   = 3,
+        VECTOR2 = 4,
+        VECTOR3 = 5,
+        VECTOR4 = 6
+	};
+
+	struct ShaderAssetDescriptionProp {
+		std::string Name;
+		ShaderAssetDescriptionPropType Type;
+		uint8_t Slot;
+	};
+
+	struct ShaderAssetDescription {
+		std::vector<ShaderAssetDescriptionProp> Props;
+	};
+
 	struct ShaderAsset {
-		std::string RawData;
+		std::string Name;
+		ShaderAssetDescription Description;
+		std::string Code;
 	};
 
 	struct TextureSubLevel {
@@ -37,7 +59,8 @@ namespace AssetLoader {
 		std::vector<TextureSubLevel> Levels;
 	};
 
+	auto SetRootDir(std::string path) -> void;
 	auto LoadModel(std::string path)-> ModelAsset;
-	auto LoadShader(const char* path)->ShaderAsset;
-	auto LoadTexture(const char* path)->TextureAsset;
+	auto LoadShader(std::string path)->ShaderAsset;
+	auto LoadTexture(std::string path)->TextureAsset;
 }

@@ -403,7 +403,7 @@ namespace Renderer {
 		
 	}
 
-	auto D3D12Device::CompileShader(const char* code)->std::shared_ptr<GraphicsShaderBinding> { 
+	auto D3D12Device::CompileShader(std::string code)->std::shared_ptr<GraphicsShaderBinding> { 
 		Microsoft::WRL::ComPtr<IDxcUtils> utils;
 		Microsoft::WRL::ComPtr<IDxcCompiler3> compiler;
 		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils));
@@ -433,8 +433,8 @@ namespace Renderer {
 			Microsoft::WRL::ComPtr<IDxcBlobEncoding> rawSource = nullptr;
 
 			DxcBuffer source;
-			source.Ptr = code;
-			source.Size = strlen(code);
+			source.Ptr = code.c_str();
+			source.Size = code.size();
 			source.Encoding = DXC_CP_ACP; // Assume BOM says UTF8 or U
 			compiler->Compile(
 				&source,
@@ -472,8 +472,8 @@ namespace Renderer {
 			};
 
 			DxcBuffer source;
-			source.Ptr = code;
-			source.Size = strlen(code);
+			source.Ptr = code.c_str();
+			source.Size = code.size();
 			source.Encoding = DXC_CP_ACP; // Assume BOM says UTF8 or U
 
 			compiler->Compile(

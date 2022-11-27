@@ -1,5 +1,6 @@
 #include "AssetLoader.hxx"
 
+#include <algorithm>
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
@@ -22,12 +23,46 @@
 #include <tiny_gltf.h>
 
 #include "FreeImage.h"
+#include <yaml-cpp/yaml.h>
 
 using namespace std::filesystem;
 namespace fs = std::filesystem;
 
-
 namespace AssetLoader {
+
+// Helper functions & types
+std::map<std::string, ShaderAssetDescriptionPropType> TypeMappings = {
+	{"Texture", ShaderAssetDescriptionPropType::TEXTURE},
+	{"Int", ShaderAssetDescriptionPropType::INT},
+	{"Float", ShaderAssetDescriptionPropType::FLOAT},
+	{"Vector2", ShaderAssetDescriptionPropType::VECTOR2},
+	{"Vector3", ShaderAssetDescriptionPropType::VECTOR3},
+	{"Vector4", ShaderAssetDescriptionPropType::VECTOR4},
+	{"Bool", ShaderAssetDescriptionPropType::BOOL},
+};
+
+auto ShaderPropTypeNameToType(const std::string& type) -> ShaderAssetDescriptionPropType {
+	return TypeMappings.at(type);
+}
+
+auto ShaderPropTypeToName(ShaderAssetDescriptionPropType type) -> std::string {
+	auto item = std::find_if(TypeMappings.begin(), TypeMappings.end(), [type](auto& item) {
+		return item.second == type;
+	});
+	
+	return item->first;
+}
+
+
+
+
+
+std::string RootDir = "";
+
+	auto SetRootDir(std::string path) -> void {
+		RootDir = path;
+	}
+
 	auto LoadModel(std::string path)->ModelAsset {
 		std::vector<ModelSubMesh> meshes = {};
 
@@ -38,7 +73,9 @@ namespace AssetLoader {
 
 		std::vector<uint8_t> bytes = {};
 
-		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, path);
+		auto fullPath = RootDir + path;
+
+		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, fullPath);
 		std::stringstream outStream;
 		for (auto& mesh : model.meshes) {
 			for (auto& primitive : mesh.primitives) {
@@ -108,26 +145,46 @@ namespace AssetLoader {
 		return { path, meshes };
 	}
 
-	auto LoadShader(const char* path)->ShaderAsset {
-		std::ifstream file(path, std::ios::in);
+        auto LoadShader(std::string path) -> ShaderAsset {
+                auto fullPath = RootDir + path;
+                ShaderAsset asset = {};
 
-		ShaderAsset asset = {};
+                // Gather shader description
+                YAML::Node shaderDescription = YAML::LoadFile(fullPath);
+                const std::string name =
+                    shaderDescription["name"].as<std::string>();
+                const std::string hlslPath =
+                    RootDir + shaderDescription["path"].as<std::string>();
+                const auto inputVec = shaderDescription["input"];
 
-		const auto fileSize = fs::file_size(path);
+                for (YAML::const_iterator it = inputVec.begin();
+                     it != inputVec.end(); ++it) {
+                        const YAML::Node &inputElem = *it;
+                        std::string name = inputElem["name"].as<std::string>();
+                        std::string type = inputElem["type"].as<std::string>();
+                        uint8_t slot = inputElem["slot"].as<int>();
+                        ShaderAssetDescriptionProp prop = {};
+                        prop.Type = ShaderPropTypeNameToType(type);
+                        prop.Slot = slot;
+                        prop.Name = name;
+                        asset.Description.Props.push_back(prop);
+                }
 
-		// Create a buffer.
-		std::string result(fileSize, '\0');
+				asset.Name = name;
+                const auto shaderCodeFileSize = fs::file_size(hlslPath);
 
-		asset.Code = new char[fileSize];
+                // Create a buffer.
+                std::string shaderCode(shaderCodeFileSize, '\0');
+                std::ifstream file(hlslPath, std::ios::in);
 
-		// Read the whole file into the buffer.
-		file.read(result.data(), fileSize);
-		std::copy(result.begin(), result.end(), asset.Code);
+                // Read the whole file into the buffer.
+                file.read(shaderCode.data(), shaderCodeFileSize);
+                asset.Code = shaderCode;
 
-		return asset;
-	}
+                return asset;
+        }
 
-	auto CalcMipLevels(uint16_t width, uint16_t height) -> uint8_t {
+        auto CalcMipLevels(uint16_t width, uint16_t height) -> uint8_t {
 		auto size = max(width, height);
 
 		// FIXME: WRONG
@@ -148,10 +205,11 @@ namespace AssetLoader {
 		}
 	}
 
-	auto LoadTexture(const char* path) -> TextureAsset {
+	auto LoadTexture(std::string path) -> TextureAsset {
+		auto fullPath = RootDir + path;
 
-		auto type = FreeImage_GetFileType(path);
-		auto result = FreeImage_Load(type, path, type == FIF_PNG ? PNG_IGNOREGAMMA : 0);
+		auto type = FreeImage_GetFileType(fullPath.c_str());
+		auto result = FreeImage_Load(type, fullPath.c_str(), type == FIF_PNG ? PNG_IGNOREGAMMA : 0);
 		int width = FreeImage_GetWidth(result);
 		int height = FreeImage_GetHeight(result);
 		auto bbp = FreeImage_GetBPP(result);

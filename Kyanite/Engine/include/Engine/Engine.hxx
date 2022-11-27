@@ -79,12 +79,13 @@ enum ShaderJSONDataStageType {
 } typedef ShaderJSONDataStageType;
 
 enum ShaderJSONDataInputPropType {
-    INT,
-    BOOL,
-    FLOAT,
-    FLOAT2,
-    FLOAT3,
-    FLOAT4,
+    SHADER_PROP_INT,
+    SHADER_PROP_BOOL,
+    SHADER_PROP_FLOAT,
+    SHADER_PROP_FLOAT2,
+    SHADER_PROP_FLOAT3,
+    SHADER_PROP_FLOAT4,
+    SHADER_PROP_TEXTURE
 } typedef ShaderJSONDataInputPropType;
 
 struct ShaderJSONDataInputProp {
@@ -93,18 +94,13 @@ struct ShaderJSONDataInputProp {
     uint8_t Slot;
 };
 
-struct ShaderJSONDataStage {
-    ShaderJSONDataStageType Type;
-    const char* Code;
-};
 // Internal Helpers
 struct ShaderJSONData {
     const char* Name;
     ShaderJSONDataLightingModel Lighting;
     ShaderJSONDataInputProp* Input;
     size_t InputLen;
-    ShaderJSONDataStage* Stages;
-    size_t StagesLen;
+    const char* Code;
 };
 
 struct ShaderInfo {
@@ -114,7 +110,7 @@ struct ShaderInfo {
 // --- Reference Functions ---
 DLL_EXPORT void AddRef(NativeRef *objc);
 DLL_EXPORT void RemoveRef(NativeRef *objc);
-
+DLL_EXPORT void SetRootDir(const char* path);
 // --- Create Functions ---
 
 // --- Load Functions ---
@@ -135,8 +131,7 @@ DLL_EXPORT ShaderInfo LoadShaderCPU(const char *path);
 DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info);
 
 // Creates a new material in the renderpipeline and returns its ref
-DLL_EXPORT NativeRef *LoadMaterialGPU(NativeRef *shader, NativeRef *textures,
-                                      size_t textureCount);
+DLL_EXPORT NativeRef *LoadMaterialGPU(NativeRef *shader);
 
 // --- Commands ---
 DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window);
