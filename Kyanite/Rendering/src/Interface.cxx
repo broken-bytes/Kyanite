@@ -268,7 +268,14 @@ auto Interface::MidFrame() -> void {
     _commandList->SetGraphicsRootDescriptorTable(1, _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer for this Mesh/Material
 
     for (auto [it, end, x] = std::tuple{material->Textures.cbegin(), material->Textures.cend(), 0}; it != end; it++, x++){
-       _commandList->SetGraphicsRootDescriptorTable(x + 2, it->second->GPUHandle);
+      auto texture = *it;
+      auto slotBinding = std::find_if(material->Shader->Slots.cbegin(), material->Shader->Slots.cend(), [texture](auto& item) { 
+        return item.Name == texture.first;
+      });
+
+      if(slotBinding != material->Shader->Slots.end()) {
+         _commandList->SetGraphicsRootDescriptorTable(2 + slotBinding->Index, it->second->GPUHandle);
+      }
     }
 
     // 2x Table = 2 | 2
