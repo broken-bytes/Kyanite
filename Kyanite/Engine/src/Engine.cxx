@@ -342,3 +342,7 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader) {
     float zRotation) {
         Interface->SetCamera({xPos, yPos, zPos}, {xRotation, yRotation, zRotation});
     }
+
+void SetCursorPosition(uint32_t x, uint32_t y) {
+  Interface->SetCursorPosition({x, y});
+}

@@ -96,12 +96,13 @@ namespace Renderer {
 		)->std::shared_ptr<Buffer> = 0;
 
 		virtual auto CreateDepthStencilView(
-			std::shared_ptr<Heap> heap,
+			std::shared_ptr<DescriptorHandle> handle,
 			std::shared_ptr<Buffer> buffer
 		) -> void = 0;
         [[nodiscard]] virtual auto CreateFrame(std::shared_ptr<Allocator> allocator, std::shared_ptr<RenderTarget> renderTarget) -> std::shared_ptr<Frame> = 0;
 		[[nodiscard]] virtual auto CreateFence(std::uint64_t fenceValue) -> std::shared_ptr<Fence> = 0;
-		[[nodiscard]] virtual auto CreateRenderTarget(std::shared_ptr<DescriptorHandle> handle, std::shared_ptr<RenderTarget> target)->std::shared_ptr<RenderTarget> = 0;
+		[[nodiscard]] virtual auto CreateRenderTarget(std::shared_ptr<TextureBuffer> texture) -> std::shared_ptr<RenderTarget> = 0;
+		[[nodiscard]] virtual auto CreateRenderTargetView(std::shared_ptr<DescriptorHandle> handle, std::shared_ptr<RenderTarget> target)->std::shared_ptr<RenderTarget> = 0;
 		virtual auto CreateShaderResourceView(std::shared_ptr<TextureBuffer> buffer, std::shared_ptr<DescriptorHandle> handle) -> void = 0;
 		virtual auto CreateConstantBufferView(std::shared_ptr<Heap> heap, std::shared_ptr<UploadBuffer> buffer, std::shared_ptr<DescriptorHandle> cpuHandle) -> void = 0;
 		virtual auto CreateMipMaps(std::shared_ptr<TextureBuffer> texture, std::shared_ptr<GraphicsCommandList> commandList, uint16_t width, uint16_t height, uint8_t levels) -> void = 0;

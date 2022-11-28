@@ -4,6 +4,7 @@
 
 namespace Renderer {
 	D3D12Fence::D3D12Fence(D3D12Device& device, std::uint64_t value): Fence(value) {
+		auto dev = device;
 		device.Native()->CreateFence(value, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence));
 	}
 

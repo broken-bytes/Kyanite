@@ -187,6 +187,7 @@ int main(int argc, char *argv[]) {
         break;
 
       case SDL_MOUSEMOTION:
+        SetCursorPosition(event.motion.x, event.motion.y);
         io.AddMousePosEvent(event.motion.x, event.motion.y);
         camY = event.motion.xrel;
         camZ = event.motion.yrel;

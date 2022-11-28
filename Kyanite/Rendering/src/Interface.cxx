@@ -15,6 +15,7 @@
 #include "glm/trigonometric.hpp"
 #include "glm/vec4.hpp"
 #include <SDL_syswm.h>
+#include <algorithm>
 #include <d3d12.h>
 #include <dxgiformat.h>
 
@@ -160,79 +161,23 @@ auto Interface::StartFrame() -> void {
   auto fenceValue = _frames[_frameIndex]->FenceValue();
 
   _frames[_frameIndex]->Allocator()->Reset();
+  _mouseOverAllocator->Reset();
   _commandList->Reset(_frames[_frameIndex]->Allocator(), nullptr);
+  _mouseOverCommandList->Reset(_mouseOverAllocator, nullptr);
   _cbAllocator[_frameIndex]->Reset();
   _cbCommandList->Reset(_cbAllocator[_frameIndex], nullptr);
 }
 
 auto Interface::MidFrame() -> void {
-  auto rtvHandle = _rtvHeap->CpuHandleFor(_frameIndex);
-  auto dsvHandle = _dsvHeap->CpuHandleFor(0);
-  _commandList->SetRenderTarget(rtvHandle, dsvHandle);
-
   _commandList->SetDescriptorHeaps({_srvHeap});
-
-  ImGui::Begin("Sun Light");
-
-  ImGui::End();
+  _mouseOverCommandList->SetDescriptorHeaps({_srvHeap});
 
   auto sun = SunLight{sunColor, {xPos, yPos, zPos, 1}, true};
 
   light.Ambient = {ambientColor, ambientIntensity};
 
   light.Sun = sun;
-
-  ImGui::Begin("Lights");
-  ImGui::PushID(0);
-  if (ImGui::CollapsingHeader("Sun")) {
-    ImGui::SliderFloat("X", &xPos, -50.0f, 50.0f);
-    ImGui::SliderFloat("Y", &yPos, -100.0f, 200.0f);
-    ImGui::SliderFloat("Z", &zPos, -50.0f, 50.0f);
-    ImGui::ColorEdit4("Sun Color", (float *)&sunColor);
-  }
-  ImGui::PopID();
-
-  ImGui::PushID(1);
-  if (ImGui::CollapsingHeader("Ambient")) {
-    ImGui::ColorEdit4("Ambient Color", (float *)&ambientColor);
-    ImGui::SliderFloat("Intensity", &ambientIntensity, 0.0f, 10.0f);
-  }
-  ImGui::PopID();
-
-  for (int x = 0; x < 16; x++) {
-    std::stringstream ss;
-    ss << "Point Lights " << x;
-
-    ImGui::PushID(x + 2);
-    if (ImGui::CollapsingHeader(ss.str().c_str())) {
-      ImGui::Checkbox("Active", &light.Lights[x].Active);
-      ImGui::SliderFloat("X", &light.Lights[x].Position.x, -50.0f, 50.0f);
-      ImGui::SliderFloat("Y", &light.Lights[x].Position.y, -100.0f, 200.0f);
-      ImGui::SliderFloat("Z", &light.Lights[x].Position.z, -50.0f, 50.0f);
-      ImGui::ColorEdit4("Color", (float *)&light.Lights[x].Color);
-      ImGui::SliderFloat("Intensity", &light.Lights[x].Intensity, 0.0f, 10.0f);
-      ImGui::SliderFloat("Range", &light.Lights[x].Radius, 0.0f, 25.0f);
-    }
-    ImGui::PopID();
-  }
-  ImGui::End();
-  _commandList->SetGraphicsRootConstantBuffer(
-      _lightDataBuffer[_frameIndex], &light, sizeof(light),
-      _lightDataGPUAddress[_frameIndex]);
-
-  _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
-                           ResourceState::PRESENT,
-                           ResourceState::RENDER_TARGET);
-
-  // Record commands.
-  glm::vec4 clearColor = {0, 0.1f, 0.4f, 1};
-  _commandList->ClearRenderTarget(rtvHandle, clearColor);
-  _commandList->ClearDepthTarget(dsvHandle);
-  _commandList->SetTopology(GraphicsPipelineStateTopology::POLYGON);
-  _commandList->SetViewport(_viewport);
-  _commandList->SetScissorRect(_scissorRect);
-
-  glm::vec3 cameraPos = {camPos.x, camPos.y, camPos.z -20};
+    glm::vec3 cameraPos = {camPos.x, camPos.y, camPos.z -20};
   glm::vec3 cameraFront = {0.0f, 0.0f, 1.0f};
   glm::vec3 cameraLookAt = camPos;
   glm::vec3 cameraUp = {0.0f, 1.0f, 0.0f};
@@ -243,6 +188,36 @@ auto Interface::MidFrame() -> void {
       glm::perspectiveFovLH(glm::radians(55.0f), (float)_windowDimension.x,
                             (float)_windowDimension.y, 0.01f, 1000.0f);
 
+
+  _commandList->SetGraphicsRootConstantBuffer(
+      _lightDataBuffer[_frameIndex], &light, sizeof(light),
+      _lightDataGPUAddress[_frameIndex]);
+  _mouseOverCommandList->SetGraphicsRootConstantBuffer(
+      _lightDataBuffer[_frameIndex], &light, sizeof(light),
+      _lightDataGPUAddress[_frameIndex]);
+
+  _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
+                           ResourceState::PRESENT,
+                           ResourceState::RENDER_TARGET);
+
+  // Record commands.
+  glm::vec4 clearColor = {1, 1, 1, 1};
+  auto rtvHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT);
+  auto dsvHandle = _dsvHeap->CpuHandleFor(1);
+  _mouseOverCommandList->SetRenderTarget(rtvHandle, dsvHandle);
+
+  _mouseOverCommandList->ClearRenderTarget(rtvHandle, clearColor);
+  _mouseOverCommandList->ClearDepthTarget(dsvHandle);
+  _mouseOverCommandList->SetTopology(GraphicsPipelineStateTopology::POLYGON);
+  _mouseOverCommandList->SetViewport(_viewport);
+  _mouseOverCommandList->SetScissorRect(_scissorRect);
+
+  // --- ON MOUSE OVER CHECK ---
+  // Encodes every Entity via a unique Id which is respresented as a color.
+  // If the mesh is inside the cursor position, the framebuffer will hold that color
+  
+  /*
+  _commandList->SetScissorRect({_cursorPosition[0], _cursorPosition[1], 1, 1});
   for (auto &mesh : _meshesToDraw) {
     // Update the projection matrix.
     float aspectRatio =
@@ -251,8 +226,105 @@ auto Interface::MidFrame() -> void {
 
     glm::mat4 modelView = mesh.Transform;
     modelView = glm::scale(modelView, {1, 1, 1});
-    modelView = glm::translate(modelView, {0, -6.0f, 4});
-    modelView = glm::rotate(modelView, glm::radians(-130.0f),
+    modelView = glm::translate(modelView, {0, 0, 0});
+    modelView = glm::rotate(modelView, glm::radians(0.0f),
+                            glm::vec3{1.0f, 0.0f, 0.0f});
+    //
+
+    auto mvp = MVPCBuffer{modelView, _projectionMatrix * _viewMatrix};
+
+    auto material = _materials[0];
+    auto shader = material->Shader;
+
+
+    _commandList->SetGraphicsRootSignature(shader->Pipeline->RootSignature());
+    _commandList->SetPipelineState(shader->Pipeline);
+    _commandList->SetGraphicsRootConstants(0, sizeof(mvp) / 4, &mvp, 0);                  // b0     -> The Model View Projection for this Mesh/Material
+    _commandList->SetGraphicsRootDescriptorTable(1, _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer for this Mesh/Material
+    _commandList->SetGraphicsRootConstants(2, sizeof(glm::mat4x4) / 4, &mesh.EntityId, 0);
+
+    auto vao = _meshes[mesh.MeshId];
+    _commandList->SetVertexBuffer(vao->VertexBuffer);
+    _commandList->SetIndexBuffer(vao->IndexBuffer);
+    _commandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
+  }
+
+*/
+
+  Rect r = {};
+  r.Left = _cursorPosition[0];
+  r.Top = _cursorPosition[1];
+  r.Right = _cursorPosition[0] + 1;
+  r.Bottom = _cursorPosition[1] + 1;
+  _mouseOverCommandList->SetScissorRect(r);
+
+  for (auto &mesh : _meshesToDraw) {
+    // Update the projection matrix.
+    float aspectRatio =
+        _windowDimension.x / static_cast<float>(_windowDimension.y);
+    // Update the MVP matrix
+
+    glm::mat4 modelView = mesh.Transform;
+    modelView = glm::scale(modelView, {1, 1, 1});
+    modelView = glm::translate(modelView, {0, 0, 0});
+    modelView = glm::rotate(modelView, glm::radians(0.0f),
+                            glm::vec3{1.0f, 0.0f, 0.0f});
+    //
+
+    auto mvp = MVPCBuffer{modelView, _projectionMatrix * _viewMatrix};
+
+    auto material = _materials[mesh.MaterialId];
+    auto shader = material->Shader;
+
+
+    _mouseOverCommandList->SetGraphicsRootSignature(shader->Pipeline->RootSignature());
+    _mouseOverCommandList->SetPipelineState(shader->Pipeline);
+    _mouseOverCommandList->SetGraphicsRootConstants(0, sizeof(mvp) / 4, &mvp, 0);                  // b0     -> The Model View Projection for this Mesh/Material
+    _mouseOverCommandList->SetGraphicsRootDescriptorTable(1, _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer for this Mesh/Material
+
+    for (auto [it, end, x] = std::tuple{material->Textures.cbegin(), material->Textures.cend(), 0}; it != end; it++, x++){
+      auto texture = *it;
+      auto slotBinding = std::find_if(material->Shader->Slots.cbegin(), material->Shader->Slots.cend(), [texture](auto& item) { 
+        return item.Name == texture.first;
+      });
+
+      if(slotBinding != material->Shader->Slots.end()) {
+         _mouseOverCommandList->SetGraphicsRootDescriptorTable(2 + slotBinding->Index, it->second->GPUHandle);
+      }
+    }
+
+    // 2x Table = 2 | 2
+    // 2x SRV = 4   | 4 + 2 = 6
+    //
+
+    auto len = sizeof(float);
+
+    auto vao = _meshes[mesh.MeshId];
+    _mouseOverCommandList->SetVertexBuffer(vao->VertexBuffer);
+    _mouseOverCommandList->SetIndexBuffer(vao->IndexBuffer);
+    _mouseOverCommandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
+  }
+
+  clearColor = { 0, 0.2, 0.2, 1};
+  dsvHandle = _dsvHeap->CpuHandleFor(0);
+   rtvHandle = _rtvHeap->CpuHandleFor(_frameIndex);
+   _commandList->SetRenderTarget(rtvHandle, dsvHandle);
+  _commandList->SetTopology(GraphicsPipelineStateTopology::POLYGON);
+  _commandList->SetViewport(_viewport);
+  _commandList->ClearRenderTarget(rtvHandle, clearColor);
+  _commandList->ClearDepthTarget(dsvHandle);
+  _commandList->SetScissorRect(_scissorRect);
+
+  for (auto &mesh : _meshesToDraw) {
+    // Update the projection matrix.
+    float aspectRatio =
+        _windowDimension.x / static_cast<float>(_windowDimension.y);
+    // Update the MVP matrix
+
+    glm::mat4 modelView = mesh.Transform;
+    modelView = glm::scale(modelView, {1, 1, 1});
+    modelView = glm::translate(modelView, {0, 0, 0});
+    modelView = glm::rotate(modelView, glm::radians(0.0f),
                             glm::vec3{1.0f, 0.0f, 0.0f});
     //
 
@@ -302,10 +374,11 @@ auto Interface::MidFrame() -> void {
                            ResourceState::RENDER_TARGET,
                            ResourceState::PRESENT);
 
+  _mouseOverCommandList->Close();
   _commandList->Close();
   _cbCommandList->Close();
 
-  _mainQueue->ExecuteCommandLists({_commandList});
+  _mainQueue->ExecuteCommandLists({_commandList, _mouseOverCommandList});
 
   // Present the frame.
   _swapChain->Swap();
@@ -329,8 +402,27 @@ auto Interface::CreateMaterial(uint64_t shaderId) -> uint64_t {
   auto mat = std::make_shared<Material>();
   mat->Shader = _shaders[shaderId];
 
-  _materials.push_back(mat);
+  std::sort(mat->Shader->Slots.begin(), mat->Shader->Slots.end(), [](auto& lhs, auto& rhs) {
+    return lhs.Index < rhs.Index;
+  });
 
+
+  size_t buffSize = 0;
+
+  // Props are 16 byte alligned -> Vector 4 = 4x4 Bytes = 16. Buffer must be multiple of 255 bytes as well
+  buffSize = ((mat->Shader->Slots.size() * 16) + 255) & ~255;
+   _materialCBVs.insert({_materials.size(), _device->CreateUploadBuffer(buffSize)});
+
+   _device->CreateConstantBufferView(
+    _srvHeap,
+     _materialCBVs.at(_materials.size()),
+    _srvHeap->CpuHandleFor(_srvCounter++));
+
+  std::vector<uint8_t> materialBuffer(buffSize);
+  _materialBuffers.insert({_materials.size(), materialBuffer});
+
+    
+  _materials.push_back(mat);
   return _materials.size() - 1;
 }
 
@@ -440,8 +532,6 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
   desc.Parameters = {};
   // MVP Matrix
 
-  auto sizes = {sizeof(MVPCBuffer) / 4, sizeof(MaterialBuffer) / 4,
-                sizeof(LightBuffer) / 4};
 
   // Add default shader-agnostic parameters.
   // TODO: Parse shader json and add additional params
@@ -481,19 +571,45 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
 
   desc.Parameters.push_back(param);
 
+    // --- USER-DEFINED CBV ---
+  param.Index = 3;
+  param.Size = 1;
+  param.ShaderRegister = 2;
+  param.RegisterSpace = 0;
+  param.Visibility = GraphicsShaderVisibility::ALL;
+  param.Type = GraphicsRootSignatureParameterType::TABLE;
+  param.RangeType = GraphicsDescriptorRangeType::CBV;
+
+  desc.Parameters.push_back(param);
+
+    // --- SHADER RESOURCE VIEW FOR USER-DEFINED CBV ---
+  param.Index = 4;
+  param.Size = 1;
+  param.ShaderRegister = 1;
+  param.RegisterSpace = 0;
+  param.Visibility = GraphicsShaderVisibility::PIXEL;
+  param.Type = GraphicsRootSignatureParameterType::TABLE;
+  param.RangeType = GraphicsDescriptorRangeType::SRV;
+
+  desc.Parameters.push_back(param);
+
   // --- TEXTURE 0 s0 ---
   for (auto [it, end, x] =
            std::tuple{shader.Slots.begin(), shader.Slots.end(), 0};
        it != end; it++, x++) {
-    param.Index = 3 + x;
-    param.Size = 1;
-    param.ShaderRegister = 1 + x;
-    param.RegisterSpace = 0;
-    param.Visibility = GraphicsShaderVisibility::PIXEL;
-    param.Type = GraphicsRootSignatureParameterType::TABLE;
-    param.RangeType = GraphicsDescriptorRangeType::SRV;
+    if (it->Type == GraphicsShaderSlotType::TEXTURE) {
+      param.Index = 5 + x;
+      param.Size = 1;
+      param.ShaderRegister = 2 + x;
+      param.RegisterSpace = 0;
+      param.Visibility = GraphicsShaderVisibility::PIXEL;
+      param.Type = GraphicsRootSignatureParameterType::TABLE;
+      param.RangeType = GraphicsDescriptorRangeType::SRV;
 
-    desc.Parameters.push_back(param);
+      desc.Parameters.push_back(param);
+    } else {
+      x--;
+    }
   }
 
   auto signature = _device->CreateGraphicsRootSignature(desc);
@@ -526,6 +642,12 @@ auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId, uint64_t materialId
   _meshesToDraw.push_back({entityId, meshId, materialId, transform});
 }
 
+auto Interface::SetCursorPosition(std::array<uint32_t, 2> position) -> void {
+  _cursorPosition = position;
+
+}
+
+
 auto Interface::SetMeshProperties() -> void {}
 
 auto Interface::SetCamera(glm::vec3 position, glm::vec3 rotation) -> void {
@@ -543,6 +665,7 @@ auto Interface::CreatePipeline() -> void {
 
   _computeQueue = _device->CreateCommandQueue(COMPUTE);
   _computeAllocator = _device->CreateCommandAllocator(COMPUTE);
+  _mouseOverAllocator = _device->CreateCommandAllocator(DIRECT);
   _computeCommandList =
       _device->CreateCommandList(COMPUTE, _computeAllocator, "Compute Queue");
 
@@ -550,22 +673,26 @@ auto Interface::CreatePipeline() -> void {
                                         _windowDimension.x, _windowDimension.y);
   _frameIndex = _swapChain->CurrentBackBufferIndex();
 
-  _rtvHeap = _device->CreateRenderTargetHeap(FRAME_COUNT);
+  _rtvHeap = _device->CreateRenderTargetHeap(32);
   _srvHeap = _device->CreateShaderResourceHeap(128);
   _uavHeap = _device->CreateUnorderedAccessHeap(100);
   _cbvHeap = _device->CreateConstantBufferHeap(128);
-  _dsvHeap = _device->CreateDepthStencilHeap(1);
+  _dsvHeap = _device->CreateDepthStencilHeap(2);
   _samplerHeap = _device->CreateSamplerHeap(128);
   _meshesToDraw = {};
 
   _depthBuffer = _device->CreateDepthBuffer(_windowDimension);
+  _mouseOverDepthBuffer = _device->CreateDepthBuffer({1, 1});
 
-  _device->CreateDepthStencilView(_dsvHeap, _depthBuffer);
+  auto depthHandle = _dsvHeap->CpuHandleFor(0);
+  _device->CreateDepthStencilView(depthHandle, _depthBuffer);
+  depthHandle = _dsvHeap->CpuHandleFor(1);
+  _device->CreateDepthStencilView(depthHandle, _mouseOverDepthBuffer);
 
   for (uint32_t x = 0; x < FRAME_COUNT; x++) {
     auto rt = _swapChain->GetBuffer(x);
     auto rtHandle = _rtvHeap->CpuHandleFor(x);
-    _device->CreateRenderTarget(rtHandle, rt);
+    _device->CreateRenderTargetView(rtHandle, rt);
     auto alloc = _device->CreateCommandAllocator(DIRECT);
     _frames[x] = _device->CreateFrame(alloc, rt);
   }
@@ -585,10 +712,19 @@ auto Interface::CreatePipeline() -> void {
   _uploadAllocator = _device->CreateCommandAllocator(DIRECT);
   _commandList = _device->CreateCommandList(
       DIRECT, _frames[_frameIndex]->Allocator(), "CommandList");
+  _mouseOverCommandList = _device->CreateCommandList(
+      DIRECT, _mouseOverAllocator, "Mouse Over CommandList");
   _uploadCommandList =
       _device->CreateCommandList(DIRECT, _uploadAllocator, "UploadCommandList");
 
+  _mouseOverBuffer = _device->CreateTextureBuffer(1, 1, 1, 1, TextureFormat::RGBA, "MouseOverBuffer");
+  _mouseOverRTV = _device->CreateRenderTarget(_mouseOverBuffer);
+  auto rtHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT);
+
+  _commandList->Transition(_mouseOverBuffer, ResourceState::COMMON, ResourceState::RENDER_TARGET);
+  _device->CreateRenderTargetView(rtHandle, _mouseOverRTV);
   _commandList->Close();
+  _mouseOverCommandList->Close();
   _uploadCommandList->Close();
   auto commandLists = {_commandList};
   _mainQueue->ExecuteCommandLists(commandLists);
@@ -623,7 +759,7 @@ auto Interface::CreatePipeline() -> void {
 #endif
 
   _computeCommandList->Close();
-
+  _mouseOverAllocator->Reset();
   _computeAllocator->Reset();
   _computeCommandList->Reset(_computeAllocator, nullptr);
 

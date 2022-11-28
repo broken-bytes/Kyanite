@@ -2,6 +2,5 @@
 
 namespace Renderer {
 class Resource {
-
 };
 }

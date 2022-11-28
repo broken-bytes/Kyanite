@@ -69,6 +69,7 @@ namespace Renderer {
 		auto SetMeshProperties() -> void;
 		auto MeshDataFor(const char* uuid) -> std::vector<std::uint64_t>;
 		auto SetCamera(glm::vec3 position, glm::vec3 rotation) -> void;
+		auto SetCursorPosition(std::array<uint32_t, 2> position) -> void;
 	protected:
 		void* _window;
 		void* _context;
@@ -93,6 +94,9 @@ namespace Renderer {
 
 		std::shared_ptr<GraphicsPipelineState> _defaultPipeline;
 		std::shared_ptr<GraphicsCommandList> _commandList;
+		std::shared_ptr<Allocator> _mouseOverAllocator;
+
+		std::shared_ptr<GraphicsCommandList> _mouseOverCommandList;
 		std::shared_ptr<CommandQueue> _mainQueue;
 
 		std::shared_ptr<GraphicsCommandList> _cbCommandList;
@@ -133,13 +137,19 @@ namespace Renderer {
 		std::vector<std::shared_ptr<Material>> _materials;
 		std::vector <std::shared_ptr<Buffer>> _constantBuffers = {};
 		std::shared_ptr<Buffer> _depthBuffer;
+		std::shared_ptr<Buffer> _mouseOverDepthBuffer;
 		glm::vec3 cameraRotation = {};
 		glm::vec3 cameraMovement = {};
 		glm::mat4 _viewMatrix;
 		glm::mat4 _projectionMatrix;
 		std::uint64_t _resourceCounter;
+		std::array<uint32_t, 2> _cursorPosition = {0,0};
 
 		std::vector<std::shared_ptr<UploadBuffer>> _uploadBuffers = {};
+		std::map<uint64_t, std::vector<uint8_t>> _materialBuffers;
+		std::map<uint64_t, std::shared_ptr<UploadBuffer>> _materialCBVs = {};
+		std::shared_ptr<RenderTarget> _mouseOverRTV;
+		std::shared_ptr<TextureBuffer> _mouseOverBuffer;
 
 		// Storage
 		auto CreatePipeline() -> void;

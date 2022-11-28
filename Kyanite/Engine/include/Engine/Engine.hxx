@@ -163,6 +163,7 @@ DLL_EXPORT void ScaleMesh(NativeRef *mesh, float x, float y, float z);
 DLL_EXPORT void RotateMesh(NativeRef *mesh, float x, float y, float z);
 DLL_EXPORT void SetCamera(float xPos, float yPos, float zPos, float xRotation,
                           float yRotation, float zRotation);
+DLL_EXPORT void SetCursorPosition(uint32_t x, uint32_t y);
 
 #ifdef __cplusplus
 }

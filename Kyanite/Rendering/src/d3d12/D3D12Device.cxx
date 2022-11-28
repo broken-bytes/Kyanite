@@ -261,20 +261,30 @@ namespace Renderer {
 		textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		textureDesc.Width = width;
 		textureDesc.Height = height;
-		textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		textureDesc.DepthOrArraySize = 1;
 		textureDesc.SampleDesc.Count = 1;
 		textureDesc.SampleDesc.Quality = 0;
 		textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-
+		
+		D3D12_CLEAR_VALUE clear = {
+			DXGI_FORMAT_R8G8B8A8_UNORM,
+			{1, 1, 1, 1}
+		};
 		_device->CreateCommittedResource(
 			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
 			&textureDesc,
 			D3D12_RESOURCE_STATE_COMMON,
-			nullptr,
+			&clear,
 			IID_PPV_ARGS(&buffer)
 		);
+
+		wchar_t wName[30];
+
+		size_t len = 0;
+		mbstowcs_s(&len, wName, name, strlen(name));
+		buffer->SetName(wName);
 
 		return std::make_shared<D3D12TextureBuffer>(buffer);
 	}
@@ -345,16 +355,15 @@ namespace Renderer {
 	}
 
 	auto D3D12Device::CreateDepthStencilView(
-		std::shared_ptr<Heap> heap,
+		std::shared_ptr<DescriptorHandle> handle,
 		std::shared_ptr<Buffer> buffer
 	) -> void {
 		auto dBuff = static_pointer_cast<D3D12Buffer<D3D12_DEPTH_STENCIL_VIEW_DESC>>(buffer);
 		auto view = dBuff->View;
-		auto handle = static_pointer_cast<D3D12Heap>(heap)->CPUHandleForHeapStart().Handle();
 		_device->CreateDepthStencilView(
 			dBuff->Buffer.Get(),
 			&view,
-			handle
+			static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(handle)->Handle()
 		);
 	}
 	auto D3D12Device::CreateFrame(std::shared_ptr<Allocator> allocator, std::shared_ptr<RenderTarget> renderTarget)->std::shared_ptr<Frame> {
@@ -365,7 +374,13 @@ namespace Renderer {
 		return std::make_shared<D3D12Fence>(*this, fenceValue);
 	}
 
-	auto D3D12Device::CreateRenderTarget(std::shared_ptr<DescriptorHandle> handle, std::shared_ptr<RenderTarget> target)->std::shared_ptr<RenderTarget> {
+	auto D3D12Device::CreateRenderTarget(std::shared_ptr<TextureBuffer> texture) -> std::shared_ptr<RenderTarget> {
+		auto buff = static_pointer_cast<D3D12TextureBuffer>(texture)->Raw();
+		return std::make_shared<D3D12RenderTarget>(buff);
+		return nullptr;
+	}
+
+	auto D3D12Device::CreateRenderTargetView(std::shared_ptr<DescriptorHandle> handle, std::shared_ptr<RenderTarget> target)->std::shared_ptr<RenderTarget> {
 		_device->CreateRenderTargetView(
 			static_pointer_cast<D3D12RenderTarget>(target)->Resource(),
 			nullptr,
