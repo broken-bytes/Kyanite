@@ -148,8 +148,8 @@ namespace Renderer {
 		std::vector<std::shared_ptr<UploadBuffer>> _uploadBuffers = {};
 		std::map<uint64_t, std::vector<uint8_t>> _materialBuffers;
 		std::map<uint64_t, std::shared_ptr<UploadBuffer>> _materialCBVs = {};
-		std::shared_ptr<RenderTarget> _mouseOverRTV;
-		std::shared_ptr<TextureBuffer> _mouseOverBuffer;
+		std::array<std::shared_ptr<RenderTarget>, FRAME_COUNT> _mouseOverRTV;
+		std::array<std::shared_ptr<TextureBuffer>, FRAME_COUNT> _mouseOverBuffer;
 
 		// Storage
 		auto CreatePipeline() -> void;

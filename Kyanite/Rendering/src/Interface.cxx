@@ -177,7 +177,7 @@ auto Interface::MidFrame() -> void {
   light.Ambient = {ambientColor, ambientIntensity};
 
   light.Sun = sun;
-    glm::vec3 cameraPos = {camPos.x, camPos.y, camPos.z -20};
+  glm::vec3 cameraPos = {camPos.x, camPos.y, camPos.z - 20};
   glm::vec3 cameraFront = {0.0f, 0.0f, 1.0f};
   glm::vec3 cameraLookAt = camPos;
   glm::vec3 cameraUp = {0.0f, 1.0f, 0.0f};
@@ -187,7 +187,6 @@ auto Interface::MidFrame() -> void {
   _projectionMatrix =
       glm::perspectiveFovLH(glm::radians(55.0f), (float)_windowDimension.x,
                             (float)_windowDimension.y, 0.01f, 1000.0f);
-
 
   _commandList->SetGraphicsRootConstantBuffer(
       _lightDataBuffer[_frameIndex], &light, sizeof(light),
@@ -202,164 +201,146 @@ auto Interface::MidFrame() -> void {
 
   // Record commands.
   glm::vec4 clearColor = {1, 1, 1, 1};
-  auto rtvHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT);
-  auto dsvHandle = _dsvHeap->CpuHandleFor(1);
-  _mouseOverCommandList->SetRenderTarget(rtvHandle, dsvHandle);
 
-  _mouseOverCommandList->ClearRenderTarget(rtvHandle, clearColor);
-  _mouseOverCommandList->ClearDepthTarget(dsvHandle);
-  _mouseOverCommandList->SetTopology(GraphicsPipelineStateTopology::POLYGON);
-  _mouseOverCommandList->SetViewport(_viewport);
-  _mouseOverCommandList->SetScissorRect(_scissorRect);
+  // --- Render pass for mouse over ---
+  {
+    auto rtvHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT + _frameIndex);
+    auto dsvHandle = _dsvHeap->CpuHandleFor(1);
+    _mouseOverCommandList->SetRenderTarget(rtvHandle, dsvHandle);
+    _mouseOverCommandList->ClearRenderTarget(rtvHandle, clearColor);
+    _mouseOverCommandList->ClearDepthTarget(dsvHandle);
+    _mouseOverCommandList->SetTopology(GraphicsPipelineStateTopology::POLYGON);
+    _mouseOverCommandList->SetViewport(_viewport);
 
-  // --- ON MOUSE OVER CHECK ---
-  // Encodes every Entity via a unique Id which is respresented as a color.
-  // If the mesh is inside the cursor position, the framebuffer will hold that color
-  
-  /*
-  _commandList->SetScissorRect({_cursorPosition[0], _cursorPosition[1], 1, 1});
-  for (auto &mesh : _meshesToDraw) {
-    // Update the projection matrix.
-    float aspectRatio =
-        _windowDimension.x / static_cast<float>(_windowDimension.y);
-    // Update the MVP matrix
+    Rect r = {};
+    r.Left = _cursorPosition[0];
+    r.Top = _cursorPosition[1];
+    r.Right = _cursorPosition[0] + 1;
+    r.Bottom = _cursorPosition[1] + 1;
+    _mouseOverCommandList->SetScissorRect(r);
+    //_mouseOverCommandList->SetScissorRect(_scissorRect);
 
-    glm::mat4 modelView = mesh.Transform;
-    modelView = glm::scale(modelView, {1, 1, 1});
-    modelView = glm::translate(modelView, {0, 0, 0});
-    modelView = glm::rotate(modelView, glm::radians(0.0f),
-                            glm::vec3{1.0f, 0.0f, 0.0f});
-    //
+    for (auto &mesh : _meshesToDraw) {
+      // Update the projection matrix.
+      float aspectRatio =
+          _windowDimension.x / static_cast<float>(_windowDimension.y);
+      // Update the MVP matrix
 
-    auto mvp = MVPCBuffer{modelView, _projectionMatrix * _viewMatrix};
+      glm::mat4 modelView = mesh.Transform;
+      modelView = glm::scale(modelView, {1, 1, 1});
+      modelView = glm::translate(modelView, {0, 0, 0});
+      modelView = glm::rotate(modelView, glm::radians(0.0f),
+                              glm::vec3{1.0f, 0.0f, 0.0f});
+      //
 
-    auto material = _materials[0];
-    auto shader = material->Shader;
+      auto mvp = MVPCBuffer{modelView, _projectionMatrix * _viewMatrix};
 
+      auto material = _materials[mesh.MaterialId];
+      auto shader = material->Shader;
 
-    _commandList->SetGraphicsRootSignature(shader->Pipeline->RootSignature());
-    _commandList->SetPipelineState(shader->Pipeline);
-    _commandList->SetGraphicsRootConstants(0, sizeof(mvp) / 4, &mvp, 0);                  // b0     -> The Model View Projection for this Mesh/Material
-    _commandList->SetGraphicsRootDescriptorTable(1, _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer for this Mesh/Material
-    _commandList->SetGraphicsRootConstants(2, sizeof(glm::mat4x4) / 4, &mesh.EntityId, 0);
+      _mouseOverCommandList->SetGraphicsRootSignature(
+          shader->Pipeline->RootSignature());
+      _mouseOverCommandList->SetPipelineState(shader->Pipeline);
+      _mouseOverCommandList->SetGraphicsRootConstants(
+          0, sizeof(mvp) / 4, &mvp,
+          0); // b0     -> The Model View Projection for this Mesh/Material
+      _mouseOverCommandList->SetGraphicsRootDescriptorTable(
+          1,
+          _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer
+                                                // for this Mesh/Material
 
-    auto vao = _meshes[mesh.MeshId];
-    _commandList->SetVertexBuffer(vao->VertexBuffer);
-    _commandList->SetIndexBuffer(vao->IndexBuffer);
-    _commandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
-  }
+      for (auto [it, end, x] = std::tuple{material->Textures.cbegin(),
+                                          material->Textures.cend(), 0};
+           it != end; it++, x++) {
+        auto texture = *it;
+        auto slotBinding = std::find_if(
+            material->Shader->Slots.cbegin(), material->Shader->Slots.cend(),
+            [texture](auto &item) { return item.Name == texture.first; });
 
-*/
-
-  Rect r = {};
-  r.Left = _cursorPosition[0];
-  r.Top = _cursorPosition[1];
-  r.Right = _cursorPosition[0] + 1;
-  r.Bottom = _cursorPosition[1] + 1;
-  _mouseOverCommandList->SetScissorRect(r);
-
-  for (auto &mesh : _meshesToDraw) {
-    // Update the projection matrix.
-    float aspectRatio =
-        _windowDimension.x / static_cast<float>(_windowDimension.y);
-    // Update the MVP matrix
-
-    glm::mat4 modelView = mesh.Transform;
-    modelView = glm::scale(modelView, {1, 1, 1});
-    modelView = glm::translate(modelView, {0, 0, 0});
-    modelView = glm::rotate(modelView, glm::radians(0.0f),
-                            glm::vec3{1.0f, 0.0f, 0.0f});
-    //
-
-    auto mvp = MVPCBuffer{modelView, _projectionMatrix * _viewMatrix};
-
-    auto material = _materials[mesh.MaterialId];
-    auto shader = material->Shader;
-
-
-    _mouseOverCommandList->SetGraphicsRootSignature(shader->Pipeline->RootSignature());
-    _mouseOverCommandList->SetPipelineState(shader->Pipeline);
-    _mouseOverCommandList->SetGraphicsRootConstants(0, sizeof(mvp) / 4, &mvp, 0);                  // b0     -> The Model View Projection for this Mesh/Material
-    _mouseOverCommandList->SetGraphicsRootDescriptorTable(1, _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer for this Mesh/Material
-
-    for (auto [it, end, x] = std::tuple{material->Textures.cbegin(), material->Textures.cend(), 0}; it != end; it++, x++){
-      auto texture = *it;
-      auto slotBinding = std::find_if(material->Shader->Slots.cbegin(), material->Shader->Slots.cend(), [texture](auto& item) { 
-        return item.Name == texture.first;
-      });
-
-      if(slotBinding != material->Shader->Slots.end()) {
-         _mouseOverCommandList->SetGraphicsRootDescriptorTable(2 + slotBinding->Index, it->second->GPUHandle);
+        if (slotBinding != material->Shader->Slots.end()) {
+          _mouseOverCommandList->SetGraphicsRootDescriptorTable(
+              2 + slotBinding->Index, it->second->GPUHandle);
+        }
       }
+
+      // 2x Table = 2 | 2
+      // 2x SRV = 4   | 4 + 2 = 6
+      //
+
+      auto len = sizeof(float);
+
+      auto vao = _meshes[mesh.MeshId];
+      _mouseOverCommandList->SetVertexBuffer(vao->VertexBuffer);
+      _mouseOverCommandList->SetIndexBuffer(vao->IndexBuffer);
+      _mouseOverCommandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0,
+                                           0);
     }
-
-    // 2x Table = 2 | 2
-    // 2x SRV = 4   | 4 + 2 = 6
-    //
-
-    auto len = sizeof(float);
-
-    auto vao = _meshes[mesh.MeshId];
-    _mouseOverCommandList->SetVertexBuffer(vao->VertexBuffer);
-    _mouseOverCommandList->SetIndexBuffer(vao->IndexBuffer);
-    _mouseOverCommandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
   }
+  // --- Display Render Pass ---
+  {
+    clearColor = {0, 0.2, 0.2, 1};
+    auto dsvHandle = _dsvHeap->CpuHandleFor(0);
+    auto rtvHandle = _rtvHeap->CpuHandleFor(_frameIndex);
+    _commandList->SetRenderTarget(rtvHandle, dsvHandle);
+    _commandList->SetTopology(GraphicsPipelineStateTopology::POLYGON);
+    _commandList->SetViewport(_viewport);
+    _commandList->ClearRenderTarget(rtvHandle, clearColor);
+    _commandList->ClearDepthTarget(dsvHandle);
+    _commandList->SetScissorRect(_scissorRect);
 
-  clearColor = { 0, 0.2, 0.2, 1};
-  dsvHandle = _dsvHeap->CpuHandleFor(0);
-   rtvHandle = _rtvHeap->CpuHandleFor(_frameIndex);
-   _commandList->SetRenderTarget(rtvHandle, dsvHandle);
-  _commandList->SetTopology(GraphicsPipelineStateTopology::POLYGON);
-  _commandList->SetViewport(_viewport);
-  _commandList->ClearRenderTarget(rtvHandle, clearColor);
-  _commandList->ClearDepthTarget(dsvHandle);
-  _commandList->SetScissorRect(_scissorRect);
+    for (auto &mesh : _meshesToDraw) {
+      // Update the projection matrix.
+      float aspectRatio =
+          _windowDimension.x / static_cast<float>(_windowDimension.y);
+      // Update the MVP matrix
 
-  for (auto &mesh : _meshesToDraw) {
-    // Update the projection matrix.
-    float aspectRatio =
-        _windowDimension.x / static_cast<float>(_windowDimension.y);
-    // Update the MVP matrix
+      glm::mat4 modelView = mesh.Transform;
+      modelView = glm::scale(modelView, {1, 1, 1});
+      modelView = glm::translate(modelView, {0, 0, 0});
+      modelView = glm::rotate(modelView, glm::radians(0.0f),
+                              glm::vec3{1.0f, 0.0f, 0.0f});
+      //
 
-    glm::mat4 modelView = mesh.Transform;
-    modelView = glm::scale(modelView, {1, 1, 1});
-    modelView = glm::translate(modelView, {0, 0, 0});
-    modelView = glm::rotate(modelView, glm::radians(0.0f),
-                            glm::vec3{1.0f, 0.0f, 0.0f});
-    //
+      auto mvp = MVPCBuffer{modelView, _projectionMatrix * _viewMatrix};
 
-    auto mvp = MVPCBuffer{modelView, _projectionMatrix * _viewMatrix};
+      auto material = _materials[mesh.MaterialId];
+      auto shader = material->Shader;
 
-    auto material = _materials[mesh.MaterialId];
-    auto shader = material->Shader;
+      _commandList->SetGraphicsRootSignature(shader->Pipeline->RootSignature());
+      _commandList->SetPipelineState(shader->Pipeline);
+      _commandList->SetGraphicsRootConstants(
+          0, sizeof(mvp) / 4, &mvp,
+          0); // b0     -> The Model View Projection for this Mesh/Material
+      _commandList->SetGraphicsRootDescriptorTable(
+          1,
+          _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer
+                                                // for this Mesh/Material
 
+      for (auto [it, end, x] = std::tuple{material->Textures.cbegin(),
+                                          material->Textures.cend(), 0};
+           it != end; it++, x++) {
+        auto texture = *it;
+        auto slotBinding = std::find_if(
+            material->Shader->Slots.cbegin(), material->Shader->Slots.cend(),
+            [texture](auto &item) { return item.Name == texture.first; });
 
-    _commandList->SetGraphicsRootSignature(shader->Pipeline->RootSignature());
-    _commandList->SetPipelineState(shader->Pipeline);
-    _commandList->SetGraphicsRootConstants(0, sizeof(mvp) / 4, &mvp, 0);                  // b0     -> The Model View Projection for this Mesh/Material
-    _commandList->SetGraphicsRootDescriptorTable(1, _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer for this Mesh/Material
-
-    for (auto [it, end, x] = std::tuple{material->Textures.cbegin(), material->Textures.cend(), 0}; it != end; it++, x++){
-      auto texture = *it;
-      auto slotBinding = std::find_if(material->Shader->Slots.cbegin(), material->Shader->Slots.cend(), [texture](auto& item) { 
-        return item.Name == texture.first;
-      });
-
-      if(slotBinding != material->Shader->Slots.end()) {
-         _commandList->SetGraphicsRootDescriptorTable(2 + slotBinding->Index, it->second->GPUHandle);
+        if (slotBinding != material->Shader->Slots.end()) {
+          _commandList->SetGraphicsRootDescriptorTable(2 + slotBinding->Index,
+                                                       it->second->GPUHandle);
+        }
       }
+
+      // 2x Table = 2 | 2
+      // 2x SRV = 4   | 4 + 2 = 6
+      //
+
+      auto len = sizeof(float);
+
+      auto vao = _meshes[mesh.MeshId];
+      _commandList->SetVertexBuffer(vao->VertexBuffer);
+      _commandList->SetIndexBuffer(vao->IndexBuffer);
+      _commandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
     }
-
-    // 2x Table = 2 | 2
-    // 2x SRV = 4   | 4 + 2 = 6
-    //
-
-    auto len = sizeof(float);
-
-    auto vao = _meshes[mesh.MeshId];
-    _commandList->SetVertexBuffer(vao->VertexBuffer);
-    _commandList->SetIndexBuffer(vao->IndexBuffer);
-    _commandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
   }
 
   ImGui::Render();
@@ -378,7 +359,7 @@ auto Interface::MidFrame() -> void {
   _commandList->Close();
   _cbCommandList->Close();
 
-  _mainQueue->ExecuteCommandLists({_commandList, _mouseOverCommandList});
+  _mainQueue->ExecuteCommandLists({_mouseOverCommandList, _commandList, });
 
   // Present the frame.
   _swapChain->Swap();
@@ -402,26 +383,24 @@ auto Interface::CreateMaterial(uint64_t shaderId) -> uint64_t {
   auto mat = std::make_shared<Material>();
   mat->Shader = _shaders[shaderId];
 
-  std::sort(mat->Shader->Slots.begin(), mat->Shader->Slots.end(), [](auto& lhs, auto& rhs) {
-    return lhs.Index < rhs.Index;
-  });
-
+  std::sort(mat->Shader->Slots.begin(), mat->Shader->Slots.end(),
+            [](auto &lhs, auto &rhs) { return lhs.Index < rhs.Index; });
 
   size_t buffSize = 0;
 
-  // Props are 16 byte alligned -> Vector 4 = 4x4 Bytes = 16. Buffer must be multiple of 255 bytes as well
+  // Props are 16 byte alligned -> Vector 4 = 4x4 Bytes = 16. Buffer must be
+  // multiple of 255 bytes as well
   buffSize = ((mat->Shader->Slots.size() * 16) + 255) & ~255;
-   _materialCBVs.insert({_materials.size(), _device->CreateUploadBuffer(buffSize)});
+  _materialCBVs.insert(
+      {_materials.size(), _device->CreateUploadBuffer(buffSize)});
 
-   _device->CreateConstantBufferView(
-    _srvHeap,
-     _materialCBVs.at(_materials.size()),
-    _srvHeap->CpuHandleFor(_srvCounter++));
+  _device->CreateConstantBufferView(_srvHeap,
+                                    _materialCBVs.at(_materials.size()),
+                                    _srvHeap->CpuHandleFor(_srvCounter++));
 
   std::vector<uint8_t> materialBuffer(buffSize);
   _materialBuffers.insert({_materials.size(), materialBuffer});
 
-    
   _materials.push_back(mat);
   return _materials.size() - 1;
 }
@@ -524,14 +503,12 @@ auto Interface::UploadTextureData(uint8_t *data, uint16_t width,
 }
 
 auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
-      auto compiledShader = _device->CompileShader(shader.Code);
-      compiledShader->ShaderIndex = _shaders.size();
-    
+  auto compiledShader = _device->CompileShader(shader.Code);
+  compiledShader->ShaderIndex = _shaders.size();
 
   GraphicsRootSignatureDescription desc = {};
   desc.Parameters = {};
   // MVP Matrix
-
 
   // Add default shader-agnostic parameters.
   // TODO: Parse shader json and add additional params
@@ -571,7 +548,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
 
   desc.Parameters.push_back(param);
 
-    // --- USER-DEFINED CBV ---
+  // --- USER-DEFINED CBV ---
   param.Index = 3;
   param.Size = 1;
   param.ShaderRegister = 2;
@@ -582,7 +559,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
 
   desc.Parameters.push_back(param);
 
-    // --- SHADER RESOURCE VIEW FOR USER-DEFINED CBV ---
+  // --- SHADER RESOURCE VIEW FOR USER-DEFINED CBV ---
   param.Index = 4;
   param.Size = 1;
   param.ShaderRegister = 1;
@@ -632,9 +609,10 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
   return _shaders.size() - 1;
 }
 
-auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId, uint64_t materialId, MeshDrawInfo info,
-                         glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
-    -> void {
+auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId,
+                         uint64_t materialId, MeshDrawInfo info,
+                         glm::vec3 position, glm::vec3 rotation,
+                         glm::vec3 scale) -> void {
 
   glm::mat4 transform = glm::mat4(1.0f);
   transform = glm::translate(transform, position);
@@ -644,9 +622,7 @@ auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId, uint64_t materialId
 
 auto Interface::SetCursorPosition(std::array<uint32_t, 2> position) -> void {
   _cursorPosition = position;
-
 }
-
 
 auto Interface::SetMeshProperties() -> void {}
 
@@ -682,7 +658,7 @@ auto Interface::CreatePipeline() -> void {
   _meshesToDraw = {};
 
   _depthBuffer = _device->CreateDepthBuffer(_windowDimension);
-  _mouseOverDepthBuffer = _device->CreateDepthBuffer({1, 1});
+  _mouseOverDepthBuffer = _device->CreateDepthBuffer({_windowDimension.x, _windowDimension.y});
 
   auto depthHandle = _dsvHeap->CpuHandleFor(0);
   _device->CreateDepthStencilView(depthHandle, _depthBuffer);
@@ -717,12 +693,17 @@ auto Interface::CreatePipeline() -> void {
   _uploadCommandList =
       _device->CreateCommandList(DIRECT, _uploadAllocator, "UploadCommandList");
 
-  _mouseOverBuffer = _device->CreateTextureBuffer(1, 1, 1, 1, TextureFormat::RGBA, "MouseOverBuffer");
-  _mouseOverRTV = _device->CreateRenderTarget(_mouseOverBuffer);
-  auto rtHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT);
+  for (int x = 0; x < FRAME_COUNT; x++) {
+    _mouseOverBuffer[x] = _device->CreateTextureBuffer(
+        _windowDimension.x, _windowDimension.y, 4, 1, TextureFormat::RGBA, "MouseOverBuffer");
+    _mouseOverRTV[x]= _device->CreateRenderTarget(_mouseOverBuffer[x]);
+    auto rtHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT + x);
 
-  _commandList->Transition(_mouseOverBuffer, ResourceState::COMMON, ResourceState::RENDER_TARGET);
-  _device->CreateRenderTargetView(rtHandle, _mouseOverRTV);
+    _commandList->Transition(_mouseOverBuffer[x], ResourceState::COMMON,
+                             ResourceState::RENDER_TARGET);
+    _device->CreateRenderTargetView(rtHandle, _mouseOverRTV[x]);
+  }
+
   _commandList->Close();
   _mouseOverCommandList->Close();
   _uploadCommandList->Close();
