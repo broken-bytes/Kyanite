@@ -96,7 +96,7 @@ auto Tick() -> void {
     info.OutlineColor[1] = 0;
     info.OutlineColor[2] = 1;
     info.OutlineColor[3] = 1;
-    DrawMesh(Meshes[x], Materials[0], info, {{0, 0, 20}, {0, 0, 0}, {1, 1, 1}});
+    DrawMesh(0, Meshes[x], Materials[0], info, {{0, 0, 20}, {0, 0, 0}, {1, 1, 1}});
   }
 }
 

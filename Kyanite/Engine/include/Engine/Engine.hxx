@@ -148,7 +148,7 @@ DLL_EXPORT void SetMaxFrameRate(uint16_t maxFramerate);
 DLL_EXPORT void SetVSync(bool enabled);
 DLL_EXPORT void Update(float frameTime);
 DLL_EXPORT void PhysicsUpdate(float frameTime);
-DLL_EXPORT void DrawMesh(NativeRef *mesh, NativeRef *material,
+DLL_EXPORT void DrawMesh(uint64_t entityId, NativeRef *mesh, NativeRef *material,
                          MeshDrawInfo info, Transform transform);
 
 DLL_EXPORT void SetClearColor(float r, float g, float b, float a);

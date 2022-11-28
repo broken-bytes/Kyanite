@@ -313,12 +313,13 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader) {
  }
  void PhysicsUpdate(float frameTime) {}
  void DrawMesh(
+    uint64_t entityId,
     NativeRef* mesh,
     NativeRef* material,
     MeshDrawInfo info,
     Transform transform
     ) {
-        Interface->DrawMesh(mesh->Identifier, material->Identifier, info, {transform.Position.X, transform.Position.Y, transform.Position.Z}, {transform.Rotation.X, transform.Rotation.Y, transform.Rotation.Z}, {transform.Scale.X, transform.Scale.Y, transform.Scale.Z});
+        Interface->DrawMesh(entityId, mesh->Identifier, material->Identifier, info, {transform.Position.X, transform.Position.Y, transform.Position.Z}, {transform.Rotation.X, transform.Rotation.Y, transform.Rotation.Z}, {transform.Scale.X, transform.Scale.Y, transform.Scale.Z});
     }
 
  void SetClearColor(float r, float g, float b, float a) {}

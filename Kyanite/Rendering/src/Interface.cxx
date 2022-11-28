@@ -516,14 +516,14 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
   return _shaders.size() - 1;
 }
 
-auto Interface::DrawMesh(uint64_t id, uint64_t materialId, MeshDrawInfo info,
+auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId, uint64_t materialId, MeshDrawInfo info,
                          glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
     -> void {
 
   glm::mat4 transform = glm::mat4(1.0f);
   transform = glm::translate(transform, position);
 
-  _meshesToDraw.push_back({id, materialId, transform});
+  _meshesToDraw.push_back({entityId, meshId, materialId, transform});
 }
 
 auto Interface::SetMeshProperties() -> void {}
