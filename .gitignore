@@ -92,3 +92,5 @@ iOSInjectionProject/
 .vscode/
 
 vcpkg_installed/
+
+.cache/
