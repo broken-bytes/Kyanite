@@ -9,7 +9,9 @@
 #include "glm/common.hpp"
 #include "glm/geometric.hpp"
 #include "glm/glm.hpp"
+#include "glm/gtx/euler_angles.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/common.hpp"
 #include "glm/mat4x4.hpp"
 #include "glm/matrix.hpp"
 #include "glm/trigonometric.hpp"
@@ -18,6 +20,7 @@
 #include <algorithm>
 #include <d3d12.h>
 #include <dxgiformat.h>
+#include <glm/ext/quaternion_transform.hpp>
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -37,6 +40,7 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #define NO_MIN_MAX
+#define WIN32_LEAN_AND_MEAN
 #include "d3d12/D3D12Device.hxx"
 #include <Windows.h>
 
@@ -203,7 +207,15 @@ auto Interface::MidFrame() -> void {
   glm::vec4 clearColor = {1, 1, 1, 1};
 
   // --- Render pass for mouse over ---
-  {
+  if(_colorOnlyShader == nullptr) {
+      auto colorShader = std::find_if(_shaders.begin(), _shaders.end(), [](auto& shader) { 
+        return shader->Name == "_COLOR_ONLY";
+      });
+
+      _colorOnlyShader = colorShader != _shaders.end() ? *colorShader : nullptr;
+  }
+
+  if(_colorOnlyShader != nullptr) {
     auto rtvHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT + _frameIndex);
     auto dsvHandle = _dsvHeap->CpuHandleFor(1);
     _mouseOverCommandList->SetRenderTarget(rtvHandle, dsvHandle);
@@ -217,10 +229,16 @@ auto Interface::MidFrame() -> void {
     r.Top = _cursorPosition[1];
     r.Right = _cursorPosition[0] + 1;
     r.Bottom = _cursorPosition[1] + 1;
-    _mouseOverCommandList->SetScissorRect(r);
+    _mouseOverCommandList->SetScissorRect(_scissorRect);
     //_mouseOverCommandList->SetScissorRect(_scissorRect);
 
     for (auto &mesh : _meshesToDraw) {
+      std::array<uint32_t, 4> entityColorArr = {
+        static_cast<unsigned int>((mesh.EntityId >> 24)  & 0xFF), static_cast<unsigned int>((mesh.EntityId >> 16) & 0xFF), static_cast<unsigned int>((mesh.EntityId >> 8) & 0xFF), static_cast<unsigned int>(mesh.EntityId & 0xFF)
+      };
+      _mouseOverCommandList->SetGraphicsRootConstantBuffer(
+      _entitySelectionBuffer, entityColorArr.data(), sizeof(uint32_t) * 4,
+      (uint8_t*)_currentEntityColor.data());
       // Update the projection matrix.
       float aspectRatio =
           _windowDimension.x / static_cast<float>(_windowDimension.y);
@@ -236,7 +254,7 @@ auto Interface::MidFrame() -> void {
       auto mvp = MVPCBuffer{modelView, _projectionMatrix * _viewMatrix};
 
       auto material = _materials[mesh.MaterialId];
-      auto shader = material->Shader;
+      auto shader = _colorOnlyShader;
 
       _mouseOverCommandList->SetGraphicsRootSignature(
           shader->Pipeline->RootSignature());
@@ -246,34 +264,14 @@ auto Interface::MidFrame() -> void {
           0); // b0     -> The Model View Projection for this Mesh/Material
       _mouseOverCommandList->SetGraphicsRootDescriptorTable(
           1,
-          _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer
+          _srvHeap->GpuHandleFor(_entitySelectionCBVId)); // b1     -> The Constant Buffer
                                                 // for this Mesh/Material
 
-      for (auto [it, end, x] = std::tuple{material->Textures.cbegin(),
-                                          material->Textures.cend(), 0};
-           it != end; it++, x++) {
-        auto texture = *it;
-        auto slotBinding = std::find_if(
-            material->Shader->Slots.cbegin(), material->Shader->Slots.cend(),
-            [texture](auto &item) { return item.Name == texture.first; });
-
-        if (slotBinding != material->Shader->Slots.end()) {
-          _mouseOverCommandList->SetGraphicsRootDescriptorTable(
-              2 + slotBinding->Index, it->second->GPUHandle);
-        }
-      }
-
-      // 2x Table = 2 | 2
-      // 2x SRV = 4   | 4 + 2 = 6
-      //
-
-      auto len = sizeof(float);
 
       auto vao = _meshes[mesh.MeshId];
       _mouseOverCommandList->SetVertexBuffer(vao->VertexBuffer);
       _mouseOverCommandList->SetIndexBuffer(vao->IndexBuffer);
-      _mouseOverCommandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0,
-                                           0);
+      _mouseOverCommandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
     }
   }
   // --- Display Render Pass ---
@@ -379,8 +377,9 @@ auto Interface::Update() -> void {}
 
 auto Interface::Resize(uint32_t width, uint32_t height) -> void {}
 
-auto Interface::CreateMaterial(uint64_t shaderId) -> uint64_t {
+auto Interface::CreateMaterial(std::string name, uint64_t shaderId) -> uint64_t {
   auto mat = std::make_shared<Material>();
+  mat->Name = name;
   mat->Shader = _shaders[shaderId];
 
   std::sort(mat->Shader->Slots.begin(), mat->Shader->Slots.end(),
@@ -505,6 +504,8 @@ auto Interface::UploadTextureData(uint8_t *data, uint16_t width,
 auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
   auto compiledShader = _device->CompileShader(shader.Code);
   compiledShader->ShaderIndex = _shaders.size();
+  compiledShader->Name = shader.Name;
+  compiledShader->IsLit = shader.IsLit;
 
   GraphicsRootSignatureDescription desc = {};
   desc.Parameters = {};
@@ -515,8 +516,9 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
 
   GraphicsRootSignatureParameter param = {};
 
+  uint8_t rootConstantIndex = 0; 
   // --- MVP MATRIX ---
-  param.Index = 0;
+  param.Index = rootConstantIndex++;
   param.Size = sizeof(MVPCBuffer) / 4;
   param.ShaderRegister = 0;
   param.RegisterSpace = 0;
@@ -526,32 +528,34 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
 
   desc.Parameters.push_back(param);
 
-  // --- LIGHT DATA CBV ---
-  param.Index = 1;
-  param.Size = 1;
-  param.ShaderRegister = 1;
-  param.RegisterSpace = 0;
-  param.Visibility = GraphicsShaderVisibility::ALL;
-  param.Type = GraphicsRootSignatureParameterType::TABLE;
-  param.RangeType = GraphicsDescriptorRangeType::CBV;
+  if (compiledShader->IsLit) {
+    // --- LIGHT DATA CBV ---
+    param.Index = rootConstantIndex++;
+    param.Size = 1;
+    param.ShaderRegister = 1;
+    param.RegisterSpace = 0;
+    param.Visibility = GraphicsShaderVisibility::ALL;
+    param.Type = GraphicsRootSignatureParameterType::TABLE;
+    param.RangeType = GraphicsDescriptorRangeType::CBV;
 
-  desc.Parameters.push_back(param);
+    desc.Parameters.push_back(param);
 
-  // --- SHADER RESOURCE VIEW FOR LIGHT DATA CBV ---
-  param.Index = 2;
-  param.Size = 1;
-  param.ShaderRegister = 0;
-  param.RegisterSpace = 0;
-  param.Visibility = GraphicsShaderVisibility::PIXEL;
-  param.Type = GraphicsRootSignatureParameterType::TABLE;
-  param.RangeType = GraphicsDescriptorRangeType::SRV;
+    // --- SHADER RESOURCE VIEW FOR LIGHT DATA CBV ---
+    param.Index = rootConstantIndex++;
+    param.Size = 1;
+    param.ShaderRegister = 0;
+    param.RegisterSpace = 0;
+    param.Visibility = GraphicsShaderVisibility::PIXEL;
+    param.Type = GraphicsRootSignatureParameterType::TABLE;
+    param.RangeType = GraphicsDescriptorRangeType::SRV;
 
-  desc.Parameters.push_back(param);
+    desc.Parameters.push_back(param);
+  }
 
   // --- USER-DEFINED CBV ---
-  param.Index = 3;
+  param.Index = rootConstantIndex++;
   param.Size = 1;
-  param.ShaderRegister = 2;
+  param.ShaderRegister = compiledShader->IsLit ? 2 : 1;
   param.RegisterSpace = 0;
   param.Visibility = GraphicsShaderVisibility::ALL;
   param.Type = GraphicsRootSignatureParameterType::TABLE;
@@ -560,9 +564,9 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
   desc.Parameters.push_back(param);
 
   // --- SHADER RESOURCE VIEW FOR USER-DEFINED CBV ---
-  param.Index = 4;
+  param.Index = rootConstantIndex++;
   param.Size = 1;
-  param.ShaderRegister = 1;
+  param.ShaderRegister = compiledShader->IsLit ? 1 : 0;
   param.RegisterSpace = 0;
   param.Visibility = GraphicsShaderVisibility::PIXEL;
   param.Type = GraphicsRootSignatureParameterType::TABLE;
@@ -575,9 +579,9 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
            std::tuple{shader.Slots.begin(), shader.Slots.end(), 0};
        it != end; it++, x++) {
     if (it->Type == GraphicsShaderSlotType::TEXTURE) {
-      param.Index = 5 + x;
+      param.Index = rootConstantIndex + x;
       param.Size = 1;
-      param.ShaderRegister = 2 + x;
+      param.ShaderRegister = 3 + x;
       param.RegisterSpace = 0;
       param.Visibility = GraphicsShaderVisibility::PIXEL;
       param.Type = GraphicsRootSignatureParameterType::TABLE;
@@ -611,11 +615,16 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
 
 auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId,
                          uint64_t materialId, MeshDrawInfo info,
-                         glm::vec3 position, glm::vec3 rotation,
+                         glm::vec3 position, glm::quat rotation,
                          glm::vec3 scale) -> void {
 
   glm::mat4 transform = glm::mat4(1.0f);
   transform = glm::translate(transform, position);
+  auto axis = glm::eulerAngles(rotation);
+  glm::mat4 transformX = glm::eulerAngleX(axis.x);
+  glm::mat4 transformY = glm::eulerAngleY(axis.y);
+  glm::mat4 transformZ = glm::eulerAngleZ(axis.z);
+  transform = transform * transformY * transformX * transformZ;
 
   _meshesToDraw.push_back({entityId, meshId, materialId, transform});
 }
@@ -753,6 +762,11 @@ auto Interface::CreatePipeline() -> void {
     _device->CreateConstantBufferView(_srvHeap, _lightDataBuffer[x],
                                       _srvHeap->CpuHandleFor(_srvCounter++));
   }
+
+  _entitySelectionBuffer = _device->CreateUploadBuffer(((sizeof(uint32_t) * 4) + 255) & ~255);
+
+  _device->CreateConstantBufferView(_srvHeap, _entitySelectionBuffer,  _srvHeap->CpuHandleFor(_srvCounter) );
+  _entitySelectionCBVId = _srvCounter++;
 
   _cbCommandList = _device->CreateCommandList(DIRECT, _cbAllocator[_frameIndex],
                                               "Constant Buffer CommandList");

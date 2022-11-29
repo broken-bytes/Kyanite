@@ -11,6 +11,18 @@
 #include "Core/NativeRef.hxx"
 #include "Shader.hxx"
 
+#include "glm/common.hpp"
+#include "glm/geometric.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtx/euler_angles.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/common.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/matrix.hpp"
+#include "glm/trigonometric.hpp"
+#include "glm/vec4.hpp"
+#include "glm/ext/quaternion_transform.hpp"
+
 
 
 std::vector<NativeRef*> _nativeRefs = {};
@@ -183,7 +195,7 @@ DLL_EXPORT ShaderInfo LoadShaderCPU(const char* path) {
     info.Data.Code = code;
 
     // Only default lighting for now
-    info.Data.Lighting = ShaderJSONDataLightingModel::DEFAULT;
+    info.Data.Lighting = shader.Description.IsLit ? ShaderJSONDataLightingModel::DEFAULT : ShaderJSONDataLightingModel::UNLIT;
     
     info.Data.Input = new ShaderJSONDataInputProp[shader.Description.Props.size()];
 
@@ -235,6 +247,7 @@ DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info) {
         Renderer::GraphicsShader shader = {};
         shader.Code = info.Data.Code;
         shader.Name = std::string(info.Data.Name);
+        shader.IsLit = info.Data.Lighting == ShaderJSONDataLightingModel::DEFAULT ? true : false;
 
         shader.Slots = {};
 
@@ -286,8 +299,8 @@ DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info) {
 }
 
 // Creates a new material in the renderpipeline and returns its ref
-DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader) {
-    auto index = Interface->CreateMaterial(shader->Identifier);
+DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
+    auto index = Interface->CreateMaterial(name, shader->Identifier);
 
     auto ref = new NativeRef();
     ref->Identifier = index;
@@ -302,6 +315,7 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader) {
  void Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
     Interface = std::make_unique<Renderer::Interface>(resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
  }
+ 
  void Shutdown() {}
  void SetMaxFrameRate(uint16_t maxFramerate) {}
  void SetVSync(bool enabled) {}
@@ -319,7 +333,10 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(NativeRef* shader) {
     MeshDrawInfo info,
     Transform transform
     ) {
-        Interface->DrawMesh(entityId, mesh->Identifier, material->Identifier, info, {transform.Position.X, transform.Position.Y, transform.Position.Z}, {transform.Rotation.X, transform.Rotation.Y, transform.Rotation.Z}, {transform.Scale.X, transform.Scale.Y, transform.Scale.Z});
+      glm::vec3 position = glm::vec3(transform.Position.X, transform.Position.Y, transform.Position.Z);
+      glm::vec3 scale = glm::vec3(transform.Scale.X, transform.Scale.Y, transform.Scale.Z);
+      glm::quat qRotation = glm::quat(transform.Rotation.Q, transform.Rotation.X, transform.Rotation.Y, transform.Rotation.Z);
+        Interface->DrawMesh(entityId, mesh->Identifier, material->Identifier, info, position, qRotation, scale);
     }
 
  void SetClearColor(float r, float g, float b, float a) {}

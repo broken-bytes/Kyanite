@@ -131,5 +131,6 @@ float4 PSMain(PS_INPUT pixel): SV_TARGET {
 
 	// Result
 	float4 result = (ambient + diffuse + specular);
-    return result;
+    //return result;
+    return DiffuseMap.Sample(TextureSampler, pixel.UV);
 }

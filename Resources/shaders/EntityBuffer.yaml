@@ -1,7 +1,0 @@
-name: PBRDefault
-path: shaders/EntityBuffer.hlsl
-lighting: none
-input:
-  - name: Color
-    type: Vector4
-    slot: 0

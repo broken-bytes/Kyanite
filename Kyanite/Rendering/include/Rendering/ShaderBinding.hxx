@@ -20,7 +20,9 @@ namespace Renderer {
 
     class GraphicsShaderBinding {
     public:
+        std::string Name;
         std::uint64_t ShaderIndex;
+        bool IsLit;
         std::vector<GraphicsShaderSlot> Slots;
         std::shared_ptr<GraphicsPipelineState> Pipeline;
     };

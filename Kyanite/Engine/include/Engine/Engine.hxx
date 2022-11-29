@@ -28,6 +28,13 @@ struct Vector4 {
   float W;
 } typedef Vector4;
 
+struct Quaternion {
+  float Q;
+  float X;
+  float Y;
+  float Z;
+} typedef Quaternion;
+
 struct Color {
   float R;
   float G;
@@ -39,7 +46,7 @@ struct MeshDrawInfo;
 
 struct Transform {
   Vector3 Position;
-  Vector3 Rotation;
+  Quaternion Rotation;
   Vector3 Scale;
 } typedef Transform;
 
@@ -139,7 +146,7 @@ DLL_EXPORT ShaderInfo LoadShaderCPU(const char *path);
 DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info);
 
 // Creates a new material in the renderpipeline and returns its ref
-DLL_EXPORT NativeRef *LoadMaterialGPU(NativeRef *shader);
+DLL_EXPORT NativeRef *LoadMaterialGPU(const char* name, NativeRef *shader);
 
 // --- Commands ---
 DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window);

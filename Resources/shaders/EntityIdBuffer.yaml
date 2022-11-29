@@ -1,0 +1,9 @@
+name: _COLOR_ONLY
+path: shaders/EntityIdBuffer.hlsl
+lighting: none
+constants:
+  - name: Color
+    type: Vector4
+    slot: 0
+buffer:
+  

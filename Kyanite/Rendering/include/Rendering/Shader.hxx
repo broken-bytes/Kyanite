@@ -24,6 +24,7 @@ namespace Renderer {
     struct GraphicsShader {
         std::string Name;
         std::vector<GraphicsShaderSlot> Slots;
+        bool IsLit;
         // Name, Code
         std::string Code;
     };

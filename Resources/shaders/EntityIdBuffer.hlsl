@@ -5,7 +5,10 @@ struct ModelViewProjection
 };
 
 struct Entity {
-    float4 Color;
+    int R;
+    int G;
+    int B;
+    int A;
 };
 
 ConstantBuffer<ModelViewProjection> MVP: register(b0);
@@ -30,5 +33,5 @@ PS_INPUT VSMain(VS_INPUT vertex) {
 }
 
 float4 PSMain(PS_INPUT pixel): SV_TARGET {
-    return EntityId.Color;
+    return float4(EntityId.R / 255.0f, EntityId.G / 255.0f, EntityId.B / 255.0f,  EntityId.A / 255.0f);
 }

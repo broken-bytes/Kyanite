@@ -8,7 +8,9 @@
 #include <vector>
 
 #if _WIN32
-#include <windows.h>
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #include <wrl.h>
 #endif
 
@@ -155,6 +157,9 @@ std::string RootDir = "";
                     shaderDescription["name"].as<std::string>();
                 const std::string hlslPath =
                     RootDir + shaderDescription["path"].as<std::string>();
+				std::string lighting = shaderDescription["lighting"].as<std::string>();
+				asset.Description.IsLit = lighting == "default" ? true : false;
+
                 const auto inputVec = shaderDescription["input"];
 
                 for (YAML::const_iterator it = inputVec.begin();
@@ -185,7 +190,8 @@ std::string RootDir = "";
         }
 
         auto CalcMipLevels(uint16_t width, uint16_t height) -> uint8_t {
-		auto size = max(width, height);
+			
+		auto size = std::max(width, height);
 
 		// FIXME: WRONG
 		// DEBUGGING: Use 1 for now
@@ -219,6 +225,12 @@ std::string RootDir = "";
 		FreeImage_GetPixelColor(result, 60, 0, &pix);
 
 		int channels = bbp / 8;
+
+		if(channels != 4) {
+			result = FreeImage_ConvertTo32Bits(result);
+		}
+
+		channels = 4;
 
 
 		TextureAsset asset;

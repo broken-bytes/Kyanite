@@ -24,6 +24,7 @@
 #include <thread>
 
 #ifdef _WIN32
+#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #if _DEBUG
@@ -86,7 +87,7 @@ auto Tick() -> void {
   ticks++;
   Update(frametime);
 
-  SetCamera(camX, camY, camZ, 0, 0, 0);
+  SetCamera(0, 0, -10, 0, 0, 0);
 
   for (int x = 0; x < Meshes.size(); x++) {
     MeshDrawInfo info;
@@ -96,7 +97,8 @@ auto Tick() -> void {
     info.OutlineColor[1] = 0;
     info.OutlineColor[2] = 1;
     info.OutlineColor[3] = 1;
-    DrawMesh(0, Meshes[x], Materials[0], info, {{0, 0, 20}, {0, 0, 0}, {1, 1, 1}});
+    DrawMesh(50, Meshes[x], Materials[0], info, {{0, 0, 1}, {0.8f, 0.3f, 0.3f, 0.2f}, {1, 1, 1}});
+    DrawMesh(0xFFFFAB, Meshes[x], Materials[0], info, {{6, 0, 1}, {0.4f, 0.3f, 0.3f, 0.2f}, {1, 1, 1}});
   }
 }
 
@@ -136,10 +138,14 @@ int main(int argc, char *argv[]) {
   Init(W, H, (void *)GlobalInstance.Window);
   SetRootDir(argv[1]);
 
+  auto colorBufferShader = LoadShaderCPU("shaders/EntityIdBuffer.yaml");
+  // Load default resources
+  LoadShaderGPU(colorBufferShader);
+
   auto textureInfo = LoadTextureCPU(
-      "models/rock_terrain_3/textures/Rock_Terrain3_baseColor.png");
+      "models/kickelhahn_tower/textures/Material.000_baseColor.jpeg");
   auto modelInfo =
-      LoadModelCPU("models/rock_terrain_3/scene.gltf");
+      LoadModelCPU("models/kickelhahn_tower/scene.gltf");
 
   auto shaderInfo = LoadShaderCPU("shaders/PBRDefault.yaml");
   auto shaderRef =
@@ -152,7 +158,7 @@ int main(int argc, char *argv[]) {
 
   auto diffuseTex = LoadTextureGPU(textureInfo);
   Textures.push_back(diffuseTex);
-  auto material = LoadMaterialGPU(shaderRef);
+  auto material = LoadMaterialGPU("DefaultPBR", shaderRef);
   Materials.push_back(material);
 
   SetMaterialTexture(material, "Diffuse", diffuseTex);

@@ -51,6 +51,7 @@ namespace Renderer {
         }
     };
     struct Material {
+        std::string Name;
         std::shared_ptr<UploadBuffer> ConstantBuffer;
         std::shared_ptr<GraphicsShaderBinding> Shader;
         std::map<std::string, std::shared_ptr<MaterialProp>> Props;

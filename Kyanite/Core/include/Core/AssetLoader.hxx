@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #if _WIN32
+#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <wrl.h>
@@ -39,6 +40,7 @@ namespace AssetLoader {
 	};
 
 	struct ShaderAssetDescription {
+		bool IsLit;
 		std::vector<ShaderAssetDescriptionProp> Props;
 	};
 

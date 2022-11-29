@@ -1,4 +1,6 @@
 #include "Kyanite-Swift.h"
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 typedef void(*TAddRef)(NativeRef* objc);
 typedef void(*TRemoveRef)(NativeRef* objc);

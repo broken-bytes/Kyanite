@@ -51,7 +51,7 @@ namespace Renderer {
 		auto EndFrame() -> void;
 		auto Update() -> void;
 		auto Resize(std::uint32_t width, std::uint32_t height) -> void;
-		auto CreateMaterial(uint64_t shaderId) -> uint64_t;
+		auto CreateMaterial(std::string name, uint64_t shaderId) -> uint64_t;
 		auto MaterialPushTexture(uint64_t textureId) -> void;
 		auto MaterialPopTexture() -> void;
 		auto SetMaterialTexture(uint64_t material, std::string name, uint64_t texture) -> void;
@@ -65,7 +65,7 @@ namespace Renderer {
 		auto UploadTextureData(std::uint8_t* data, std::uint16_t width, std::uint16_t height, std::uint8_t channels) -> std::uint64_t;
 		auto UploadShaderData(GraphicsShader shader)->std::uint64_t;
 		auto DrawMesh(uint64_t entityId, uint64_t meshId, uint64_t materialId, MeshDrawInfo info,
-                         glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) -> void;
+                         glm::vec3 position, glm::quat rotation, glm::vec3 scale) -> void;
 		auto SetMeshProperties() -> void;
 		auto MeshDataFor(const char* uuid) -> std::vector<std::uint64_t>;
 		auto SetCamera(glm::vec3 position, glm::vec3 rotation) -> void;
@@ -121,9 +121,6 @@ namespace Renderer {
 		std::array<std::shared_ptr<Heap>, FRAME_COUNT> _lightDataHeap;
 		std::array<std::shared_ptr<UploadBuffer>, FRAME_COUNT> _lightDataBuffer;
 
-
-
-
 		// Frame 
 		std::uint32_t _frameIndex;
 		std::uint32_t _nextFrameIndex;
@@ -150,7 +147,13 @@ namespace Renderer {
 		std::map<uint64_t, std::shared_ptr<UploadBuffer>> _materialCBVs = {};
 		std::array<std::shared_ptr<RenderTarget>, FRAME_COUNT> _mouseOverRTV;
 		std::array<std::shared_ptr<TextureBuffer>, FRAME_COUNT> _mouseOverBuffer;
+		std::array<uint32_t, 4> _currentEntityColor;
+		std::shared_ptr<UploadBuffer> _entitySelectionBuffer;
+		uint64_t _entitySelectionCBVId;
 
+		// --- DEFAULT SHADERS & MATERIALS --- 
+		// Color Only shader. -> Used for outlining and mouse over detection
+		std::shared_ptr<GraphicsShaderBinding> _colorOnlyShader;
 		// Storage
 		auto CreatePipeline() -> void;
 		auto CreateAssets() -> void;
