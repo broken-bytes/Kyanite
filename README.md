@@ -1,12 +1,9 @@
 # Kyanite
+[![Maintainability](https://api.codeclimate.com/v1/badges/9a51f09fee7b3e7c90c6/maintainability)](https://codeclimate.com/github/broken-bytes/Kyanite/maintainability)
 
 ## Building
-The dependencies are not included in the project, therefore it is up to the user to supply these.
+It is advised to use CMake inside of Visual Studio Code to build the project. 
+Dependencies are puleld via vcpkg, so the toolchain needs to be configured for CMake.
 
-For ease of use, I recommend vcpkg
-Install dependencies via vcpg:
-- freeimage
-- sdl2
-- tinygltf
 
-Add the vcpkg toolchain to CMAKE e.g. -DCMAKE_TOOLCHAIN_FILE=C:/libs/vcpkg/scripts/buildsystems/vcpkg.cmake
+
