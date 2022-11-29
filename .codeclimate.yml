@@ -3,7 +3,6 @@ plugins:
   cppcheck:
     enabled: true
     config:
-      check: all
       language: c++
       stds:
-        - c++20
+        - c++17
