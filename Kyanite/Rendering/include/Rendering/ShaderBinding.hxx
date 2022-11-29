@@ -23,7 +23,8 @@ namespace Renderer {
         std::string Name;
         std::uint64_t ShaderIndex;
         bool IsLit;
-        std::vector<GraphicsShaderSlot> Slots;
+        std::vector<GraphicsShaderSlot> ConstantBufferLayout;
+        std::vector<GraphicsShaderSlot> Constants;
         std::shared_ptr<GraphicsPipelineState> Pipeline;
     };
 }
