@@ -2,7 +2,3 @@ version: "2"
 plugins:
   cppcheck:
     enabled: true
-    config:
-      language: c++
-      stds:
-        - c++17
