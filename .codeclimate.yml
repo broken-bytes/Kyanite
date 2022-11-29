@@ -7,4 +7,3 @@ plugins:
       language: c++
       stds:
         - c++20
-      platform: windows
