@@ -4,17 +4,7 @@ plugins:
     enabled: true
     config:
       check: all
-      project: compile_commands.json
       language: c++
       stds:
         - c++20
       platform: windows
-      defines:
-      - "DEBUG=1"
-      - "__cplusplus"
-      undefines:
-      - "DEBUG"
-      max_configs: 42
-      inconclusive: false
-      suppressions-list: .cppcheck-suppressions
-      inline-suppr: true
