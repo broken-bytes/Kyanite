@@ -72,6 +72,8 @@ namespace Renderer {
 			const char* name = "TextureBuffer"
 		)->std::shared_ptr<Renderer::TextureBuffer>;
 
+		[[nodiscard]] virtual auto CreateReadbackBuffer(size_t sizeInBytes) -> std::shared_ptr<ReadbackBuffer>;
+
 		[[nodiscard]] virtual auto CreateConstantBuffer(
 			void* data,
 			size_t size,

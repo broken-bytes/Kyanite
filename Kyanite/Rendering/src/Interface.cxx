@@ -2,6 +2,7 @@
 #include "DescriptorHandle.hxx"
 #include "Mesh.hxx"
 #include "Rect.hxx"
+#include "Renderer.hxx"
 #include "Vertex.hxx"
 #include "Viewport.hxx"
 
@@ -743,6 +744,8 @@ auto Interface::CreatePipeline() -> void {
     _commandList->Transition(_mouseOverBuffer[x], ResourceState::COMMON,
                              ResourceState::RENDER_TARGET);
     _device->CreateRenderTargetView(rtHandle, _mouseOverRTV[x]);
+
+    _mouseOverCommandList->Transition(_mouseOverBuffer[x], ResourceState::COPY_DEST, ResourceState::COPY_SOURCE);
   }
 
   _commandList->Close();

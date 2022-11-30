@@ -12,6 +12,7 @@
 #include "GraphicsRootSignature.hxx"
 #include "Heap.hxx"
 #include "IndexBuffer.hxx"
+#include "ReadbackBuffer.hxx"
 #include "Renderer.hxx"
 #include "RenderTarget.hxx"
 #include "Shader.hxx"
@@ -71,6 +72,7 @@ namespace Renderer {
 			const char* name = "TextureBuffer"
 		)->std::shared_ptr<Renderer::TextureBuffer> = 0;
 
+		[[nodiscard]] virtual auto CreateReadbackBuffer(size_t sizeInBytes) -> std::shared_ptr<ReadbackBuffer> = 0;
 
 		[[nodiscard]] virtual auto CreateConstantBuffer(
 			void* data,

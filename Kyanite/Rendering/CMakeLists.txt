@@ -38,6 +38,7 @@ set(HEADERS
     include/Rendering/ShaderBinding.hxx
     include/Rendering/ShaderData.hxx
     include/Rendering/SwapChain.hxx
+    include/Rendering/ReadbackBuffer.hxx
     include/Rendering/TextureBuffer.hxx
     include/Rendering/Vertex.hxx
     include/Rendering/UploadBuffer.hxx
@@ -69,6 +70,7 @@ list(APPEND HEADERS
     internal/d3d12/D3D12Shader.hxx
     internal/d3d12/D3D12ShaderBinding.hxx
     internal/d3d12/D3D12SwapChain.hxx
+    internal/d3d12/D3D12ReadbackBuffer.hxx
     internal/d3d12/D3D12TextureBuffer.hxx
     internal/d3d12/D3D12UploadBuffer.hxx
     internal/d3d12/D3D12VertexBuffer.hxx
@@ -88,6 +90,7 @@ list(APPEND SRC
     src/d3d12/D3D12IndexBuffer.cxx
     src/d3d12/D3D12Shader.cxx
     src/d3d12/D3D12SwapChain.cxx
+    src/d3d12/D3D12ReadbackBuffer.cxx
     src/d3d12/D3D12TextureBuffer.cxx
     src/d3d12/D3D12VertexBuffer.cxx
 )

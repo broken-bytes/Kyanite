@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include "ReadbackBuffer.hxx"
 #include "glm/glm.hpp"
 #include <vector>
 #include "DescriptorHandle.hxx"
@@ -93,6 +94,8 @@ namespace Renderer {
 
 		virtual auto UpdateSubresources(std::shared_ptr<Buffer> dst, std::shared_ptr<UploadBuffer> src, void* data, size_t rowPitch, size_t slicePitch) -> void = 0;
 		virtual auto UpdateSubresources(std::shared_ptr<TextureBuffer> dst, std::shared_ptr<UploadBuffer> src, void* data, size_t rowPitch, size_t slicePitch) -> void = 0;
+
+		virtual auto Copy(std::shared_ptr<RenderTarget> from, std::shared_ptr<ReadbackBuffer> to) -> void = 0;
 
 
 #pragma endregion

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <memory>
+#include "d3d12/D3D12ReadbackBuffer.hxx"
 #include "glm/glm.hpp"
 #include "Rect.hxx"
 #include "d3d12/D3D12Allocator.hxx"
@@ -212,6 +213,13 @@ namespace Renderer {
 			D3D12_RESOURCE_STATES(to)
 		);
 		_commandList->ResourceBarrier(1, &barrier);
+	}
+
+	auto D3D12GraphicsCommandList::Copy(std::shared_ptr<RenderTarget> from, std::shared_ptr<ReadbackBuffer> to) -> void {
+		auto renderTarget = static_pointer_cast<D3D12RenderTarget>(from);
+		auto readbackBuffer = static_pointer_cast<D3D12ReadbackBuffer>(to);
+
+		_commandList->CopyResource(renderTarget->Resource(), readbackBuffer->Raw());
 	}
 
 
