@@ -160,10 +160,10 @@ std::string RootDir = "";
 				std::string lighting = shaderDescription["lighting"].as<std::string>();
 				asset.Description.IsLit = lighting == "default" ? true : false;
 
-                const auto inputVec = shaderDescription["input"];
+                const auto constants = shaderDescription["constants"];
 
-                for (YAML::const_iterator it = inputVec.begin();
-                     it != inputVec.end(); ++it) {
+                for (YAML::const_iterator it = constants.begin();
+                     it != constants.end(); ++it) {
                         const YAML::Node &inputElem = *it;
                         std::string name = inputElem["name"].as<std::string>();
                         std::string type = inputElem["type"].as<std::string>();
@@ -172,7 +172,22 @@ std::string RootDir = "";
                         prop.Type = ShaderPropTypeNameToType(type);
                         prop.Slot = slot;
                         prop.Name = name;
-                        asset.Description.Props.push_back(prop);
+                        asset.Description.Constants.push_back(prop);
+                }
+
+				const auto buffer = shaderDescription["buffer"];
+
+                for (YAML::const_iterator it = buffer.begin();
+                     it != buffer.end(); ++it) {
+                        const YAML::Node &inputElem = *it;
+                        std::string name = inputElem["name"].as<std::string>();
+                        std::string type = inputElem["type"].as<std::string>();
+                        uint8_t slot = inputElem["slot"].as<int>();
+                        ShaderAssetDescriptionProp prop = {};
+                        prop.Type = ShaderPropTypeNameToType(type);
+                        prop.Slot = slot;
+                        prop.Name = name;
+                        asset.Description.ConstantBufferLayout.push_back(prop);
                 }
 
 				asset.Name = name;

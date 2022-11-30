@@ -197,9 +197,10 @@ DLL_EXPORT ShaderInfo LoadShaderCPU(const char* path) {
     // Only default lighting for now
     info.Data.Lighting = shader.Description.IsLit ? ShaderJSONDataLightingModel::DEFAULT : ShaderJSONDataLightingModel::UNLIT;
     
-    info.Data.Input = new ShaderJSONDataInputProp[shader.Description.Props.size()];
+    info.Data.Constants = new ShaderJSONDataInputProp[shader.Description.Constants.size()];
+    info.Data.ConstantBufferLayout = new ShaderJSONDataInputProp[shader.Description.ConstantBufferLayout.size()];
 
-    for (auto [it, end, x] = std::tuple{shader.Description.Props.begin(),shader.Description.Props.end(), 0}; it != end; it++, x++){
+    for (auto [it, end, x] = std::tuple{shader.Description.Constants.begin(),shader.Description.Constants.end(), 0}; it != end; it++, x++){
         auto item = it;
         ShaderJSONDataInputPropType type = [&, item]() {
                   switch (item->Type) {
@@ -229,7 +230,40 @@ DLL_EXPORT ShaderInfo LoadShaderCPU(const char* path) {
         prop.Name = propName;
         prop.Type = type;
         prop.Slot = item->Slot;
-        info.Data.Input[x] = prop;
+        info.Data.Constants[x] = prop;
+    }
+
+        for (auto [it, end, x] = std::tuple{shader.Description.ConstantBufferLayout.begin(),shader.Description.ConstantBufferLayout.end(), 0}; it != end; it++, x++){
+        auto item = it;
+        ShaderJSONDataInputPropType type = [&, item]() {
+                  switch (item->Type) {
+                  case AssetLoader::ShaderAssetDescriptionPropType::TEXTURE:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_TEXTURE;
+                  case AssetLoader::ShaderAssetDescriptionPropType::FLOAT:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_FLOAT;
+                  case AssetLoader::ShaderAssetDescriptionPropType::VECTOR2:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_FLOAT2;
+                  case AssetLoader::ShaderAssetDescriptionPropType::VECTOR3:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_FLOAT3;
+                  case AssetLoader::ShaderAssetDescriptionPropType::VECTOR4:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_FLOAT4;
+                  case AssetLoader::ShaderAssetDescriptionPropType::BOOL:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_BOOL;
+                  case AssetLoader::ShaderAssetDescriptionPropType::INT:
+                    return ShaderJSONDataInputPropType::SHADER_PROP_INT;
+                default:
+                    throw std::runtime_error("Unknown shader prop type");
+                  }
+                }();
+        ShaderJSONDataInputProp prop = {};
+        size_t propNameLen = item->Name.length();
+        char* propName = new char[propNameLen + 1];
+        item->Name.copy(propName, propNameLen);
+        propName[propNameLen] = '\0';
+        prop.Name = propName;
+        prop.Type = type;
+        prop.Slot = item->Slot;
+        info.Data.ConstantBufferLayout[x] = prop;
     }
 
     auto nameLen = shader.Name.size();
@@ -237,7 +271,8 @@ DLL_EXPORT ShaderInfo LoadShaderCPU(const char* path) {
     shader.Name.copy(name, nameLen);
     name[nameLen] = '\0';
     info.Data.Name = name;
-    info.Data.InputLen = shader.Description.Props.size();
+    info.Data.ConstantsLen = shader.Description.Constants.size();
+    info.Data.ConstantBufferLayoutLen = shader.Description.ConstantBufferLayout.size();
 
     return info;
 }
@@ -249,11 +284,12 @@ DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info) {
         shader.Name = std::string(info.Data.Name);
         shader.IsLit = info.Data.Lighting == ShaderJSONDataLightingModel::DEFAULT ? true : false;
 
-        shader.Slots = {};
+        shader.Constants = {};
+        shader.ConstantBufferLayout = {};
 
-        for (int x = 0; x < info.Data.InputLen; x++) {
+        for (int x = 0; x < info.Data.ConstantsLen; x++) {
                 Renderer::GraphicsShaderSlotType type = [&]() {
-                  switch (info.Data.Input[x].Type) {
+                  switch (info.Data.Constants[x].Type) {
                   case SHADER_PROP_TEXTURE:
                     return Renderer::GraphicsShaderSlotType::TEXTURE;
                   case SHADER_PROP_FLOAT:
@@ -273,11 +309,40 @@ DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info) {
                   }
                 }();
                 Renderer::GraphicsShaderSlot slot = {};
-                slot.Name = info.Data.Input[x].Name;
-                slot.Index = info.Data.Input[x].Slot;
+                slot.Name = info.Data.Constants[x].Name;
+                slot.Index = info.Data.Constants[x].Slot;
                 slot.Type = type;
-                shader.Slots.push_back(slot);
+                shader.Constants.push_back(slot);
         }
+
+        for (int x = 0; x < info.Data.ConstantBufferLayoutLen; x++) {
+                Renderer::GraphicsShaderSlotType type = [&]() {
+                  switch (info.Data.ConstantBufferLayout[x].Type) {
+                  case SHADER_PROP_TEXTURE:
+                    return Renderer::GraphicsShaderSlotType::TEXTURE;
+                  case SHADER_PROP_FLOAT:
+                    return Renderer::GraphicsShaderSlotType::FLOAT;
+                  case SHADER_PROP_FLOAT2:
+                    return Renderer::GraphicsShaderSlotType::VECTOR2;
+                  case SHADER_PROP_FLOAT3:
+                    return Renderer::GraphicsShaderSlotType::VECTOR3;
+                  case SHADER_PROP_FLOAT4:
+                    return Renderer::GraphicsShaderSlotType::VECTOR4;
+                  case SHADER_PROP_INT:
+                    return Renderer::GraphicsShaderSlotType::INT;
+                  case SHADER_PROP_BOOL:
+                    return Renderer::GraphicsShaderSlotType::BOOL;
+                default:
+                    throw std::runtime_error("Unknown shader prop type");
+                  }
+                }();
+                Renderer::GraphicsShaderSlot slot = {};
+                slot.Name = info.Data.ConstantBufferLayout[x].Name;
+                slot.Index = info.Data.ConstantBufferLayout[x].Slot;
+                slot.Type = type;
+                shader.ConstantBufferLayout.push_back(slot);
+        }
+
 
         auto index = Interface->UploadShaderData(shader);
 

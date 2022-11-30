@@ -23,7 +23,8 @@ namespace Renderer {
 
     struct GraphicsShader {
         std::string Name;
-        std::vector<GraphicsShaderSlot> Slots;
+        std::vector<GraphicsShaderSlot> Constants;
+        std::vector<GraphicsShaderSlot> ConstantBufferLayout;
         bool IsLit;
         // Name, Code
         std::string Code;

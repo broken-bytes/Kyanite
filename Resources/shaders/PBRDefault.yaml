@@ -1,25 +1,8 @@
 name: PBRDefault
 path: shaders/PBRDefault.hlsl
 lighting: default
-input:
-  - name: IntName
-    type: Int
-    slot: 0
-  - name: BoolName
-    type: Bool
-    slot: 1
-  - name: FloatName
-    type: Float
-    slot: 2
-  - name: Vec2Name
-    type: Vector2
-    slot: 3
-  - name: Vec3Name
-    type: Vector3
-    slot: 4
-  - name: Vec4Name
-    type: Vector4
-    slot: 5
+buffer:
+constants:
   - name: Diffuse
     type: Texture
     slot: 0

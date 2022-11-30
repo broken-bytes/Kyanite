@@ -105,8 +105,10 @@ struct ShaderJSONDataInputProp {
 struct ShaderJSONData {
     const char* Name;
     ShaderJSONDataLightingModel Lighting;
-    ShaderJSONDataInputProp* Input;
-    size_t InputLen;
+    ShaderJSONDataInputProp* ConstantBufferLayout;
+    size_t ConstantBufferLayoutLen;
+    ShaderJSONDataInputProp* Constants;
+    size_t ConstantsLen;
     const char* Code;
 };
 

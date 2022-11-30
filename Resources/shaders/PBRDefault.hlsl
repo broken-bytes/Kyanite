@@ -38,21 +38,11 @@ struct LightData
 };
 
 
-struct TestCBV {
-    int IntValue;
-    bool BoolValue;
-    float FloatValue;
-    float2 Float2Value;
-    float3 Float3Value;
-    float4 Float4Value;
-};
-
 Texture2D<float4> DiffuseMap: register(t0);
 Texture2D<float4> NormalMap: register(t1);
 
 ConstantBuffer<ModelViewProjection> MVP: register(b0);
 ConstantBuffer<LightData> Light: register(b1);
-ConstantBuffer<TestCBV> CBV: register(b2);
 
 SamplerState TextureSampler: register(s0);
 
@@ -74,7 +64,6 @@ struct PS_INPUT {
     float4 WorldPosition: WORLD_POSITION;
     float3 Normal : NORMAL;
     float2 UV: TEXCOORD;
-    TestCBV CBV: TESTCBV;
 };
 
 PS_INPUT VSMain(VS_INPUT vertex) {
@@ -86,14 +75,13 @@ PS_INPUT VSMain(VS_INPUT vertex) {
 
     output.Normal = mul(float4(vertex.Normal, 1), MVP.Model);
     output.Normal = normalize(output.Normal);
-    output.CBV = CBV;
     return output;
 }
 
 float4 PSMain(PS_INPUT pixel): SV_TARGET {
 
     float3 norm = normalize(pixel.Normal);
-	float3 lightDir = normalize(Light.Sun.Position - pixel.Position);
+	float3 lightDir = normalize(Light.Sun.Position - pixel.Position) *  NormalMap.Sample(TextureSampler, pixel.UV);
 	
 	// Ambient
 	float4 ambient = float4(0,0,0,0 );
@@ -131,6 +119,6 @@ float4 PSMain(PS_INPUT pixel): SV_TARGET {
 
 	// Result
 	float4 result = (ambient + diffuse + specular);
-    //return result;
-    return DiffuseMap.Sample(TextureSampler, pixel.UV);
+    return result;
+    //return DiffuseMap.Sample(TextureSampler, pixel.UV);
 }

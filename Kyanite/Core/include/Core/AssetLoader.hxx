@@ -41,7 +41,8 @@ namespace AssetLoader {
 
 	struct ShaderAssetDescription {
 		bool IsLit;
-		std::vector<ShaderAssetDescriptionProp> Props;
+		std::vector<ShaderAssetDescriptionProp> Constants;
+		std::vector<ShaderAssetDescriptionProp> ConstantBufferLayout;
 	};
 
 	struct ShaderAsset {

@@ -52,9 +52,9 @@
 #include "d3d12/D3D12Heap.hxx"
 
 float xPos = 1;
-float yPos = 1;
-float zPos = 1;
-glm::vec4 sunColor = {0, 0.1f, 0.4f, 1};
+float yPos = 50;
+float zPos = -5;
+glm::vec4 sunColor = {1, 0.7f, 0.7f, 1};
 glm::vec4 ambientColor = {1, 1, 1, 1};
 float ambientIntensity = 1;
 
@@ -195,9 +195,6 @@ auto Interface::MidFrame() -> void {
   _commandList->SetGraphicsRootConstantBuffer(
       _lightDataBuffer[_frameIndex], &light, sizeof(light),
       _lightDataGPUAddress[_frameIndex]);
-  _mouseOverCommandList->SetGraphicsRootConstantBuffer(
-      _lightDataBuffer[_frameIndex], &light, sizeof(light),
-      _lightDataGPUAddress[_frameIndex]);
 
   _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
                            ResourceState::PRESENT,
@@ -236,9 +233,6 @@ auto Interface::MidFrame() -> void {
       std::array<uint32_t, 4> entityColorArr = {
         static_cast<unsigned int>((mesh.EntityId >> 24)  & 0xFF), static_cast<unsigned int>((mesh.EntityId >> 16) & 0xFF), static_cast<unsigned int>((mesh.EntityId >> 8) & 0xFF), static_cast<unsigned int>(mesh.EntityId & 0xFF)
       };
-      _mouseOverCommandList->SetGraphicsRootConstantBuffer(
-      _entitySelectionBuffer, entityColorArr.data(), sizeof(uint32_t) * 4,
-      (uint8_t*)_currentEntityColor.data());
       // Update the projection matrix.
       float aspectRatio =
           _windowDimension.x / static_cast<float>(_windowDimension.y);
@@ -262,10 +256,8 @@ auto Interface::MidFrame() -> void {
       _mouseOverCommandList->SetGraphicsRootConstants(
           0, sizeof(mvp) / 4, &mvp,
           0); // b0     -> The Model View Projection for this Mesh/Material
-      _mouseOverCommandList->SetGraphicsRootDescriptorTable(
-          1,
-          _srvHeap->GpuHandleFor(_entitySelectionCBVId)); // b1     -> The Constant Buffer
-                                                // for this Mesh/Material
+       _mouseOverCommandList->SetGraphicsRootConstants(1, 4, &entityColorArr, 0);
+
 
 
       auto vao = _meshes[mesh.MeshId];
@@ -313,16 +305,16 @@ auto Interface::MidFrame() -> void {
           1,
           _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer
                                                 // for this Mesh/Material
-
+      // FIXME: Currently, the user-defined CBV is skipped. Need to implement that later on
       for (auto [it, end, x] = std::tuple{material->Textures.cbegin(),
                                           material->Textures.cend(), 0};
            it != end; it++, x++) {
         auto texture = *it;
         auto slotBinding = std::find_if(
-            material->Shader->Slots.cbegin(), material->Shader->Slots.cend(),
+            material->Shader->Constants.cbegin(), material->Shader->Constants.cend(),
             [texture](auto &item) { return item.Name == texture.first; });
 
-        if (slotBinding != material->Shader->Slots.end()) {
+        if (slotBinding != material->Shader->Constants.end()) {
           _commandList->SetGraphicsRootDescriptorTable(2 + slotBinding->Index,
                                                        it->second->GPUHandle);
         }
@@ -382,24 +374,27 @@ auto Interface::CreateMaterial(std::string name, uint64_t shaderId) -> uint64_t 
   mat->Name = name;
   mat->Shader = _shaders[shaderId];
 
-  std::sort(mat->Shader->Slots.begin(), mat->Shader->Slots.end(),
-            [](auto &lhs, auto &rhs) { return lhs.Index < rhs.Index; });
+  if (!mat->Shader->ConstantBufferLayout.empty()) {
 
-  size_t buffSize = 0;
+    std::sort(mat->Shader->ConstantBufferLayout.begin(),
+              mat->Shader->ConstantBufferLayout.end(),
+              [](auto &lhs, auto &rhs) { return lhs.Index < rhs.Index; });
 
-  // Props are 16 byte alligned -> Vector 4 = 4x4 Bytes = 16. Buffer must be
-  // multiple of 255 bytes as well
-  buffSize = ((mat->Shader->Slots.size() * 16) + 255) & ~255;
-  _materialCBVs.insert(
-      {_materials.size(), _device->CreateUploadBuffer(buffSize)});
+    size_t buffSize = 0;
 
-  _device->CreateConstantBufferView(_srvHeap,
-                                    _materialCBVs.at(_materials.size()),
-                                    _srvHeap->CpuHandleFor(_srvCounter++));
+    // Props are 16 byte alligned -> Vector 4 = 4x4 Bytes = 16. Buffer must be
+    // multiple of 255 bytes as well
+    buffSize = ((mat->Shader->ConstantBufferLayout.size() * 16) + 255) & ~255;
+    _materialCBVs.insert(
+        {_materials.size(), _device->CreateUploadBuffer(buffSize)});
 
-  std::vector<uint8_t> materialBuffer(buffSize);
-  _materialBuffers.insert({_materials.size(), materialBuffer});
+    _device->CreateConstantBufferView(_srvHeap,
+                                      _materialCBVs.at(_materials.size()),
+                                      _srvHeap->CpuHandleFor(_srvCounter++));
 
+    std::vector<uint8_t> materialBuffer(buffSize);
+    _materialBuffers.insert({_materials.size(), materialBuffer});
+  }
   _materials.push_back(mat);
   return _materials.size() - 1;
 }
@@ -484,14 +479,14 @@ auto Interface::UploadTextureData(uint8_t *data, uint16_t width,
   _uploadCommandList->UpdateSubresources(
       texBuff, uploadBuffer, data, width * channels, width * channels * height);
 
+  auto index = _srvCounter++;
   _device->CreateShaderResourceView(texBuff,
-                                    _srvHeap->CpuHandleFor(_srvCounter));
-  texBuff->GPUHandle = _srvHeap->GpuHandleFor(_srvCounter);
+                                    _srvHeap->CpuHandleFor(index));
+  texBuff->GPUHandle = _srvHeap->GpuHandleFor(index);
   _uploadCommandList->Transition(static_pointer_cast<TextureBuffer>(texBuff),
                                  ResourceState::COPY_DEST,
                                  ResourceState::PIXEL_SHADER);
 
-  _srvCounter++;
   //_device->CreateMipMaps(texBuff, _computeCommandList, width, height, width /
   // 256);
 
@@ -517,10 +512,12 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
   GraphicsRootSignatureParameter param = {};
 
   uint8_t rootConstantIndex = 0; 
+  uint8_t shaderRegisterB = 0;
+  uint8_t shaderRegisterS = 0;
   // --- MVP MATRIX ---
   param.Index = rootConstantIndex++;
   param.Size = sizeof(MVPCBuffer) / 4;
-  param.ShaderRegister = 0;
+  param.ShaderRegister = shaderRegisterB++;
   param.RegisterSpace = 0;
   param.Visibility = GraphicsShaderVisibility::VERTEX;
   param.Type = GraphicsRootSignatureParameterType::CONSTANT;
@@ -532,7 +529,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
     // --- LIGHT DATA CBV ---
     param.Index = rootConstantIndex++;
     param.Size = 1;
-    param.ShaderRegister = 1;
+    param.ShaderRegister = shaderRegisterB++;
     param.RegisterSpace = 0;
     param.Visibility = GraphicsShaderVisibility::ALL;
     param.Type = GraphicsRootSignatureParameterType::TABLE;
@@ -543,7 +540,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
     // --- SHADER RESOURCE VIEW FOR LIGHT DATA CBV ---
     param.Index = rootConstantIndex++;
     param.Size = 1;
-    param.ShaderRegister = 0;
+    param.ShaderRegister = shaderRegisterS++;
     param.RegisterSpace = 0;
     param.Visibility = GraphicsShaderVisibility::PIXEL;
     param.Type = GraphicsRootSignatureParameterType::TABLE;
@@ -552,44 +549,78 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
     desc.Parameters.push_back(param);
   }
 
-  // --- USER-DEFINED CBV ---
-  param.Index = rootConstantIndex++;
-  param.Size = 1;
-  param.ShaderRegister = compiledShader->IsLit ? 2 : 1;
-  param.RegisterSpace = 0;
-  param.Visibility = GraphicsShaderVisibility::ALL;
-  param.Type = GraphicsRootSignatureParameterType::TABLE;
-  param.RangeType = GraphicsDescriptorRangeType::CBV;
+  for (auto &item : shader.Constants) {
+    // SKip Textures, those belond to SRV, not Constants
+    if(item.Type == GraphicsShaderSlotType::TEXTURE) {
+      continue;
+    }
+    size_t size = 0;
+    switch(item.Type) {
+      case GraphicsShaderSlotType::INT:
+      case GraphicsShaderSlotType::BOOL:
+      case GraphicsShaderSlotType::FLOAT:
+        size = 1;
+        break;
+      case GraphicsShaderSlotType::VECTOR2:
+        size = 2;
+        break;
+      case GraphicsShaderSlotType::VECTOR3:
+        size = 3;
+        break;
+      case GraphicsShaderSlotType::VECTOR4:
+        size = 4;
+        break;
+      default:
+        throw std::runtime_error("Textures are not meant to be bound to the root signature via constants");
+    }
+    param.Index = rootConstantIndex++;
+    param.Size = size;
+    param.ShaderRegister = shaderRegisterB++;
+    param.RegisterSpace = 0;
+    param.Visibility = GraphicsShaderVisibility::ALL;
+    param.Type = GraphicsRootSignatureParameterType::CONSTANT;
+    param.RangeType = GraphicsDescriptorRangeType::CBV;
 
-  desc.Parameters.push_back(param);
+    desc.Parameters.push_back(param);
+  }
 
-  // --- SHADER RESOURCE VIEW FOR USER-DEFINED CBV ---
-  param.Index = rootConstantIndex++;
-  param.Size = 1;
-  param.ShaderRegister = compiledShader->IsLit ? 1 : 0;
-  param.RegisterSpace = 0;
-  param.Visibility = GraphicsShaderVisibility::PIXEL;
-  param.Type = GraphicsRootSignatureParameterType::TABLE;
-  param.RangeType = GraphicsDescriptorRangeType::SRV;
+  if (!shader.ConstantBufferLayout.empty()) {
 
-  desc.Parameters.push_back(param);
+    // --- USER-DEFINED CBV ---
+    param.Index = rootConstantIndex++;
+    param.Size = 1;
+    param.ShaderRegister = shaderRegisterB++;
+    param.RegisterSpace = 0;
+    param.Visibility = GraphicsShaderVisibility::ALL;
+    param.Type = GraphicsRootSignatureParameterType::TABLE;
+    param.RangeType = GraphicsDescriptorRangeType::CBV;
+
+    desc.Parameters.push_back(param);
+
+    // --- SHADER RESOURCE VIEW FOR USER-DEFINED CBV ---
+    param.Index = rootConstantIndex++;
+    param.Size = 1;
+    param.ShaderRegister = shaderRegisterS++;
+    param.RegisterSpace = 0;
+    param.Visibility = GraphicsShaderVisibility::PIXEL;
+    param.Type = GraphicsRootSignatureParameterType::TABLE;
+    param.RangeType = GraphicsDescriptorRangeType::SRV;
+
+    desc.Parameters.push_back(param);
+  }
 
   // --- TEXTURE 0 s0 ---
-  for (auto [it, end, x] =
-           std::tuple{shader.Slots.begin(), shader.Slots.end(), 0};
-       it != end; it++, x++) {
-    if (it->Type == GraphicsShaderSlotType::TEXTURE) {
-      param.Index = rootConstantIndex + x;
+  for (auto& item: shader.Constants) {
+    if (item.Type == GraphicsShaderSlotType::TEXTURE) {
+      param.Index = rootConstantIndex++;
       param.Size = 1;
-      param.ShaderRegister = 3 + x;
+      param.ShaderRegister = shaderRegisterS++;
       param.RegisterSpace = 0;
       param.Visibility = GraphicsShaderVisibility::PIXEL;
       param.Type = GraphicsRootSignatureParameterType::TABLE;
       param.RangeType = GraphicsDescriptorRangeType::SRV;
 
       desc.Parameters.push_back(param);
-    } else {
-      x--;
     }
   }
 
@@ -607,7 +638,8 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
       _device->CreatePipelineState(signature, inputElements, compiledShader);
   compiledShader->Pipeline = pipeline;
 
-  compiledShader->Slots = shader.Slots;
+  compiledShader->Constants = shader.Constants;
+  compiledShader->ConstantBufferLayout = shader.ConstantBufferLayout;
   _shaders.push_back(compiledShader);
 
   return _shaders.size() - 1;
