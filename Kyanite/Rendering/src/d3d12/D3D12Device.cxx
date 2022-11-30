@@ -264,7 +264,7 @@ auto D3D12Device::CreateReadbackBuffer(size_t sizeInBytes)
         bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
         bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
         bufferDesc.Height = 1;
-        bufferDesc.Width = sizeInBytes;
+        bufferDesc.Width = ((sizeInBytes) + 255) & ~255;
         bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         bufferDesc.MipLevels = 1;
         bufferDesc.SampleDesc.Count = 1;

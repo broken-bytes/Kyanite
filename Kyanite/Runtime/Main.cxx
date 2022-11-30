@@ -70,8 +70,8 @@ std::vector<NativeRef *> Meshes = {};
 std::vector<NativeRef *> Shaders = {};
 std::vector<NativeRef *> Materials = {};
 
-constexpr int W = 1600;
-constexpr int H = 800;
+constexpr int W = 1920;
+constexpr int H = 1080;
 
 auto Tick() -> void {
   auto start = std::chrono::high_resolution_clock::now();
