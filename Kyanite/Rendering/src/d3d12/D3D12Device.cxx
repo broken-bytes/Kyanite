@@ -256,12 +256,20 @@ auto D3D12Device::CreateReadbackBuffer(size_t sizeInBytes)
     -> std::shared_ptr<ReadbackBuffer> {
   D3D12_HEAP_PROPERTIES readbackHeapProperties{
       CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_READBACK)};
-  D3D12_RESOURCE_DESC readbackBufferDesc{
-      CD3DX12_RESOURCE_DESC::Buffer(sizeInBytes)};
   Microsoft::WRL::ComPtr<ID3D12Resource> readbackBuffer;
 
+  D3D12_RESOURCE_DESC bufferDesc = {};
+        bufferDesc.DepthOrArraySize = 1;
+        bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+        bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
+        bufferDesc.Height = 1;
+        bufferDesc.Width = sizeInBytes;
+        bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        bufferDesc.MipLevels = 1;
+        bufferDesc.SampleDesc.Count = 1;
   _device->CreateCommittedResource(
-      &readbackHeapProperties, D3D12_HEAP_FLAG_NONE, &readbackBufferDesc,
+      &readbackHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc,
       D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&readbackBuffer));
 
 	return std::make_shared<D3D12ReadbackBuffer>(readbackBuffer);

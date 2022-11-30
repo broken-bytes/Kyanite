@@ -266,6 +266,8 @@ auto Interface::MidFrame() -> void {
       _mouseOverCommandList->SetIndexBuffer(vao->IndexBuffer);
       _mouseOverCommandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
     }
+    // Copy Resulting Render Texture to a readbackbuffer in order for CPU to detect the mouse over.
+    _mouseOverCommandList->Copy(0, 0, _windowDimension.x, _windowDimension.y, _mouseOverBuffer[_frameIndex], _mouseOverReadbackBuffer);
   }
   // --- Display Render Pass ---
   {
@@ -747,6 +749,8 @@ auto Interface::CreatePipeline() -> void {
 
     _mouseOverCommandList->Transition(_mouseOverBuffer[x], ResourceState::COPY_DEST, ResourceState::COPY_SOURCE);
   }
+
+  _mouseOverReadbackBuffer = _device->CreateReadbackBuffer(_windowDimension.x * _windowDimension.y * 4);
 
   _commandList->Close();
   _mouseOverCommandList->Close();

@@ -1,5 +1,7 @@
 #pragma once 
 
+#include <memory.h>
+
 #include "Buffer.hxx"
 #include "DescriptorHandle.hxx"
 

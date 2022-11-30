@@ -147,9 +147,11 @@ namespace Renderer {
 		std::map<uint64_t, std::shared_ptr<UploadBuffer>> _materialCBVs = {};
 		std::array<std::shared_ptr<RenderTarget>, FRAME_COUNT> _mouseOverRTV;
 		std::array<std::shared_ptr<TextureBuffer>, FRAME_COUNT> _mouseOverBuffer;
+		std::shared_ptr<ReadbackBuffer> _mouseOverReadbackBuffer;
 		std::array<uint32_t, 4> _currentEntityColor;
 		std::shared_ptr<UploadBuffer> _entitySelectionBuffer;
 		uint64_t _entitySelectionCBVId;
+
 
 		// --- DEFAULT SHADERS & MATERIALS --- 
 		// Color Only shader. -> Used for outlining and mouse over detection

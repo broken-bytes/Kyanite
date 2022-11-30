@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <dxgiformat.h>
 #include <memory>
+#include "Renderer.hxx"
 #include "d3d12/D3D12ReadbackBuffer.hxx"
 #include "glm/glm.hpp"
 #include "Rect.hxx"
@@ -222,6 +224,26 @@ namespace Renderer {
 		_commandList->CopyResource(renderTarget->Resource(), readbackBuffer->Raw());
 	}
 
+	auto D3D12GraphicsCommandList::Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<TextureBuffer> from, std::shared_ptr<ReadbackBuffer> to) -> void {
+		auto texture = static_pointer_cast<D3D12TextureBuffer>(from);
+		auto readbackBuffer = static_pointer_cast<D3D12ReadbackBuffer>(to);
+
+
+        D3D12_PLACED_SUBRESOURCE_FOOTPRINT bufferFootprint = {};
+        bufferFootprint.Footprint.Width = width;
+        bufferFootprint.Footprint.Height = height;
+        bufferFootprint.Footprint.Depth = 1;
+        bufferFootprint.Footprint.RowPitch = width * 4;
+        bufferFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		const CD3DX12_TEXTURE_COPY_LOCATION copyDest(readbackBuffer->Raw(), bufferFootprint);
+        const CD3DX12_TEXTURE_COPY_LOCATION copySrc(texture->Raw(), 0);
+
+		Transition(from, ResourceState::RENDER_TARGET, ResourceState::COPY_SOURCE);
+
+		_commandList->CopyTextureRegion(&copyDest, 0, 0, 0, &copySrc, nullptr);
+
+		Transition(from, ResourceState::COPY_SOURCE, ResourceState::RENDER_TARGET);
+	}
 
 	auto D3D12GraphicsCommandList::Native() const->ID3D12GraphicsCommandList5* {
 		return _commandList.Get();
