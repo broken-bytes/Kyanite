@@ -33,5 +33,5 @@ PS_INPUT VSMain(VS_INPUT vertex) {
 }
 
 float4 PSMain(PS_INPUT pixel): SV_TARGET {
-    return float4(EntityId.R / 255.0f, EntityId.G / 255.0f, EntityId.B / 255.0f,  EntityId.A / 255.0f);
+    return float4(EntityId.R, EntityId.G, EntityId.B,  EntityId.A);
 }

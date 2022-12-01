@@ -226,10 +226,21 @@ auto D3D12Device::CreateTextureBuffer(uint16_t width, uint16_t height,
     -> std::shared_ptr<Renderer::TextureBuffer> {
   Microsoft::WRL::ComPtr<ID3D12Resource> buffer;
 
+  DXGI_FORMAT dxgiFormat = DXGI_FORMAT_UNKNOWN;
+
+  switch(format) {
+    case RGBA:
+    dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+    break;
+    case RGBA_INT:
+    dxgiFormat = DXGI_FORMAT_R8G8B8A8_UINT;
+    break;
+  }
+
   auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
   D3D12_RESOURCE_DESC textureDesc = {};
   textureDesc.MipLevels = mipLevels;
-  textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  textureDesc.Format = dxgiFormat;
   textureDesc.Width = width;
   textureDesc.Height = height;
   textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -238,7 +249,7 @@ auto D3D12Device::CreateTextureBuffer(uint16_t width, uint16_t height,
   textureDesc.SampleDesc.Quality = 0;
   textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
-  D3D12_CLEAR_VALUE clear = {DXGI_FORMAT_R8G8B8A8_UNORM, {1, 1, 1, 1}};
+  D3D12_CLEAR_VALUE clear = {dxgiFormat, {1, 1, 1, 1}};
   _device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
                                    &textureDesc, D3D12_RESOURCE_STATE_COMMON,
                                    &clear, IID_PPV_ARGS(&buffer));
@@ -272,7 +283,7 @@ auto D3D12Device::CreateReadbackBuffer(size_t sizeInBytes)
       &readbackHeapProperties, D3D12_HEAP_FLAG_NONE, &bufferDesc,
       D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&readbackBuffer));
 
-	return std::make_shared<D3D12ReadbackBuffer>(readbackBuffer);
+	return std::make_shared<D3D12ReadbackBuffer>(readbackBuffer, ((sizeInBytes) + 255) & ~255);
 }
 
 auto D3D12Device::CreateConstantBuffer(void *data, size_t size,

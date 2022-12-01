@@ -1,6 +1,8 @@
 #pragma once
 
-#include <memory.h>
+#include <cstdint>
+#include <memory>
+#include <vector>
 
 #include "Buffer.hxx"
 #include "DescriptorHandle.hxx"
@@ -11,6 +13,7 @@ namespace Renderer {
             std::shared_ptr<DescriptorHandle> GPUHandle;
             ReadbackBuffer() {}
             virtual ~ReadbackBuffer() {};
+            virtual auto ReadBytes() -> uint32_t* = 0;
         private:
     };
 }

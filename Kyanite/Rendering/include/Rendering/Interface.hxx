@@ -110,6 +110,10 @@ namespace Renderer {
 		std::uint64_t _uploadFenceValue;
 		void* _uploadFenceEvent;
 
+		//std::shared_ptr<Allocator> _copyAllocator;
+		//std::shared_ptr<CommandQueue> _copyQueue;
+		//std::shared_ptr<GraphicsCommandList> _copyCommandList;
+
 		std::shared_ptr<Allocator> _computeAllocator;
 		std::shared_ptr<CommandQueue> _computeQueue;
 		std::shared_ptr<GraphicsCommandList> _computeCommandList;

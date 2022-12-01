@@ -352,7 +352,7 @@ auto Interface::MidFrame() -> void {
   _commandList->Close();
   _cbCommandList->Close();
 
-  _mainQueue->ExecuteCommandLists({_mouseOverCommandList, _commandList, });
+  _mainQueue->ExecuteCommandLists({_mouseOverCommandList, _commandList });
 
   // Present the frame.
   _swapChain->Swap();
@@ -366,6 +366,16 @@ auto Interface::EndFrame() -> void {
   _uploadCommandList->Reset(_uploadAllocator, nullptr);
   _computeAllocator->Reset();
   _computeCommandList->Reset(_computeAllocator, nullptr);
+
+  auto rowPitchActual = (int)(_windowDimension.x * 4);
+  auto rowPitchRequired = (((int)(_windowDimension.x * 4)) + 255) & ~255; 
+  auto padding = rowPitchRequired - rowPitchActual;
+  auto index = (
+    _cursorPosition[0] // THE X Location of our target pixel.
+    + (int)(_windowDimension.x * _cursorPosition[1]) + (_cursorPosition[1] * (padding))
+    );
+  auto mouseOverData = _mouseOverReadbackBuffer->ReadBytes();
+  printf("X: %i Y: %i Value: %u\n", _cursorPosition[0], _cursorPosition[1], (mouseOverData[index]));
 }
 
 auto Interface::Update() -> void {}
@@ -682,12 +692,14 @@ auto Interface::MeshDataFor(const char *uuid) -> std::vector<uint64_t> {
 auto Interface::CreatePipeline() -> void {
   _resourceCounter = 0;
   _mainQueue = _device->CreateCommandQueue(DIRECT);
-
+  //_copyQueue = _device->CreateCommandQueue(COPY);
+  //_copyAllocator = _device->CreateCommandAllocator(COPY);
+  //_copyCommandList = _device->CreateCommandList(COPY, _copyAllocator, "Copy List");
   _computeQueue = _device->CreateCommandQueue(COMPUTE);
   _computeAllocator = _device->CreateCommandAllocator(COMPUTE);
   _mouseOverAllocator = _device->CreateCommandAllocator(DIRECT);
   _computeCommandList =
-      _device->CreateCommandList(COMPUTE, _computeAllocator, "Compute Queue");
+      _device->CreateCommandList(COMPUTE, _computeAllocator, "Compute List");
 
   _swapChain = _device->CreateSwapChain(_mainQueue, FRAME_COUNT,
                                         _windowDimension.x, _windowDimension.y);
@@ -752,6 +764,7 @@ auto Interface::CreatePipeline() -> void {
 
   _mouseOverReadbackBuffer = _device->CreateReadbackBuffer(_windowDimension.x * _windowDimension.y * 4);
 
+  //_copyCommandList->Close();
   _commandList->Close();
   _mouseOverCommandList->Close();
   _uploadCommandList->Close();
@@ -775,6 +788,8 @@ auto Interface::CreatePipeline() -> void {
   }
 #endif
 
+  //_copyAllocator->Reset();
+  //_copyCommandList->Reset(_copyAllocator, nullptr);
   _uploadAllocator->Reset();
   _uploadCommandList->Reset(_uploadAllocator, nullptr);
 
@@ -813,6 +828,7 @@ auto Interface::CreatePipeline() -> void {
 
   WaitForGPU(_mainQueue);
   WaitForGPU(_computeQueue);
+ // WaitForGPU(_copyQueue);
 
 #if _WIN32
   auto device = static_pointer_cast<D3D12Device>(_device)->Native();
@@ -843,6 +859,8 @@ auto Interface::FillCommandList() -> void {}
 auto Interface::MoveToNextFrame() -> void {
   const uint64_t currentFenceValue = _frames[_frameIndex]->FenceValue();
   _mainQueue->Signal(_fence, currentFenceValue);
+
+  //_copyQueue->Signal(_fence, currentFenceValue);
 
   // Update the frame index.
   _frameIndex = _swapChain->CurrentBackBufferIndex();
