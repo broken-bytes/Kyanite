@@ -88,6 +88,7 @@ namespace Renderer {
 			std::shared_ptr<GraphicsRootSignature> rootSignature,
 			std::vector<GraphicsPipelineInputElement> inputLayout,
 			std::shared_ptr < GraphicsShaderBinding> shaderBinding,
+			TextureFormat format,
 			bool depth = true,
 			bool stencil = true,
 			GraphicsPipelineStateTopology topology = GraphicsPipelineStateTopology::POLYGON

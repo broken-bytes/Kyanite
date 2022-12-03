@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer.hxx"
 #include <map>
 #include <string>
 #include <vector>
@@ -23,6 +24,7 @@ namespace Renderer {
 
     struct GraphicsShader {
         std::string Name;
+        TextureFormat Format;
         std::vector<GraphicsShaderSlot> Constants;
         std::vector<GraphicsShaderSlot> ConstantBufferLayout;
         bool IsLit;

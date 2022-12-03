@@ -70,6 +70,7 @@ namespace Renderer {
 		auto MeshDataFor(const char* uuid) -> std::vector<std::uint64_t>;
 		auto SetCamera(glm::vec3 position, glm::vec3 rotation) -> void;
 		auto SetCursorPosition(std::array<uint32_t, 2> position) -> void;
+		auto ReadMouseOverData(uint32_t x, uint32_t y) -> uint32_t;
 	protected:
 		void* _window;
 		void* _context;
@@ -155,6 +156,9 @@ namespace Renderer {
 		std::array<uint32_t, 4> _currentEntityColor;
 		std::shared_ptr<UploadBuffer> _entitySelectionBuffer;
 		uint64_t _entitySelectionCBVId;
+		uint64_t _mouseOverRowPitchActual;
+  		uint64_t _mouseOverRowPitchRequired; 
+  		uint64_t _mouseOverPadding;
 
 
 		// --- DEFAULT SHADERS & MATERIALS --- 

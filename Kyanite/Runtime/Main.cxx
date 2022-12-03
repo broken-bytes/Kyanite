@@ -97,8 +97,14 @@ auto Tick() -> void {
     info.OutlineColor[1] = 0;
     info.OutlineColor[2] = 1;
     info.OutlineColor[3] = 1;
-    DrawMesh(50, Meshes[x], Materials[0], info, {{0, 0, 1}, {0.7f, 0.4f, -0.0f, 0.7f}, {1, 1, 1}});
-    DrawMesh(0xFFFFAB, Meshes[x], Materials[0], info, {{6, 0, -15}, {0.7f, 0.7f, 0.3f, 0.2f}, {2, 2, 2}});
+    if(GetMouseOverEntityId(0, 0) == 56) {
+      printf("ID is 56\n");
+      DrawMesh(56, Meshes[x], Materials[0], info, {{0, 3, 2}, {0.4f, 0.8f, -0.0f, 0.7f}, {1.2f, 1.2f, 1.2f}});
+    } else {
+      DrawMesh(56, Meshes[x], Materials[0], info, {{0, 3, 2}, {0.4f, 0.8f, -0.0f, 0.7f}, {1, 1, 1}});
+    } 
+    DrawMesh(55, Meshes[x], Materials[0], info, {{0, 0, 1}, {0.7f, 0.4f, -0.0f, 0.7f}, {1, 1, 1}});
+    DrawMesh(0xFFFFAB, Meshes[x], Materials[0], info, {{6, 0, -15}, {0.7f, 0.7f, 0.3f, 0.2f}, {1, 1, 1}});
   }
 }
 

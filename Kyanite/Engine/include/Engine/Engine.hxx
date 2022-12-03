@@ -85,6 +85,11 @@ enum ShaderJSONDataStageType {
     MESH
 } typedef ShaderJSONDataStageType;
 
+enum ShaderJSONDataOutputFormat {
+  SHADER_OUTPUT_RGBA_FLOAT = 0,
+  SHADER_OUTPUT_RGBA_UINT = 1
+} typedef ShaderJSONDataOutputFormat;
+
 enum ShaderJSONDataInputPropType {
     SHADER_PROP_INT,
     SHADER_PROP_BOOL,
@@ -104,6 +109,7 @@ struct ShaderJSONDataInputProp {
 // Internal Helpers
 struct ShaderJSONData {
     const char* Name;
+    ShaderJSONDataOutputFormat Format;
     ShaderJSONDataLightingModel Lighting;
     ShaderJSONDataInputProp* ConstantBufferLayout;
     size_t ConstantBufferLayoutLen;
@@ -173,7 +179,7 @@ DLL_EXPORT void RotateMesh(NativeRef *mesh, float x, float y, float z);
 DLL_EXPORT void SetCamera(float xPos, float yPos, float zPos, float xRotation,
                           float yRotation, float zRotation);
 DLL_EXPORT void SetCursorPosition(uint32_t x, uint32_t y);
-
+DLL_EXPORT uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y);
 #ifdef __cplusplus
 }
 #endif

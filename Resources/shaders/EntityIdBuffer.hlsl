@@ -5,10 +5,10 @@ struct ModelViewProjection
 };
 
 struct Entity {
-    int R;
-    int G;
-    int B;
-    int A;
+    uint R;
+    uint G;
+    uint B;
+    uint A;
 };
 
 ConstantBuffer<ModelViewProjection> MVP: register(b0);
@@ -32,6 +32,6 @@ PS_INPUT VSMain(VS_INPUT vertex) {
     return output;
 }
 
-float4 PSMain(PS_INPUT pixel): SV_TARGET {
+uint4 PSMain(PS_INPUT pixel): SV_TARGET {
     return float4(EntityId.R, EntityId.G, EntityId.B,  EntityId.A);
 }

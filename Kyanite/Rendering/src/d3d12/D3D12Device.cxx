@@ -228,12 +228,17 @@ auto D3D12Device::CreateTextureBuffer(uint16_t width, uint16_t height,
 
   DXGI_FORMAT dxgiFormat = DXGI_FORMAT_UNKNOWN;
 
+  D3D12_CLEAR_VALUE clear;
+
+
   switch(format) {
     case RGBA:
     dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+    clear = { dxgiFormat, 1, 1, 1, 1};
     break;
-    case RGBA_INT:
+    case RGBA_UINT:
     dxgiFormat = DXGI_FORMAT_R8G8B8A8_UINT;
+    clear = { dxgiFormat, 255, 255, 255, 255};
     break;
   }
 
@@ -249,7 +254,7 @@ auto D3D12Device::CreateTextureBuffer(uint16_t width, uint16_t height,
   textureDesc.SampleDesc.Quality = 0;
   textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
-  D3D12_CLEAR_VALUE clear = {dxgiFormat, {1, 1, 1, 1}};
+
   _device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
                                    &textureDesc, D3D12_RESOURCE_STATE_COMMON,
                                    &clear, IID_PPV_ARGS(&buffer));
@@ -301,11 +306,13 @@ auto D3D12Device::CreateGraphicsRootSignature(
 auto D3D12Device::CreatePipelineState(
     std::shared_ptr<GraphicsRootSignature> rootSignature,
     std::vector<GraphicsPipelineInputElement> inputLayout,
-    std::shared_ptr<GraphicsShaderBinding> shaderBinding, bool depth,
+    std::shared_ptr<GraphicsShaderBinding> shaderBinding,
+    TextureFormat format,
+    bool depth,
     bool stencil, GraphicsPipelineStateTopology topology)
     -> std::shared_ptr<GraphicsPipelineState> {
   return std::make_shared<D3D12GraphicsPipelineState>(
-      *this, rootSignature, inputLayout, shaderBinding, 0, topology);
+      *this, rootSignature, inputLayout, shaderBinding, format, 0, topology);
 }
 
 auto D3D12Device::CreateDepthBuffer(glm::vec2 dimensions)

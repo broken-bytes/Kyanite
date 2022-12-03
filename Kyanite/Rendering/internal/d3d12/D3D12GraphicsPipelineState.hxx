@@ -15,6 +15,7 @@ namespace Renderer {
             std::shared_ptr<Renderer::GraphicsRootSignature> rootSignature,
             std::vector<GraphicsPipelineInputElement> inputLayout,
             std::shared_ptr<GraphicsShaderBinding> shaderBinding,
+            TextureFormat format,
             std::uint8_t flags,
             GraphicsPipelineStateTopology topology
         );

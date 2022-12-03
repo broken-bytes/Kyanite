@@ -238,11 +238,7 @@ namespace Renderer {
 		const CD3DX12_TEXTURE_COPY_LOCATION copyDest(readbackBuffer->Raw(), bufferFootprint);
         const CD3DX12_TEXTURE_COPY_LOCATION copySrc(texture->Raw(), 0);
 
-		Transition(from, ResourceState::RENDER_TARGET, ResourceState::COPY_SOURCE);
-
 		_commandList->CopyTextureRegion(&copyDest, 0, 0, 0, &copySrc, nullptr);
-
-		Transition(from, ResourceState::COPY_SOURCE, ResourceState::RENDER_TARGET);
 	}
 
 	auto D3D12GraphicsCommandList::Native() const->ID3D12GraphicsCommandList5* {

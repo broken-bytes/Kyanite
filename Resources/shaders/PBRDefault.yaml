@@ -1,6 +1,7 @@
 name: PBRDefault
 path: shaders/PBRDefault.hlsl
 lighting: default
+format: rgba_float
 buffer:
 constants:
   - name: Diffuse

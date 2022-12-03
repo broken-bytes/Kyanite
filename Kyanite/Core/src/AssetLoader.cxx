@@ -56,9 +56,6 @@ auto ShaderPropTypeToName(ShaderAssetDescriptionPropType type) -> std::string {
 }
 
 
-
-
-
 std::string RootDir = "";
 
 	auto SetRootDir(std::string path) -> void {
@@ -159,6 +156,17 @@ std::string RootDir = "";
                     RootDir + shaderDescription["path"].as<std::string>();
 				std::string lighting = shaderDescription["lighting"].as<std::string>();
 				asset.Description.IsLit = lighting == "default" ? true : false;
+				
+				std::string format = shaderDescription["format"].as<std::string>();
+
+				if(format == "rgba_float") {
+					asset.Description.Format = ShaderAssetOutputFormat::RGBA_FLOAT;
+				}
+
+				if(format == "rgba_uint") {
+					asset.Description.Format = ShaderAssetOutputFormat::RGBA_UINT;
+				}
+
 
                 const auto constants = shaderDescription["constants"];
 

@@ -1,5 +1,6 @@
 #include <d3dx12.h>
 
+#include "Renderer.hxx"
 #include "d3d12/D3D12GraphicsPipelineState.hxx"
 #include "d3d12/D3D12GraphicsRootSignature.hxx"
 #include "d3d12/D3D12ShaderBinding.hxx"
@@ -11,9 +12,10 @@ namespace Renderer {
         std::shared_ptr<Renderer::GraphicsRootSignature> rootSignature,
         std::vector<GraphicsPipelineInputElement> inputLayout,
         std::shared_ptr<GraphicsShaderBinding> shaderBinding,
+		TextureFormat format,
         std::uint8_t flags,
         GraphicsPipelineStateTopology topology
-    ): GraphicsPipelineState(rootSignature, inputLayout, shaderBinding, flags, topology) {
+    ): GraphicsPipelineState(rootSignature, inputLayout, shaderBinding, format, flags, topology) {
 		struct PipelineStateConfig
 		{
 			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
@@ -41,10 +43,21 @@ namespace Renderer {
 		CD3DX12_SHADER_BYTECODE vertexShader = { d3d312Shader.VertexShader.Get() };
 		CD3DX12_SHADER_BYTECODE pixelShader = { d3d312Shader.PixelShader.Get()};
 
+		DXGI_FORMAT dxgiFormat = {};
+
+		switch(format) {
+			case TextureFormat::RGBA:
+			dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+			break;
+			case TextureFormat::RGBA_UINT:
+			dxgiFormat = DXGI_FORMAT_R8G8B8A8_UINT;
+			break;
+		}
+
 		PipelineStateConfig config{};
 		D3D12_RT_FORMAT_ARRAY rtvFormats = {};
 		rtvFormats.NumRenderTargets = 1;
-		rtvFormats.RTFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		rtvFormats.RTFormats[0] = dxgiFormat;
 		CD3DX12_RASTERIZER_DESC rasterDesc = {};
 		rasterDesc.MultisampleEnable = false;
 		rasterDesc.FillMode = D3D12_FILL_MODE_SOLID;

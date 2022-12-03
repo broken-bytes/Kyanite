@@ -3,7 +3,7 @@
 namespace Renderer {
     enum TextureFormat {
         RGBA = 0,
-        RGBA_INT
+        RGBA_UINT = 1
     };
 
     enum class ResourceState {

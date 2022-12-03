@@ -1,6 +1,7 @@
 name: _COLOR_ONLY
 path: shaders/EntityIdBuffer.hlsl
 lighting: none
+format: rgba_uint
 constants:
   - name: Color
     type: Vector4

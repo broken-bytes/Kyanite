@@ -33,6 +33,11 @@ namespace AssetLoader {
         VECTOR4 = 6
 	};
 
+	enum class ShaderAssetOutputFormat {
+		RGBA_FLOAT = 0,
+		RGBA_UINT = 1
+	};
+
 	struct ShaderAssetDescriptionProp {
 		std::string Name;
 		ShaderAssetDescriptionPropType Type;
@@ -41,6 +46,7 @@ namespace AssetLoader {
 
 	struct ShaderAssetDescription {
 		bool IsLit;
+		ShaderAssetOutputFormat Format;
 		std::vector<ShaderAssetDescriptionProp> Constants;
 		std::vector<ShaderAssetDescriptionProp> ConstantBufferLayout;
 	};

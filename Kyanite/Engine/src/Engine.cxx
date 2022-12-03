@@ -196,7 +196,16 @@ DLL_EXPORT ShaderInfo LoadShaderCPU(const char* path) {
 
     // Only default lighting for now
     info.Data.Lighting = shader.Description.IsLit ? ShaderJSONDataLightingModel::DEFAULT : ShaderJSONDataLightingModel::UNLIT;
-    
+
+    switch (shader.Description.Format) {
+    case AssetLoader::ShaderAssetOutputFormat::RGBA_FLOAT:
+                info.Data.Format = SHADER_OUTPUT_RGBA_FLOAT;
+                break;
+    case AssetLoader::ShaderAssetOutputFormat::RGBA_UINT:
+                info.Data.Format = SHADER_OUTPUT_RGBA_UINT;
+                break;
+    }
+
     info.Data.Constants = new ShaderJSONDataInputProp[shader.Description.Constants.size()];
     info.Data.ConstantBufferLayout = new ShaderJSONDataInputProp[shader.Description.ConstantBufferLayout.size()];
 
@@ -283,6 +292,17 @@ DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info) {
         shader.Code = info.Data.Code;
         shader.Name = std::string(info.Data.Name);
         shader.IsLit = info.Data.Lighting == ShaderJSONDataLightingModel::DEFAULT ? true : false;
+
+        switch(info.Data.Format) {
+          case SHADER_OUTPUT_RGBA_FLOAT:
+          shader.Format = Renderer::TextureFormat::RGBA;
+          break;
+          case SHADER_OUTPUT_RGBA_UINT:
+          shader.Format = Renderer::TextureFormat::RGBA_UINT;
+          break;
+          default:
+          break;
+        }
 
         shader.Constants = {};
         shader.ConstantBufferLayout = {};
@@ -427,4 +447,8 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
 
 void SetCursorPosition(uint32_t x, uint32_t y) {
   Interface->SetCursorPosition({x, y});
+}
+
+uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y) {
+    return Interface->ReadMouseOverData(x, y);
 }

@@ -21,6 +21,7 @@ namespace Renderer {
     class GraphicsShaderBinding {
     public:
         std::string Name;
+        TextureFormat Format;
         std::uint64_t ShaderIndex;
         bool IsLit;
         std::vector<GraphicsShaderSlot> ConstantBufferLayout;

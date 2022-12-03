@@ -193,16 +193,8 @@ auto Interface::MidFrame() -> void {
       glm::perspectiveFovLH(glm::radians(55.0f), (float)_windowDimension.x,
                             (float)_windowDimension.y, 0.01f, 1000.0f);
 
-  _commandList->SetGraphicsRootConstantBuffer(
-      _lightDataBuffer[_frameIndex], &light, sizeof(light),
-      _lightDataGPUAddress[_frameIndex]);
-
-  _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
-                           ResourceState::PRESENT,
-                           ResourceState::RENDER_TARGET);
-
   // Record commands.
-  glm::vec4 clearColor = {1, 1, 1, 1};
+  glm::vec4 clearColor = {255, 255, 255, 255};
 
   // --- Render pass for mouse over ---
   if(_colorOnlyShader == nullptr) {
@@ -214,6 +206,9 @@ auto Interface::MidFrame() -> void {
   }
 
   if(_colorOnlyShader != nullptr) {
+    
+    _mouseOverCommandList->Transition(_mouseOverBuffer[_frameIndex], ResourceState::COPY_SOURCE,
+                             ResourceState::RENDER_TARGET);
     auto rtvHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT + _frameIndex);
     auto dsvHandle = _dsvHeap->CpuHandleFor(1);
     _mouseOverCommandList->SetRenderTarget(rtvHandle, dsvHandle);
@@ -232,7 +227,7 @@ auto Interface::MidFrame() -> void {
 
     for (auto &mesh : _meshesToDraw) {
       std::array<uint32_t, 4> entityColorArr = {
-        static_cast<unsigned int>((mesh.EntityId >> 24)  & 0xFF), static_cast<unsigned int>((mesh.EntityId >> 16) & 0xFF), static_cast<unsigned int>((mesh.EntityId >> 8) & 0xFF), static_cast<unsigned int>(mesh.EntityId & 0xFF)
+        static_cast<uint8_t>((mesh.EntityId)  & 0xFF), static_cast<uint8_t>((mesh.EntityId >> 8) & 0xFF), static_cast<uint8_t>((mesh.EntityId >> 16) & 0xFF), static_cast<uint8_t>((mesh.EntityId >> 24) & 0xFF)
       };
       // Update the projection matrix.
       float aspectRatio =
@@ -266,12 +261,24 @@ auto Interface::MidFrame() -> void {
       _mouseOverCommandList->SetIndexBuffer(vao->IndexBuffer);
       _mouseOverCommandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
     }
+
+    _mouseOverCommandList->Transition(_mouseOverBuffer[_frameIndex],
+                             ResourceState::RENDER_TARGET, ResourceState::COPY_SOURCE);
     // Copy Resulting Render Texture to a readbackbuffer in order for CPU to detect the mouse over.
     _mouseOverCommandList->Copy(0, 0, _windowDimension.x, _windowDimension.y, _mouseOverBuffer[_frameIndex], _mouseOverReadbackBuffer);
   }
   // --- Display Render Pass ---
   {
     clearColor = {0, 0.2, 0.2, 1};
+
+      _commandList->SetGraphicsRootConstantBuffer(
+      _lightDataBuffer[_frameIndex], &light, sizeof(light),
+      _lightDataGPUAddress[_frameIndex]);
+
+  _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
+                           ResourceState::PRESENT,
+                           ResourceState::RENDER_TARGET);
+
     auto dsvHandle = _dsvHeap->CpuHandleFor(0);
     auto rtvHandle = _rtvHeap->CpuHandleFor(_frameIndex);
     _commandList->SetRenderTarget(rtvHandle, dsvHandle);
@@ -366,16 +373,6 @@ auto Interface::EndFrame() -> void {
   _uploadCommandList->Reset(_uploadAllocator, nullptr);
   _computeAllocator->Reset();
   _computeCommandList->Reset(_computeAllocator, nullptr);
-
-  auto rowPitchActual = (int)(_windowDimension.x * 4);
-  auto rowPitchRequired = (((int)(_windowDimension.x * 4)) + 255) & ~255; 
-  auto padding = rowPitchRequired - rowPitchActual;
-  auto index = (
-    _cursorPosition[0] // THE X Location of our target pixel.
-    + (int)(_windowDimension.x * _cursorPosition[1]) + (_cursorPosition[1] * (padding))
-    );
-  auto mouseOverData = _mouseOverReadbackBuffer->ReadBytes();
-  printf("X: %i Y: %i Value: %u\n", _cursorPosition[0], _cursorPosition[1], (mouseOverData[index]));
 }
 
 auto Interface::Update() -> void {}
@@ -514,6 +511,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
   compiledShader->ShaderIndex = _shaders.size();
   compiledShader->Name = shader.Name;
   compiledShader->IsLit = shader.IsLit;
+  compiledShader->Format = shader.Format;
 
   GraphicsRootSignatureDescription desc = {};
   desc.Parameters = {};
@@ -648,7 +646,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
        GraphicsPipelineClassification::VERTEX, 0}};
 
   auto pipeline =
-      _device->CreatePipelineState(signature, inputElements, compiledShader);
+      _device->CreatePipelineState(signature, inputElements, compiledShader, compiledShader->Format);
   compiledShader->Pipeline = pipeline;
 
   compiledShader->Constants = shader.Constants;
@@ -664,6 +662,7 @@ auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId,
                          glm::vec3 scale) -> void {
 
   glm::mat4 transform = glm::mat4(1.0f);
+  transform = glm::scale(transform, scale);
   transform = glm::translate(transform, position);
   auto axis = glm::eulerAngles(rotation);
   glm::mat4 transformX = glm::eulerAngleX(axis.x);
@@ -676,6 +675,15 @@ auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId,
 
 auto Interface::SetCursorPosition(std::array<uint32_t, 2> position) -> void {
   _cursorPosition = position;
+}
+
+auto Interface::ReadMouseOverData(uint32_t x, uint32_t y) -> uint32_t {
+  auto index = (
+    _cursorPosition[0] // THE X Location of our target pixel.
+    + (int)(_windowDimension.x * _cursorPosition[1]) + (_cursorPosition[1] * (_mouseOverPadding))
+    );
+  auto mouseOverData = _mouseOverReadbackBuffer->ReadBytes();
+  return (mouseOverData[index]);
 }
 
 auto Interface::SetMeshProperties() -> void {}
@@ -751,24 +759,25 @@ auto Interface::CreatePipeline() -> void {
 
   for (int x = 0; x < FRAME_COUNT; x++) {
     _mouseOverBuffer[x] = _device->CreateTextureBuffer(
-        _windowDimension.x, _windowDimension.y, 4, 1, TextureFormat::RGBA, "MouseOverBuffer");
-    _mouseOverRTV[x]= _device->CreateRenderTarget(_mouseOverBuffer[x]);
+        _windowDimension.x, _windowDimension.y, 4, 1, TextureFormat::RGBA_UINT, "MouseOverBuffer");
+    _mouseOverRTV[x] = _device->CreateRenderTarget(_mouseOverBuffer[x]);
     auto rtHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT + x);
 
-    _commandList->Transition(_mouseOverBuffer[x], ResourceState::COMMON,
-                             ResourceState::RENDER_TARGET);
+    _mouseOverCommandList->Transition(_mouseOverBuffer[x], ResourceState::COMMON,
+                             ResourceState::COPY_SOURCE);
     _device->CreateRenderTargetView(rtHandle, _mouseOverRTV[x]);
-
-    _mouseOverCommandList->Transition(_mouseOverBuffer[x], ResourceState::COPY_DEST, ResourceState::COPY_SOURCE);
   }
 
   _mouseOverReadbackBuffer = _device->CreateReadbackBuffer(_windowDimension.x * _windowDimension.y * 4);
+  _mouseOverRowPitchActual = (int)(_windowDimension.x * 4);
+  _mouseOverRowPitchRequired = (((int)(_windowDimension.x * 4)) + 255) & ~255; 
+  _mouseOverPadding = _mouseOverRowPitchActual - _mouseOverRowPitchRequired;
 
   //_copyCommandList->Close();
   _commandList->Close();
   _mouseOverCommandList->Close();
   _uploadCommandList->Close();
-  auto commandLists = {_commandList};
+  auto commandLists = {_mouseOverCommandList, _commandList };
   _mainQueue->ExecuteCommandLists(commandLists);
 
   _frames[_frameIndex]->IncrementFenceValue();
@@ -803,7 +812,6 @@ auto Interface::CreatePipeline() -> void {
 #endif
 
   _computeCommandList->Close();
-  _mouseOverAllocator->Reset();
   _computeAllocator->Reset();
   _computeCommandList->Reset(_computeAllocator, nullptr);
 
