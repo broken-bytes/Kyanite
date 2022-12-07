@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "DescriptorHandle.hxx"
+#include "Renderer.hxx"
 #include "glm/glm.hpp"
 
 namespace Renderer {
@@ -10,5 +12,7 @@ namespace Renderer {
 		std::uint64_t MeshId;
 		std::uint64_t MaterialId;
 		glm::mat4 Transform;
+		RendererLayer RenderLayer;
+		DescriptorHandle RenderTarget;
 	};
 }

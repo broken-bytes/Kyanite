@@ -87,17 +87,21 @@ std::string RootDir = "";
 				const tinygltf::Accessor& posAcc = model.accessors[primitive.attributes["POSITION"]];
 				const tinygltf::Accessor& texAcc = model.accessors[primitive.attributes["TEXCOORD_0"]];
 				const tinygltf::Accessor& norAcc = model.accessors[primitive.attributes["NORMAL"]];
+				const tinygltf::Accessor& colAcc = model.accessors[primitive.attributes["COLOR"]];
 
 				const tinygltf::BufferView& posView = model.bufferViews[posAcc.bufferView];
 				const tinygltf::BufferView& texView = model.bufferViews[texAcc.bufferView];
 				const tinygltf::BufferView& norView = model.bufferViews[norAcc.bufferView];
+				const tinygltf::BufferView& colView = model.bufferViews[colAcc.bufferView];
 
 				const tinygltf::Buffer& posBuff = model.buffers[posView.buffer];
 				const tinygltf::Buffer& texBuff = model.buffers[texView.buffer];
 				const tinygltf::Buffer& norBuff = model.buffers[norView.buffer];
+				const tinygltf::Buffer& colBuff = model.buffers[colView.buffer];
 				const float* positionsArr = reinterpret_cast<const float*>(&posBuff.data[posView.byteOffset + posAcc.byteOffset]);
 				const float* texArr = reinterpret_cast<const float*>(&texBuff.data[texView.byteOffset + texAcc.byteOffset]);
 				const float* norArr = reinterpret_cast<const float*>(&norBuff.data[norView.byteOffset + norAcc.byteOffset]);
+				const float* colArr = reinterpret_cast<const float*>(&colBuff.data[colView.byteOffset + colAcc.byteOffset]);
 
 				const uint32_t* indicesArr = reinterpret_cast<const uint32_t*>(&indBuff.data[indView.byteOffset + indAcc.byteOffset]);
 
@@ -135,6 +139,14 @@ std::string RootDir = "";
 					verts.push_back(norArr[i * 3 + 2]);
 					verts.push_back(u);
 					verts.push_back(v);
+					auto r = colArr[i * 3 + 0];
+					auto g = colArr[i * 3 + 1];
+					auto b = colArr[i * 3 + 2];
+
+					verts.push_back(r);
+					verts.push_back(g);
+					verts.push_back(b);
+					verts.push_back(1);
 				}
 
 				ModelSubMesh subMesh = {mesh.name, verts, inds};

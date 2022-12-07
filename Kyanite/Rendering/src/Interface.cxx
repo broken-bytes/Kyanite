@@ -311,11 +311,18 @@ auto Interface::MidFrame() -> void {
       _commandList->SetGraphicsRootConstants(
           0, sizeof(mvp) / 4, &mvp,
           0); // b0     -> The Model View Projection for this Mesh/Material
-      _commandList->SetGraphicsRootDescriptorTable(
-          1,
-          _srvHeap->GpuHandleFor(_frameIndex)); // b1     -> The Constant Buffer
-                                                // for this Mesh/Material
-      // FIXME: Currently, the user-defined CBV is skipped. Need to implement that later on
+
+      if (shader->IsLit) {
+        _commandList->SetGraphicsRootDescriptorTable(
+            1,
+            _srvHeap->GpuHandleFor(
+                _frameIndex)); // b1     -> The Constant Buffer
+                               // for this Mesh/Material Light data
+      }
+      // FIXME: The Texture offsets might start earlier if there is no light CBV
+      // andor no User-defined CBV
+      // FIXME: Currently, the user-defined CBV is skipped. Need to implement
+      // that later on
       for (auto [it, end, x] = std::tuple{material->Textures.cbegin(),
                                           material->Textures.cend(), 0};
            it != end; it++, x++) {
@@ -325,8 +332,8 @@ auto Interface::MidFrame() -> void {
             [texture](auto &item) { return item.Name == texture.first; });
 
         if (slotBinding != material->Shader->Constants.end()) {
-          _commandList->SetGraphicsRootDescriptorTable(2 + slotBinding->Index,
-                                                       it->second->GPUHandle);
+          auto index = 1 + (shader->ConstantBufferLayout.empty() ? 0 : 1)  + slotBinding->Index + (shader->IsLit ? 1 : 0);
+          _commandList->SetGraphicsRootDescriptorTable(index,it->second->GPUHandle);
         }
       }
 
@@ -437,6 +444,7 @@ auto Interface::UploadMeshData(Vertex *vertices, size_t vCount, Index *indices,
     std::memcpy(v.Position, vertices[x].Position, 4 * sizeof(float));
     std::memcpy(v.Normal, vertices[x].Normal, 3 * sizeof(float));
     std::memcpy(v.UV, vertices[x].UV, 2 * sizeof(float));
+    std::memcpy(v.Color, vertices[x].Color, 4 * sizeof(float));
     vertBuffer.push_back(v);
   }
 
@@ -638,12 +646,11 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
   auto signature = _device->CreateGraphicsRootSignature(desc);
 
   std::vector<GraphicsPipelineInputElement> inputElements = {
-      {"POSITION", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 0,
-       GraphicsPipelineClassification::VERTEX, 0},
-      {"NORMAL", 0, GraphicsPipelineFormat::RGB32_FLOAT, 0, 16,
-       GraphicsPipelineClassification::VERTEX, 0},
-      {"TEXCOORD", 0, GraphicsPipelineFormat::RG32_FLOAT, 0, 28,
-       GraphicsPipelineClassification::VERTEX, 0}};
+      {"POSITION", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 0, GraphicsPipelineClassification::VERTEX, 0},
+      {"NORMAL", 0, GraphicsPipelineFormat::RGB32_FLOAT, 0, 16,GraphicsPipelineClassification::VERTEX, 0},
+      {"TEXCOORD", 0, GraphicsPipelineFormat::RG32_FLOAT, 0, 28,GraphicsPipelineClassification::VERTEX, 0},
+      {"COLOR", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 36, GraphicsPipelineClassification::VERTEX, 0}
+      };
 
   auto pipeline =
       _device->CreatePipelineState(signature, inputElements, compiledShader, compiledShader->Format);
@@ -662,8 +669,8 @@ auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId,
                          glm::vec3 scale) -> void {
 
   glm::mat4 transform = glm::mat4(1.0f);
-  transform = glm::scale(transform, scale);
   transform = glm::translate(transform, position);
+  transform = glm::scale(transform, scale);
   auto axis = glm::eulerAngles(rotation);
   glm::mat4 transformX = glm::eulerAngleX(axis.x);
   glm::mat4 transformY = glm::eulerAngleY(axis.y);

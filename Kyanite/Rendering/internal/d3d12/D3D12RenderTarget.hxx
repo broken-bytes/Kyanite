@@ -15,7 +15,13 @@ namespace Renderer {
 		auto Resource() ->ID3D12Resource* {
 			return _renderTarget.Get();
 		}
+
+		auto Depth() ->ID3D12Resource* {
+			return _depthTarget.Get();
+		}
+
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> _renderTarget;
+		Microsoft::WRL::ComPtr<ID3D12Resource> _depthTarget;
 	};
 }

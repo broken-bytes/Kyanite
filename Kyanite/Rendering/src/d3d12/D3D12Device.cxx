@@ -370,7 +370,6 @@ auto D3D12Device::CreateRenderTarget(std::shared_ptr<TextureBuffer> texture)
     -> std::shared_ptr<RenderTarget> {
   auto buff = static_pointer_cast<D3D12TextureBuffer>(texture)->Raw();
   return std::make_shared<D3D12RenderTarget>(buff);
-  return nullptr;
 }
 
 auto D3D12Device::CreateRenderTargetView(

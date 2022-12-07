@@ -70,6 +70,16 @@ std::vector<NativeRef *> Meshes = {};
 std::vector<NativeRef *> Shaders = {};
 std::vector<NativeRef *> Materials = {};
 
+
+
+std::map<uint32_t, Transform> Transforms = {};
+
+
+std::vector<NativeRef*> TransformModel = {};
+NativeRef* TransformTexture;
+NativeRef* TransformShader;
+NativeRef* TransformMaterial;
+
 constexpr int W = 1920;
 constexpr int H = 1080;
 
@@ -89,7 +99,7 @@ auto Tick() -> void {
 
   SetCamera(0, 0, -10, 0, 0, 0);
 
-  for (int x = 0; x < Meshes.size(); x++) {
+  for (auto& transform: Transforms) {
     MeshDrawInfo info;
     info.Flags = MESH_DRAW_INFO_FLAGS_DRAW_OUTLINE;
     info.OutlineWidth = 2;
@@ -97,18 +107,27 @@ auto Tick() -> void {
     info.OutlineColor[1] = 0;
     info.OutlineColor[2] = 1;
     info.OutlineColor[3] = 1;
-    if(GetMouseOverEntityId(0, 0) == 56) {
-      printf("ID is 56\n");
-      DrawMesh(56, Meshes[x], Materials[0], info, {{0, 3, 2}, {0.4f, 0.8f, -0.0f, 0.7f}, {1.2f, 1.2f, 1.2f}});
-    } else {
-      DrawMesh(56, Meshes[x], Materials[0], info, {{0, 3, 2}, {0.4f, 0.8f, -0.0f, 0.7f}, {1, 1, 1}});
-    } 
-    DrawMesh(55, Meshes[x], Materials[0], info, {{0, 0, 1}, {0.7f, 0.4f, -0.0f, 0.7f}, {1, 1, 1}});
-    DrawMesh(0xFFFFAB, Meshes[x], Materials[0], info, {{6, 0, -15}, {0.7f, 0.7f, 0.3f, 0.2f}, {1, 1, 1}});
+
+
+    DrawMesh(transform.first, Meshes[0], Materials[0], info, transform.second);
   }
+
+      int64_t selectionId = GetMouseOverEntityId(0, 0);
+
+  if(selectionId > 0 && selectionId < 0xFFFFFF) {
+    for(auto& mesh: TransformModel) {
+      auto pos = Transforms[selectionId].Position;
+      auto rot = Transforms[selectionId].Rotation;
+      DrawMesh(0xFFFFFF, mesh, TransformMaterial, {}, {pos, rot, {0.1f, 0.1f, 0.1f}});
+    }
+  }
+
 }
 
 int main(int argc, char *argv[]) {
+
+  Transforms.insert({55, {{0, 3, 2}, {0.4f, 0.8f, -0.0f, 0.7f}, {1, 1, 1}}});
+  Transforms.insert({56, {{15, 2, 6}, {0.8f, 0.8f, -0.0f, 0.23f}, {1, 1, 1}}});
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
   // Enable Gamepad Controls
@@ -174,6 +193,17 @@ int main(int argc, char *argv[]) {
 
   SetMaterialTexture(material, "Diffuse", diffuseTex);
   SetMaterialTexture(material, "Normal", normalTex);
+
+  modelInfo =
+      LoadModelCPU("models/transform/scene.gltf");
+
+  for(int x = 0; x < modelInfo.MeshCount; x++) {
+    TransformModel.push_back( LoadMeshGPU(modelInfo.Meshes[x]));
+  }
+  shaderInfo = LoadShaderCPU("shaders/EditorDefault.yaml");
+  TransformShader =
+      LoadShaderGPU(shaderInfo);
+  TransformMaterial = LoadMaterialGPU("EditorDefault", TransformShader);
 
   SDL_Event event;
 
