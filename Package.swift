@@ -10,6 +10,10 @@ let package = Package(
             name: "Generator",
             targets: ["Generator-Executable"]
         ),
+        .executable(
+            name: "Builder",
+            targets: ["Builder-Executable"]
+        ),
         .library(
             name: "Kyanite",
             type: .dynamic,
@@ -28,9 +32,14 @@ let package = Package(
             path: "./Kyanite/Scripting/Generator"
         ),
 
-         .target(
+        .target(
             name: "Audio",
             path: "./Kyanite/Scripting/Audio"
+        ),
+
+        .executableTarget(
+            name: "Builder-Executable",
+            path: "./Kyanite/Scripting/Builder"
         ),
 
         .target(
