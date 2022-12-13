@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
   "name": "kyanite",
   "version": "1.0.6",
-  "builtin-baseline": "67d17889c241a46f46d0785669d4eaf4ee4ab9f2",
+  "builtin-baseline": "5d1f1884038e23e5c23afdcbacdde06d7769a85f",
   "dependencies": [
     "d3dx12",
     "directx-dxc",
@@ -11,7 +11,11 @@
     "glm",
     {
       "name": "imgui",
-      "features": ["dx12-binding", "sdl2-binding", "win32-binding"]
+      "features": [
+        "dx12-binding",
+        "sdl2-binding",
+        "win32-binding"
+      ]
     },
     "jsoncons",
     "sdl2",

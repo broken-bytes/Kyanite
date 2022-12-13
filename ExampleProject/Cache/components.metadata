@@ -1,0 +1,24 @@
+[
+  {
+    "properties" : [
+      {
+        "name" : "health",
+        "type" : "Float"
+      }
+    ],
+    "name" : "HealthComponent"
+  },
+  {
+    "properties" : [
+      {
+        "name" : "isHostile",
+        "type" : "Bool"
+      },
+      {
+        "name" : "radius",
+        "type" : "Float"
+      }
+    ],
+    "name" : "AIComponent"
+  }
+]
