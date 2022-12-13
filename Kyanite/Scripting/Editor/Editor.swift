@@ -8,7 +8,7 @@ import Foundation
 struct Editor {
     static let repl = REPL()
 
-    static func main() {
+    static func main() -> Void {
         signal(SIGINT) { 
             sigIntHandler(sig: $0)
         }

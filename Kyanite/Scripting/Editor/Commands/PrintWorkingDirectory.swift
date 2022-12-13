@@ -6,9 +6,11 @@ class PrintWorkingDirectory: Command {
     public let keyword = "pwd"
 
 
-    public func run(input: [String]) {
+    public func run(input: [String]) -> Bool {
         let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
         let path = getcwd(ptr, 1024)
-        print(String(cString: path!))
+        Console.default.print(color: .white, background: .black, str: "\(String(cString: path!))")
+
+        return true
     }
 }

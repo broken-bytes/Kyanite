@@ -6,33 +6,60 @@ import Foundation
 
 public class REPL {
     public let commands: [Command] = [
-        Clear(), PrintWorkingDirectory()
+        Clear(), PrintWorkingDirectory(), ChangeDirectory(), Exit(), List()
     ]
     public var currentInput: String = ""
 
     public init() {
         clear()
+        Console.default.print(
+            color: .brightMagenta,
+             background: .black,
+              str: 
+"""
+🐙 Welcome to KrakenShell.🐙
+Your modern terminal gateway on the fastlane\n\n
+"""
+)
+
+    Console.default.print(color: .brightMagenta, background: .black, str: "Please join our ")
+    Console.default.print(color: .green, background: .black, str: "Discord")
+    Console.default.print(color: .brightMagenta, background: .black, str: " at ")
+    Console.default.print(color: .brightCyan, background: .black, str: "https://discord.gg/rEzXUJREWn\n")
+
+    Console.default.print(color: .brightMagenta, background: .black, str: "Our")
+    Console.default.print(color: .green, background: .black, str: " GitHub")
+    Console.default.print(color: .brightMagenta, background: .black, str: " repository is at ")
+    Console.default.print(color: .brightCyan, background: .black, str: "https://github.com/broken-bytes/Kyanite\n")
+
+    Console.default.print(color: .brightMagenta, background: .black, str: "Visit our")
+    Console.default.print(color: .green, background: .black, str: " Website")
+    Console.default.print(color: .brightMagenta, background: .black, str: " at ")
+    Console.default.print(color: .brightCyan, background: .black, str: "https://krakenshell.sh\n\n")
     }
+
+
 
     public func update() {
         clear()
-        printIndicator()
         printDir()
     }
 
     public func eval(command: String) {
-        let keywords = command.components(separatedBy: "")
+        let keywords = command.components(separatedBy: " ")
 
-        printIndicator()
-        printDir()
+        //printDir()
 
         if let cmd = self.commands.first(where: { $0.keyword == keywords[0]}) {
-            cmd.run(input: keywords)
+            // If out command did output text, we head over to the next line
+            if cmd.run(input: keywords) {
+                Console.default.print(color: .white, background: .black, str: "\n")
+            }
         }
     }
 
     public func takeInput() -> String? {
-        var line = readLine(strippingNewline: false)
+        var line = readLine(strippingNewline: true)
         return line
     }
 
@@ -48,8 +75,8 @@ public class REPL {
     public func printDir() {
         var ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
         getcwd(ptr, 1024);
-        Console.default.print(color: .red, background: .black, str: "\(String(cString: ptr))")
-        Console.default.print(color: .brightCyan, background: .black, str: ">")
+        Console.default.print(color: .brightGreen, background: .black, str: "\(String(cString: ptr))")
+        Console.default.print(color: .brightCyan, background: .black, str: "〉")
     }
 
     public func printIndicator() {
@@ -58,7 +85,6 @@ public class REPL {
 
     public func handleSigInt() {
         print("\n")
-        printIndicator()
         printDir()
     }
 }

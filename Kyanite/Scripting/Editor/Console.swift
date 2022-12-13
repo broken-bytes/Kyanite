@@ -5,6 +5,8 @@ import WinSDK
 public class Console {
     public static let `default` = Console()
 
+    private var currentLine: String = ""
+
     private init() {
     #if os(Windows)
         var hOut = GetStdHandle(STD_OUTPUT_HANDLE)
@@ -23,14 +25,14 @@ public class Console {
         }
     #endif
         var esc = UnicodeScalar(27)!
-        var term = UnicodeScalar(0x07);
-        Swift.print("\(esc)]0;Kyanite\(term)");
-        Swift.print("\(esc)[1SPq");
+        var term = UnicodeScalar(0x07)
+        Swift.print("\(esc)]0;Kyanite\(term)")
+        Swift.print("\(esc)[1SPq")
     }
 
     public func print(color: Color, background: BackgroundColor, str: String) {
         var esc = UnicodeScalar(27)!
-        Swift.print("\(esc)[\(color.rawValue)m\(str)\r", terminator: "");
+        Swift.print("\(esc)[\(color.rawValue)m\(str)", terminator: "")
     }
 
     public func clear() {

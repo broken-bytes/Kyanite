@@ -1,5 +1,5 @@
 public protocol Command {
     var keyword: String { get }
 
-    func run(input: [String])
+    func run(input: [String]) -> Bool
 }
