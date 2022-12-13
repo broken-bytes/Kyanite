@@ -6,13 +6,13 @@
 //
 
 @main
-struct Builder {
+struct MetaBuilder {
     static func main() {
         generate()
     }
 
     public static func generate() {
-        let steps: [GeneratorStep] = [JobBindingsStep(), MetaDataStep(), ComponentBindingStep(), RuntimeStep()]
+        let steps: [GeneratorStep] = [MetaDataStep(), JobBindingsStep(), ComponentBindingStep(), RuntimeStep()]
         for step in steps {
             step.setUp()
             step.run()

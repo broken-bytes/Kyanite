@@ -11,8 +11,8 @@ let package = Package(
             targets: ["Generator-Executable"]
         ),
         .executable(
-            name: "Builder",
-            targets: ["Builder-Executable"]
+            name: "MetaBuilder",
+            targets: ["MetaBuilder-Executable"]
         ),
         .library(
             name: "Kyanite",
@@ -38,8 +38,8 @@ let package = Package(
         ),
 
         .executableTarget(
-            name: "Builder-Executable",
-            path: "./Kyanite/Scripting/Builder"
+            name: "MetaBuilder-Executable",
+            path: "./Kyanite/Scripting/MetaBuilder"
         ),
 
         .target(

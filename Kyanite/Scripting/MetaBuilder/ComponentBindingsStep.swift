@@ -17,7 +17,7 @@ public class ComponentBindingStep: GeneratorStep {
     func run() {
         let path: String = CommandLine.arguments[1]
 
-        guard let metadata = FileManager.default.contents(atPath: path.appending("/Build/components.metadata")) else {
+        guard let metadata = FileManager.default.contents(atPath: path.appending("/Cache/components.metadata")) else {
              fatalError("Metadata for components missing")
         }
 
