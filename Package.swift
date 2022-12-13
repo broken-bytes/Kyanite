@@ -7,6 +7,10 @@ let package = Package(
     name: "Kyanite",
     products: [
         .executable(
+            name: "Editor",
+            targets: ["Editor-Executable"]
+        ),
+        .executable(
             name: "Generator",
             targets: ["Generator-Executable"]
         ),
@@ -45,6 +49,11 @@ let package = Package(
         .target(
             name: "CBindings",
             path: "./Kyanite/Scripting/CBindings"
+        ),
+
+        .executableTarget(
+            name: "Editor-Executable",
+            path: "./Kyanite/Scripting/Editor"
         ),
     
         .target(
