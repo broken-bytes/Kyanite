@@ -6,8 +6,8 @@ class Exit: Command {
     public let keyword = "exit"
 
 
-    public func run(input: [String]) -> Bool {
+    public func run(input: [String]) -> DataStructure {
         exit(0)
-        return false
+        return EmptyData()
     }
 }

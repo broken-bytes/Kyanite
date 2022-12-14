@@ -8,7 +8,7 @@ class List: Command {
     public let keyword = "ls"
 
 
-    public func run(input: [String]) -> Bool {
+    public func run(input: [String]) -> DataStructure {
         let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
         let pathPtr = getcwd(ptr, 1024)
         let fm = FileManager.default
@@ -26,17 +26,19 @@ class List: Command {
                 let fileSize = attributes[FileAttributeKey.size] as! UInt64
                 let modifyDate = attributes[FileAttributeKey.modificationDate] as? Date
 
-                let nameField = DataTableField(title: "name", type: .text, value: item)
-                let sizeField = DataTableField(title: "size", type: .number, value: String(fileSize))
-                let modifyField = DataTableField(title: "size", type: .number, value: (modifyDate ?? Date()))
+                let nameField = DataField(name: "name", value: item, type: .text)
+                let sizeField = DataField(name: "size", value: String(fileSize), type: .number)
+                let modifyField = DataField(name: "size", value: (modifyDate ?? Date()), type: .number)
                 let entry = DataTableEntry(fields: [nameField, sizeField, modifyField])
 
                 entries.append(entry)
             }
+            return DataTable(fields: entries)
+
         } catch {
             print(error)
         }
 
-        return true
+        return EmptyData()
     }
 }

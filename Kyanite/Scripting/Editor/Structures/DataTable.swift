@@ -1,14 +1,8 @@
-public struct DataTableField {
-    let title: String
-    let type: DataType
-    let value: Any
-}
-
 public struct DataTableEntry {
-    let fields: [DataTableField]
+    let fields: [DataField]
 }
 
-public struct DataTable {
+public struct DataTable: DataStructure {
     let fields: [DataTableEntry]
 }
 

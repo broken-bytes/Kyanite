@@ -48,14 +48,18 @@ Your modern terminal gateway on the fastlane\n\n
     public func eval(command: String) {
         let keywords = command.components(separatedBy: " ")
 
-        //printDir()
-
         if let cmd = self.commands.first(where: { $0.keyword == keywords[0]}) {
             // If out command did output text, we head over to the next line
-            if cmd.run(input: keywords) {
+            let output = cmd.run(input: keywords)
+            if !(output is EmptyData) {
+                print(output)
                 Console.default.print(color: .white, background: .black, str: "\n")
             }
         }
+    }
+
+    public func pipeline(input: DataStructure, command: [String]) -> DataStructure {
+        return input
     }
 
     public func takeInput() -> String? {

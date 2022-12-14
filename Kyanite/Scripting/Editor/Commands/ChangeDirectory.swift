@@ -6,9 +6,9 @@ class ChangeDirectory: Command {
     public let keyword = "cd"
 
 
-    public func run(input: [String]) -> Bool {
+    public func run(input: [String]) -> DataStructure {
         chdir(input[1])
 
-        return false
+        return EmptyData()
     }
 }
