@@ -29,7 +29,7 @@ class List: Command {
                 let nameField = DataTableField(title: "name", type: .text, value: item)
                 let sizeField = DataTableField(title: "size", type: .number, value: String(fileSize))
                 let modifyField = DataTableField(title: "size", type: .number, value: (modifyDate ?? Date()))
-                let entry = DataTableEntry(fields: [nameField, sizeField, modifyDate])
+                let entry = DataTableEntry(fields: [nameField, sizeField, modifyField])
 
                 entries.append(entry)
             }

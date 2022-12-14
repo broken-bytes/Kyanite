@@ -1,15 +1,7 @@
-public enum DataTableFieldType {
-    case text
-    case number
-    case timestamp
-    case bool
-    case size
-}
-
 public struct DataTableField {
     let title: String
-    let type: DataTableFieldType
-    let value: String
+    let type: DataType
+    let value: Any
 }
 
 public struct DataTableEntry {
