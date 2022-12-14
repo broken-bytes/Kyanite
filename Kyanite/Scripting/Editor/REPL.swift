@@ -1,5 +1,8 @@
 #if os(Windows)
 import WinSDK
+#elseif os(macOS)
+import Darwin
+#else
 #endif
 
 import Foundation
