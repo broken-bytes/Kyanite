@@ -30,6 +30,7 @@ class CodeGenerator {
                         .replacingOccurrences(of: "#include <cstddef>", with: "")
                         .replacingOccurrences(of: "#include <cstdint>", with: "#include <stdint.h>")
                         .replacingOccurrences(of: "#include \"[0-9a-zA-Z.]+\"", with: "", options: [.regularExpression])
+                        .replacingOccurrences(of: "(struct|class) [0-9a-zA-Z]+;", with: "", options: [.regularExpression])
                         .replacingOccurrences(of: "size_t", with: "uint64_t")
                         .replacingOccurrences(of: "#define DLL_EXPORT __declspec(dllexport)", with: "")
                         .replacingOccurrences(of: "#define DLL_EXPORT", with: "")
@@ -59,6 +60,7 @@ class CodeGenerator {
         }
 
         outSource.append("#include <Windows.h>\n".data(using: .utf8)!)
+        outSource.append("#include <Core/NativeRef.hxx>\n".data(using: .utf8)!)
 
         for function in outFuncs {
             outSource.append("typedef \(function.returnType)(*T\(function.name))(\(function.params));\n".data(using: .utf8)!)

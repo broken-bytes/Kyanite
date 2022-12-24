@@ -7,7 +7,7 @@ let package = Package(
     name: "Kyanite",
     products: [
         .library(
-            name: "Editor",
+            name: "Kyanite-Editor",
             type: .dynamic,
             targets: ["Editor"]
         ),
@@ -22,7 +22,7 @@ let package = Package(
         .library(
             name: "Kyanite",
             type: .dynamic,
-            targets: ["Audio", "CBindings", "EntityComponentSystem", "Runtime", "Rendering"]
+            targets: ["Audio", "EntityComponentSystem", "Runtime", "Rendering"]
         )
     ],
     targets: [
@@ -44,18 +44,13 @@ let package = Package(
         ),
 
         .target(
-            name: "CBindings",
-            path: "./Kyanite/Scripting/CBindings"
-        ),
-
-        .target(
             name: "Editor",
             path: "./Kyanite/Scripting/Editor"
         ),
     
         .target(
             name: "EntityComponentSystem",
-            dependencies: ["Audio", "CBindings", "Physics", "Rendering"],
+            dependencies: ["Audio", "Physics", "Rendering"],
             path: "./Kyanite/Scripting/EntityComponentSystem"    
         ),
 
@@ -66,19 +61,19 @@ let package = Package(
 
         .target(
             name: "Physics",
-            dependencies: ["CBindings", "Math"],
+            dependencies: ["Math"],
             path: "./Kyanite/Scripting/Physics"    
         ),
 
         .target(
             name: "Rendering",
-            dependencies: ["CBindings"],
+            dependencies: [],
             path: "./Kyanite/Scripting/Rendering"
         ),
 
         .target(
             name: "Runtime",
-            dependencies: ["CBindings"],
+            dependencies: [],
             path: "./Kyanite/Scripting/Runtime"
         ),
     ]

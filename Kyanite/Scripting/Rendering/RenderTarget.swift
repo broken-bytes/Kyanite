@@ -1,3 +1,5 @@
-struct RenderTarget {
-    
+public struct RenderTarget {
+    public init() {
+        
+    }
 }

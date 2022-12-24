@@ -2,6 +2,7 @@
 #include <SDL_keycode.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_win32.h>
+#include <chrono>
 #if _WIN32
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
@@ -10,14 +11,6 @@
 #include <SDL_syswm.h>
 #include <SDL_vulkan.h>
 #endif
-
-#include <array>
-#include <filesystem>
-#include <map>
-#include <memory>
-#include <regex>
-#include <sstream>
-#include <thread>
 
 #ifdef _WIN32
 #define NOMINMAX
@@ -33,12 +26,18 @@ RENDERDOC_API_1_5_0 *rdoc_api = NULL;
 #include <dlfcn.h>
 #endif
 
+typedef void EditorTick();
+typedef void Tick(float);
+
+
 
 struct Instance {
   SDL_Window *Window;
   bool Running;
   const char *Name;
   const char *Version;
+  EditorTick* EditorTick;
+  Tick* Tick;
 };
 
 float frametime = 0;
@@ -50,9 +49,11 @@ Instance GlobalInstance = {};
 constexpr int W = 1920;
 constexpr int H = 1080;
 
-auto Tick() -> void {
+auto OnTick() -> void {
   auto start = std::chrono::high_resolution_clock::now();
   auto end = std::chrono::high_resolution_clock::now();
+  GlobalInstance.Tick(frametime);
+  GlobalInstance.EditorTick();
   frametime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   ticks++;
 }
@@ -67,6 +68,10 @@ int main(int argc, char *argv[]) {
   // ImGui::StyleColorsLight();
 
 #if _WIN32
+
+    auto lib = LoadLibraryA("Kyanite-Editor.dll");
+    GlobalInstance.EditorTick = (EditorTick*)GetProcAddress(lib, "editorTick");
+    GlobalInstance.Tick = (Tick*)GetProcAddress(lib, "tick");
 #if _DEBUG
   if (HMODULE mod = GetModuleHandleA("renderdoc.dll")) {
     pRENDERDOC_GetAPI RENDERDOC_GetAPI =
@@ -94,7 +99,7 @@ int main(int argc, char *argv[]) {
   SDL_Event event;
 
   while (!GlobalInstance.Running) {
-    Tick();
+    OnTick();
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_WINDOWEVENT:
