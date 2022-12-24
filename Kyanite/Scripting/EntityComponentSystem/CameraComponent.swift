@@ -8,5 +8,4 @@ public struct CameraComponent: Component {
     public init() {
         
     }
-    
 }

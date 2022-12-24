@@ -4,8 +4,8 @@ let editor = Editor()
     editor.start()
 }
 
-@_cdecl("tick") func tick() {
-    editor.tick()
+@_cdecl("tick") func tick(lastTick: Float) {
+    editor.tick(lastTick: lastTick)
 }
 
 @_cdecl("editorTick") func editorTick() {

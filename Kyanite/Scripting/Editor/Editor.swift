@@ -7,7 +7,7 @@ public class Editor {
         windows.append(Universe())
     }
 
-    func tick() {
+    func tick(lastTick: Float) {
 
     }
 

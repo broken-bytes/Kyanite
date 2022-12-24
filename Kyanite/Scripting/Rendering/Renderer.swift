@@ -12,5 +12,4 @@ public class Renderer {
     public func drawMesh(mesh: Mesh, with material: Material) {
 
     }
-
 }

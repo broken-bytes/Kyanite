@@ -27,7 +27,7 @@ add_subdirectory(Kyanite/Runtime)
 add_subdirectory(Kyanite/Engine) 
 
 # Editor code
-#add_subdirectory(Kyanite/Editor)
+add_subdirectory(Kyanite/Editor)
 
 
 target_link_libraries(Rendering PUBLIC Core)
