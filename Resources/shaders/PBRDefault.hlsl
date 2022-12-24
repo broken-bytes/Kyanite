@@ -57,6 +57,7 @@ struct VS_INPUT
     float4 Position : POSITION;
     float3 Normal : NORMAL;
     float2 UV: TEXCOORD;
+    float4 Color: COLOR;
 };
 
 struct PS_INPUT {
@@ -64,6 +65,7 @@ struct PS_INPUT {
     float4 WorldPosition: WORLD_POSITION;
     float3 Normal : NORMAL;
     float2 UV: TEXCOORD;
+    float4 Color: COLOR;
 };
 
 PS_INPUT VSMain(VS_INPUT vertex) {
@@ -75,6 +77,7 @@ PS_INPUT VSMain(VS_INPUT vertex) {
 
     output.Normal = mul(float4(vertex.Normal, 1), MVP.Model);
     output.Normal = normalize(output.Normal);
+    output.Color = vertex.Color;
     return output;
 }
 

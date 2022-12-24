@@ -6,9 +6,10 @@ import PackageDescription
 let package = Package(
     name: "Kyanite",
     products: [
-        .executable(
+        .library(
             name: "Editor",
-            targets: ["Editor-Executable"]
+            type: .dynamic,
+            targets: ["Editor"]
         ),
         .executable(
             name: "Generator",
@@ -23,10 +24,6 @@ let package = Package(
             type: .dynamic,
             targets: ["Audio", "CBindings", "EntityComponentSystem", "Runtime", "Rendering"]
         )
-    ],
-    dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -51,8 +48,8 @@ let package = Package(
             path: "./Kyanite/Scripting/CBindings"
         ),
 
-        .executableTarget(
-            name: "Editor-Executable",
+        .target(
+            name: "Editor",
             path: "./Kyanite/Scripting/Editor"
         ),
     

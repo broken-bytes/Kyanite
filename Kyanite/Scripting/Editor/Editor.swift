@@ -1,30 +1,23 @@
-#if os(Windows)
-import WinSDK
-#endif
+public class Editor {
+    private var windows: [EditorWindow] = []
 
-import Foundation
+    func start() {
+        windows.append(Outliner())
+        windows.append(Profiler())
+        windows.append(Universe())
+    }
 
-@main
-struct Editor {
-    static let repl = REPL()
+    func tick() {
 
-    static func main() -> Void {
-        signal(SIGINT) { 
-            sigIntHandler(sig: $0)
-        }
+    }
 
-        while true {
-            repl.printDir()
-
-            if let command = repl.takeInput() {
-                repl.eval(command: command)
-            }
+    func editorTick() {
+        for window in windows {
+            window.draw()
         }
     }
-}
 
-func sigIntHandler(sig: Int32) {
-    signal(sig, SIG_IGN)
-    signal(SIGINT, sigIntHandler)
-    Editor.repl.handleSigInt()
+    func end() {
+
+    }
 }

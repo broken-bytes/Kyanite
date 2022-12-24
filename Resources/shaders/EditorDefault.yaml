@@ -4,6 +4,3 @@ lighting: unlit
 format: rgba_float
 buffer:
 constants:
-  - name: Diffuse
-    type: Texture
-    slot: 0
