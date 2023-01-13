@@ -91,7 +91,7 @@ float4 PSMain(PS_INPUT pixel): SV_TARGET {
 	ambient = Light.Ambient.Color * Light.Ambient.Intensity / 10;
 
 	// Diffuse
-    float4 diffuse = DiffuseMap.Sample(TextureSampler, pixel.UV);
+    float4 diffuse = DiffuseMap.Sample(TextureSampler, pixel.UV).bgra;
 	float diff = max(dot(norm, lightDir), 0.0);
 	diffuse = Light.Sun.Color * (diff * diffuse);
 

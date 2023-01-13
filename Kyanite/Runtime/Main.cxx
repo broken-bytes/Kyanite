@@ -95,6 +95,7 @@ auto Tick() -> void {
                   .count();
 
   ticks++;
+
   Update(frametime);
 
   SetCamera(0, 0, -10, 0, 0, 0);
@@ -113,29 +114,15 @@ auto Tick() -> void {
   }
 
       int64_t selectionId = GetMouseOverEntityId(0, 0);
-
-  if(selectionId > 0 && selectionId < 0xFFFFFF) {
-    for(auto& mesh: TransformModel) {
-      auto pos = Transforms[selectionId].Position;
-      auto rot = Transforms[selectionId].Rotation;
-      DrawMesh(0xFFFFFF, mesh, TransformMaterial, {}, {pos, rot, {0.1f, 0.1f, 0.1f}});
-    }
-  }
-
 }
 
+struct TestComponent {
+  float x;
+  float y;
+  float z;
+};
+
 int main(int argc, char *argv[]) {
-
-  Transforms.insert({55, {{0, 3, 2}, {0.4f, 0.8f, -0.0f, 0.7f}, {1, 1, 1}}});
-  Transforms.insert({56, {{15, 2, 6}, {0.8f, 0.8f, -0.0f, 0.23f}, {1, 1, 1}}});
-  ImGui::CreateContext();
-  ImGuiIO &io = ImGui::GetIO();
-  // Enable Gamepad Controls
-
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  // ImGui::StyleColorsLight();
-
 #if _WIN32
 #if _DEBUG
   if (HMODULE mod = GetModuleHandleA("renderdoc.dll")) {
@@ -151,6 +138,7 @@ int main(int argc, char *argv[]) {
            SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
   SDL_DisplayMode mode = {};
   SDL_GetDesktopDisplayMode(0, &mode);
+  GlobalInstance.Running = true;
   GlobalInstance.Window = SDL_CreateWindow("SDL2Test", SDL_WINDOWPOS_UNDEFINED,
                                            SDL_WINDOWPOS_UNDEFINED, W, H,
 #ifdef __APPLE__
@@ -160,17 +148,36 @@ int main(int argc, char *argv[]) {
 #endif
   );
 
+  auto ctx = ImGui::CreateContext();
+  ImGui::SetCurrentContext(ctx);
+  ImGuiIO &io = ImGui::GetIO();
+  // Enable Gamepad Controls
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  // ImGui::StyleColorsLight();
   Init(W, H, (void *)GlobalInstance.Window);
   SetRootDir(argv[1]);
+
+
+  auto comp =  TestComponent {1, 2 , 3};
+  auto compName = "TEST";
+
+  Transforms.insert({56, {{0, 0, 20}, {0, 0, -0, 0}, {0.1f, 0.1f, 0.1f}}});
+  auto entity = CreateEntity();
+
+  auto testCompId = RegisterComponent(sizeof(TestComponent), alignof(TestComponent), compName);
+  AddComponent(entity, testCompId, sizeof(TestComponent), &comp);
+
+  auto dataPtr =  reinterpret_cast<const TestComponent*> (GetComponent(entity, testCompId));
+  auto data = *dataPtr;
 
   auto colorBufferShader = LoadShaderCPU("shaders/EntityIdBuffer.yaml");
   // Load default resources
   LoadShaderGPU(colorBufferShader);
 
-  auto textureInfo = LoadTextureCPU(
-      "models/kickelhahn_tower/textures/Material.000_baseColor.jpeg");
   auto modelInfo =
-      LoadModelCPU("models/kickelhahn_tower/scene.gltf");
+      LoadModelCPU("models/stylized_orc_warrior/scene.gltf");
 
   auto shaderInfo = LoadShaderCPU("shaders/PBRDefault.yaml");
   auto shaderRef =
@@ -181,33 +188,25 @@ int main(int argc, char *argv[]) {
     Meshes.push_back(LoadMeshGPU(modelInfo.Meshes[x]));
   }
 
+  auto textureInfo = LoadTextureCPU(
+      "models/stylized_orc_warrior/textures/body_baseColor.png");
+
   auto diffuseTex = LoadTextureGPU(textureInfo);
   Textures.push_back(diffuseTex);
   auto material = LoadMaterialGPU("DefaultPBR", shaderRef);
   Materials.push_back(material);
 
   textureInfo = LoadTextureCPU(
-      "models/kickelhahn_tower/textures/Material.000_normal.png");
+      "models/stylized_orc_warrior/textures/body_normal.png");
   auto normalTex = LoadTextureGPU(textureInfo);
   Textures.push_back(normalTex);
 
   SetMaterialTexture(material, "Diffuse", diffuseTex);
   SetMaterialTexture(material, "Normal", normalTex);
 
-  modelInfo =
-      LoadModelCPU("models/transform/scene.gltf");
-
-  for(int x = 0; x < modelInfo.MeshCount; x++) {
-    TransformModel.push_back( LoadMeshGPU(modelInfo.Meshes[x]));
-  }
-  shaderInfo = LoadShaderCPU("shaders/EditorDefault.yaml");
-  TransformShader =
-      LoadShaderGPU(shaderInfo);
-  TransformMaterial = LoadMaterialGPU("EditorDefault", TransformShader);
-
   SDL_Event event;
 
-  while (!GlobalInstance.Running) {
+  while (GlobalInstance.Running) {
     Tick();
     while (SDL_PollEvent(&event)) {
       switch (event.type) {

@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(glm CONFIG REQUIRED)
 find_package(stduuid CONFIG REQUIRED)
+find_package(flecs CONFIG REQUIRED)
 
 add_library(
     Kyanite-Runtime
@@ -28,6 +29,7 @@ target_include_directories(
 
 target_link_libraries(Kyanite-Runtime PUBLIC glm::glm)
 target_link_libraries(Kyanite-Runtime PUBLIC stduuid)
+target_link_libraries(Kyanite-Runtime PUBLIC flecs::flecs flecs::flecs_static)
 
 
 target_include_directories(Kyanite-Runtime PUBLIC include/Engine)

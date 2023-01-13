@@ -1,7 +1,7 @@
 let editor = Editor()
 
 @_cdecl("start") func start(hwnd: UnsafeMutableRawPointer) {
-    editor.start()
+    editor.start(hwnd: hwnd)
 }
 
 @_cdecl("tick") func tick(lastTick: Float) {

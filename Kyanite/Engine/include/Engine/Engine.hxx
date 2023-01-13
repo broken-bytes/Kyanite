@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdint>
+#include <stdint.h>
 
 #ifdef _WIN32
 #define DLL_EXPORT __declspec(dllexport)
@@ -180,6 +181,22 @@ DLL_EXPORT void SetCamera(float xPos, float yPos, float zPos, float xRotation,
                           float yRotation, float zRotation);
 DLL_EXPORT void SetCursorPosition(uint32_t x, uint32_t y);
 DLL_EXPORT uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y);
+
+// Entity system
+
+enum COMPONENT_PROP_TYPE {
+  COMPONENT_PROP_TYPE_INT,
+  COMPONENT_PROP_TYPE_UINT,
+  COMPONENT_PROP_TYPE_FLOAT,
+  COMPONENT_PROP_TYPE_BOOL,
+  COMPONENT_PROP_TYPE_STRING
+} typedef COMPONENT_PROP_TYPE;
+
+DLL_EXPORT uint64_t CreateEntity();
+DLL_EXPORT uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid);
+DLL_EXPORT uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data);
+DLL_EXPORT const void* GetComponent(uint64_t entity, uint64_t id);
+
 #ifdef __cplusplus
 }
 #endif

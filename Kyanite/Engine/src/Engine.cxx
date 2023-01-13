@@ -23,10 +23,21 @@
 #include "glm/vec4.hpp"
 #include "glm/ext/quaternion_transform.hpp"
 
+#define FLECS_CUSTOM_BUILD  // Don't build all addons
+#define FLECS_SYSTEM        // Build FLECS_SYSTEM
+#define FLECS_META
+#define FLECS_META_C
+#define FLECS_EXPR
+#define FLECS_SNAPSHOT
+#define FLECS_LOG
+#define FLECS_PIPELINE
+#include <flecs.h>
 
 
 std::vector<NativeRef*> _nativeRefs = {};
 std::unique_ptr<Renderer::Interface> Interface;
+
+ecs_world_t* ECS;
 
 // Internal Helpers
 
@@ -398,6 +409,7 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
 
 // --- Commands ---
  void Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
+    ECS = ecs_init();
     Interface = std::make_unique<Renderer::Interface>(resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
  }
  
@@ -451,4 +463,31 @@ void SetCursorPosition(uint32_t x, uint32_t y) {
 
 uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y) {
     return Interface->ReadMouseOverData(x, y);
+}
+
+// Entity functions
+
+
+uint64_t CreateEntity() {
+  ecs_entity_t e = ecs_new_id(ECS);
+  return e;
+}
+
+uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid) {
+  ecs_component_desc_t desc = {};
+  desc.type = {};
+  desc.type.size = size;
+  desc.type.alignment = alignment;
+  desc.type.name = uuid;
+
+  return ecs_component_init(ECS, &desc);
+}
+
+uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data) {
+  ecs_set_id(ECS, entity, id, size, data);
+  return 0;
+}
+
+const void* GetComponent(uint64_t entity, uint64_t id) {
+  return ecs_get_id(ECS, entity, id);
 }

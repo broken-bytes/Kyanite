@@ -26,6 +26,7 @@ RENDERDOC_API_1_5_0 *rdoc_api = NULL;
 #include <dlfcn.h>
 #endif
 
+typedef void EditorStart(void*);
 typedef void EditorTick();
 typedef void Tick(float);
 
@@ -66,10 +67,11 @@ int main(int argc, char *argv[]) {
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
   // ImGui::StyleColorsLight();
+  GlobalInstance.Running = true;
 
 #if _WIN32
-
     auto lib = LoadLibraryA("Kyanite-Editor.dll");
+    ((EditorStart*)GetProcAddress(lib, "start"))(GlobalInstance.Window);
     GlobalInstance.EditorTick = (EditorTick*)GetProcAddress(lib, "editorTick");
     GlobalInstance.Tick = (Tick*)GetProcAddress(lib, "tick");
 #if _DEBUG
@@ -98,7 +100,7 @@ int main(int argc, char *argv[]) {
 
   SDL_Event event;
 
-  while (!GlobalInstance.Running) {
+  while (GlobalInstance.Running) {
     OnTick();
     while (SDL_PollEvent(&event)) {
       switch (event.type) {

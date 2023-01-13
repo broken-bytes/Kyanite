@@ -1,1 +1,5 @@
-public protocol Job {}
+public protocol Job {
+    func start()
+    func run() 
+    func stop()
+}

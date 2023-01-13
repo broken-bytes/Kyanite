@@ -177,9 +177,6 @@ auto Interface::MidFrame() -> void {
   _commandList->SetDescriptorHeaps({_srvHeap});
   _mouseOverCommandList->SetDescriptorHeaps({_srvHeap});
 
-  ImGui::Begin("Test");
-  ImGui::End();
-
   auto sun = SunLight{sunColor, {xPos, yPos, zPos, 1}, true};
 
   light.Ambient = {ambientColor, ambientIntensity};

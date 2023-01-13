@@ -1,20 +1,7 @@
-import WinSDK
-import Foundation
+@_cdecl("start") public func start(window: UnsafeMutableRawPointer) {
 
-class Runtime {
-    private static let `default` = Runtime()
+}
 
-    private var engine: HMODULE! 
+@_cdecl("update") public func update(tick: Float) {
 
-    private init() {
-        self.engine = LoadLibraryA("Kyanite.dll")
-    }
-
-    public func loadFunc<T>(named: String) -> UnsafeMutablePointer<T> {
-        var ptr = GetProcAddress(self.engine, named)
-
-        let rawPtr = UnsafeMutableRawPointer(mutating: ptr)
-
-        return rawPtr.load(as: T.self)
-    }
 }

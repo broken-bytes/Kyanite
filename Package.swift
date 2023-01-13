@@ -22,7 +22,7 @@ let package = Package(
         .library(
             name: "Kyanite",
             type: .dynamic,
-            targets: ["Audio", "EntityComponentSystem", "Runtime", "Rendering"]
+            targets: ["Core", "Audio", "EntityComponentSystem", "Runtime", "Rendering"]
         )
     ],
     targets: [
@@ -44,7 +44,13 @@ let package = Package(
         ),
 
         .target(
+            name: "Core",
+            path: "./Kyanite/Scripting/Core"    
+        ),
+
+        .target(
             name: "Editor",
+            dependencies: ["Core"],
             path: "./Kyanite/Scripting/Editor"
         ),
     
