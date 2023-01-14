@@ -9,7 +9,7 @@ public class Library {
     }
 
     public func loadFunc<T>(named: String) -> T {
-        guard let ptr = GetProcAddress(self.lib, named) else { fatalError("Failed to load dll func")}
+        guard let ptr = GetProcAddress(self.lib, named) else { fatalError("Failed to load dll func \(named)")}
 
         return withUnsafePointer(to: ptr) { 
             let rawPtr = UnsafeMutableRawPointer(mutating: $0)

@@ -79,7 +79,7 @@ let package = Package(
 
         .target(
             name: "Runtime",
-            dependencies: [],
+            dependencies: ["Core"],
             path: "./Kyanite/Scripting/Runtime"
         ),
     ]

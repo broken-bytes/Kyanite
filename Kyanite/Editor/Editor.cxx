@@ -65,7 +65,6 @@ int main(int argc, char *argv[]) {
   // Enable Gamepad Controls
 
   // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
   // ImGui::StyleColorsLight();
   GlobalInstance.Running = true;
 

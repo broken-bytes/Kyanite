@@ -1,4 +1,3 @@
-#include "Mesh.hxx"
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <imgui_impl_sdl.h>
@@ -12,8 +11,6 @@
 #include <SDL_vulkan.h>
 #endif
 
-#include "Engine.hxx"
-#include "Core/NativeRef.hxx"
 
 #include <array>
 #include <filesystem>
@@ -41,11 +38,16 @@ std::vector<uint64_t> ShaderIndices = {};
 std::vector<uint64_t> MeshIndices = {};
 std::vector<uint64_t> TextureIndices = {};
 
+// Width, Height, SDL Window, ImGui ctx, ImGui Style, Root Dir
+typedef void RuntimeStart(uint32_t, uint32_t, void*, void*, void*, const char*);
+typedef void RuntimeTick(float);
+
 struct Instance {
   SDL_Window *Window;
   bool Running;
   const char *Name;
   const char *Version;
+  RuntimeTick* Tick;
 };
 
 float frametime = 0;
@@ -65,30 +67,11 @@ float camZ = 0;
 
 Instance GlobalInstance = {};
 
-std::vector<NativeRef *> Textures = {};
-std::vector<NativeRef *> Meshes = {};
-std::vector<NativeRef *> Shaders = {};
-std::vector<NativeRef *> Materials = {};
-
-
-
-std::map<uint32_t, Transform> Transforms = {};
-
-
-std::vector<NativeRef*> TransformModel = {};
-NativeRef* TransformTexture;
-NativeRef* TransformShader;
-NativeRef* TransformMaterial;
-
 constexpr int W = 1920;
 constexpr int H = 1080;
 
 auto Tick() -> void {
   auto start = std::chrono::high_resolution_clock::now();
-  // Update(frametime);
-  std::array<float, 3> pos = {0, 0, 0};
-  std::array<float, 3> scale = {1, 1, 1};
-  std::array<float, 3> rot = {0, 0, 0};
 
   auto end = std::chrono::high_resolution_clock::now();
   frametime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
@@ -96,24 +79,7 @@ auto Tick() -> void {
 
   ticks++;
 
-  Update(frametime);
-
-  SetCamera(0, 0, -10, 0, 0, 0);
-
-  for (auto& transform: Transforms) {
-    MeshDrawInfo info;
-    info.Flags = MESH_DRAW_INFO_FLAGS_DRAW_OUTLINE;
-    info.OutlineWidth = 2;
-    info.OutlineColor[0] = 1;
-    info.OutlineColor[1] = 0;
-    info.OutlineColor[2] = 1;
-    info.OutlineColor[3] = 1;
-
-
-    DrawMesh(transform.first, Meshes[0], Materials[0], info, transform.second);
-  }
-
-      int64_t selectionId = GetMouseOverEntityId(0, 0);
+  GlobalInstance.Tick(frametime);
 }
 
 struct TestComponent {
@@ -148,62 +114,14 @@ int main(int argc, char *argv[]) {
 #endif
   );
 
-  auto ctx = ImGui::CreateContext();
-  ImGui::SetCurrentContext(ctx);
-  ImGuiIO &io = ImGui::GetIO();
-  // Enable Gamepad Controls
-
+  //Init(W, H, (void *)GlobalInstance.Window);
+  //SetRootDir(argv[1]);
+#if _WIN32
+    auto lib = LoadLibraryA("Kyanite.dll");
+    ((RuntimeStart*)GetProcAddress(lib, "start"))(W, H, GlobalInstance.Window, nullptr, nullptr, argv[1]);
+    GlobalInstance.Tick = (RuntimeTick*)GetProcAddress(lib, "update");
+#endif
   // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  // ImGui::StyleColorsLight();
-  Init(W, H, (void *)GlobalInstance.Window);
-  SetRootDir(argv[1]);
-
-
-  auto comp =  TestComponent {1, 2 , 3};
-  auto compName = "TEST";
-
-  Transforms.insert({56, {{0, 0, 20}, {0, 0, -0, 0}, {0.1f, 0.1f, 0.1f}}});
-  auto entity = CreateEntity();
-
-  auto testCompId = RegisterComponent(sizeof(TestComponent), alignof(TestComponent), compName);
-  AddComponent(entity, testCompId, sizeof(TestComponent), &comp);
-
-  auto dataPtr =  reinterpret_cast<const TestComponent*> (GetComponent(entity, testCompId));
-  auto data = *dataPtr;
-
-  auto colorBufferShader = LoadShaderCPU("shaders/EntityIdBuffer.yaml");
-  // Load default resources
-  LoadShaderGPU(colorBufferShader);
-
-  auto modelInfo =
-      LoadModelCPU("models/stylized_orc_warrior/scene.gltf");
-
-  auto shaderInfo = LoadShaderCPU("shaders/PBRDefault.yaml");
-  auto shaderRef =
-      LoadShaderGPU(shaderInfo);
-  Shaders.push_back(shaderRef);
-
-  for (int x = 0; x < modelInfo.MeshCount; x++) {
-    Meshes.push_back(LoadMeshGPU(modelInfo.Meshes[x]));
-  }
-
-  auto textureInfo = LoadTextureCPU(
-      "models/stylized_orc_warrior/textures/body_baseColor.png");
-
-  auto diffuseTex = LoadTextureGPU(textureInfo);
-  Textures.push_back(diffuseTex);
-  auto material = LoadMaterialGPU("DefaultPBR", shaderRef);
-  Materials.push_back(material);
-
-  textureInfo = LoadTextureCPU(
-      "models/stylized_orc_warrior/textures/body_normal.png");
-  auto normalTex = LoadTextureGPU(textureInfo);
-  Textures.push_back(normalTex);
-
-  SetMaterialTexture(material, "Diffuse", diffuseTex);
-  SetMaterialTexture(material, "Normal", normalTex);
-
   SDL_Event event;
 
   while (GlobalInstance.Running) {
@@ -221,11 +139,11 @@ int main(int argc, char *argv[]) {
         // Handle any key presses here.
         break;
       case SDL_MOUSEBUTTONUP:
-        io.AddMouseButtonEvent(0, 0);
+        //io.AddMouseButtonEvent(0, 0);
         // Handle mouse clicks here.
         break;
       case SDL_MOUSEBUTTONDOWN:
-        io.AddMouseButtonEvent(0, 1);
+        //io.AddMouseButtonEvent(0, 1);
         // Handle mouse clicks here.
         break;
 
@@ -234,8 +152,7 @@ int main(int argc, char *argv[]) {
         break;
 
       case SDL_MOUSEMOTION:
-        SetCursorPosition(event.motion.x, event.motion.y);
-        io.AddMousePosEvent(event.motion.x, event.motion.y);
+        //io.AddMousePosEvent(event.motion.x, event.motion.y);
         camY = event.motion.xrel;
         camZ = event.motion.yrel;
       default:

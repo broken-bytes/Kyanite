@@ -20,6 +20,7 @@
 #include <SDL_syswm.h>
 #include <algorithm>
 #include <d3d12.h>
+#include <debugapi.h>
 #include <dxgiformat.h>
 #include <glm/ext/quaternion_transform.hpp>
 
@@ -103,7 +104,7 @@ struct LightBuffer {
 
 auto light = LightBuffer{};
 
-Interface::Interface(uint32_t width, uint32_t height, void *window,
+Interface::Interface(uint32_t width, uint32_t height, void *window, void* ctx,
                      RenderBackendAPI type) {
   SDL_SysWMinfo wmInfo;
   SDL_VERSION(&wmInfo.version);
@@ -111,6 +112,7 @@ Interface::Interface(uint32_t width, uint32_t height, void *window,
   _window = window;
   HWND hwnd = wmInfo.info.win.window;
   _windowDimension = {(float)width, (float)height};
+
   switch (type) {
   case DirectX12:
     _device = static_pointer_cast<Device>(std::make_shared<D3D12Device>(hwnd));
@@ -126,6 +128,7 @@ Interface::Interface(uint32_t width, uint32_t height, void *window,
     break;
   }
   setlocale(LC_ALL, "en_US.utf8");
+  //ImGui::SetCurrentContext((reinterpret_cast<ImGuiContext*>(ctx)));
 
   CreatePipeline();
 }

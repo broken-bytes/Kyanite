@@ -42,7 +42,7 @@ namespace Renderer {
 	};
     class Interface {
         public: 
-        Interface(std::uint32_t width, std::uint32_t height, void* window, RenderBackendAPI type);
+        Interface(std::uint32_t width, std::uint32_t height, void* window, void* ctx, RenderBackendAPI type);
         ~Interface();
 		float yOffset = 0;
 

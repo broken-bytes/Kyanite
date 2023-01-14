@@ -158,7 +158,7 @@ DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info);
 DLL_EXPORT NativeRef *LoadMaterialGPU(const char* name, NativeRef *shader);
 
 // --- Commands ---
-DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window);
+DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window, void* ctx, void* style);
 DLL_EXPORT void Shutdown();
 DLL_EXPORT void SetMaxFrameRate(uint16_t maxFramerate);
 DLL_EXPORT void SetVSync(bool enabled);

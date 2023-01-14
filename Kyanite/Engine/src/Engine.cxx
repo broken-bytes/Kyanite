@@ -23,6 +23,8 @@
 #include "glm/vec4.hpp"
 #include "glm/ext/quaternion_transform.hpp"
 
+#include "imgui.h"
+
 #define FLECS_CUSTOM_BUILD  // Don't build all addons
 #define FLECS_SYSTEM        // Build FLECS_SYSTEM
 #define FLECS_META
@@ -408,9 +410,14 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
 
 
 // --- Commands ---
- void Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
+ void Init(uint32_t resolutionX, uint32_t resolutionY, void* window, void* ctx, void* style) {
     ECS = ecs_init();
-    Interface = std::make_unique<Renderer::Interface>(resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
+  auto context = ImGui::CreateContext();
+  ImGui::SetCurrentContext(context);
+  ImGuiIO &io = ImGui::GetIO();
+  // Enable Gamepad Controls
+  ImGui::StyleColorsLight();
+    Interface = std::make_unique<Renderer::Interface>(resolutionX, resolutionY, window, &context, Renderer::RenderBackendAPI::DirectX12);
  }
  
  void Shutdown() {}

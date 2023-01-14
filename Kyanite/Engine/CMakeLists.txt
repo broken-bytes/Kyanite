@@ -18,7 +18,7 @@ find_package(flecs CONFIG REQUIRED)
 
 add_library(
     Kyanite-Runtime
-    STATIC
+    SHARED
     src/Engine.cxx
 )
 target_include_directories(
