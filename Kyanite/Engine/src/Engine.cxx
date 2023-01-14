@@ -40,6 +40,7 @@ std::vector<NativeRef*> _nativeRefs = {};
 std::unique_ptr<Renderer::Interface> Interface;
 
 ecs_world_t* ECS;
+ecs_entity_t Scene;
 
 // Internal Helpers
 
@@ -411,12 +412,13 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
 
 // --- Commands ---
  void Init(uint32_t resolutionX, uint32_t resolutionY, void* window, void* ctx, void* style) {
-    ECS = ecs_init();
+  ECS = ecs_init();
+  Scene = ecs_new_id(ECS);
   auto context = ImGui::CreateContext();
   ImGui::SetCurrentContext(context);
   ImGuiIO &io = ImGui::GetIO();
   // Enable Gamepad Controls
-  ImGui::StyleColorsLight();
+  ImGui::StyleColorsDark();
     Interface = std::make_unique<Renderer::Interface>(resolutionX, resolutionY, window, &context, Renderer::RenderBackendAPI::DirectX12);
  }
  
@@ -426,6 +428,19 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
  void Update(float frameTime) {
     Interface->Update();
     Interface->StartFrame();
+    ImGui::Begin("Entities");
+    auto termIt = ecs_term_t { ecs_pair(EcsChildOf, Scene) };
+    ecs_iter_t it = ecs_term_iter(ECS, &termIt);
+    //ecs_iter_poly(ECS, ECS, &it, NULL);
+    while (ecs_iter_next(&it)) {
+      for (int i = 0; i < it.count; i++) {
+        auto text = ecs_get_name(it.world, it.entities[i]);
+        if(text != nullptr) {
+          ImGui::Text(text); // Need the Name here
+        }
+      }
+    }
+    ImGui::End();
     Interface->MidFrame();
     Interface->EndFrame();
  }
@@ -475,8 +490,9 @@ uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y) {
 // Entity functions
 
 
-uint64_t CreateEntity() {
-  ecs_entity_t e = ecs_new_id(ECS);
+uint64_t CreateEntity(const char* name) {
+  ecs_entity_t e = ecs_new_w_pair(ECS, EcsChildOf, Scene);
+  ecs_set_name(ECS, e, name);
   return e;
 }
 

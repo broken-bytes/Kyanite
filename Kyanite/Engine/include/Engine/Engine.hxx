@@ -192,7 +192,7 @@ enum COMPONENT_PROP_TYPE {
   COMPONENT_PROP_TYPE_STRING
 } typedef COMPONENT_PROP_TYPE;
 
-DLL_EXPORT uint64_t CreateEntity();
+DLL_EXPORT uint64_t CreateEntity(const char* name);
 DLL_EXPORT uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid);
 DLL_EXPORT uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data);
 DLL_EXPORT const void* GetComponent(uint64_t entity, uint64_t id);

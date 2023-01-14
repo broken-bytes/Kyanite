@@ -22,7 +22,7 @@ let package = Package(
         .library(
             name: "Kyanite",
             type: .dynamic,
-            targets: ["Core", "Audio", "EntityComponentSystem", "Runtime", "Rendering"]
+            targets: ["Core", "Audio", "Engine", "Rendering"]
         )
     ],
     targets: [
@@ -53,12 +53,6 @@ let package = Package(
             dependencies: ["Core"],
             path: "./Kyanite/Scripting/Editor"
         ),
-    
-        .target(
-            name: "EntityComponentSystem",
-            dependencies: ["Audio", "Physics", "Rendering"],
-            path: "./Kyanite/Scripting/EntityComponentSystem"    
-        ),
 
         .target(
             name: "Math",
@@ -78,9 +72,9 @@ let package = Package(
         ),
 
         .target(
-            name: "Runtime",
-            dependencies: ["Core"],
-            path: "./Kyanite/Scripting/Runtime"
+            name: "Engine",
+            dependencies: ["Core", "Audio", "Rendering", "Math", "Physics"],
+            path: "./Kyanite/Scripting/Engine"
         ),
     ]
 )

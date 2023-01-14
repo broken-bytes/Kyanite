@@ -4,7 +4,7 @@ internal typealias Update = @convention(c) (Float) -> Void
 internal typealias SetRootDir = @convention(c) (UnsafeMutableRawPointer) -> Void
 
 // Entity Funcs
-internal typealias CreateEntity = @convention(c) () -> UInt64
+internal typealias CreateEntity = @convention(c) (UnsafeMutableRawPointer) -> UInt64
 internal typealias RegisterComponent = @convention(c) (UInt64, UInt8, UnsafeMutableRawPointer) -> UInt64
 internal typealias AddComponent = @convention(c) (UInt64, UInt64, UInt64, UnsafeMutableRawPointer) -> UInt64
 internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
@@ -61,8 +61,11 @@ public class NativeCore {
         self.coreFuncs.setRootDir(str)
     }
 
-    public func createNewEntity() -> UInt64 {
-        return self.entityFuncs.createEntity()
+    public func createNewEntity(name: String) -> UInt64 {
+        return withUnsafePointer(to: name.data(using: .utf8)) { ptr in 
+            let rawPtr = UnsafeMutableRawPointer(mutating: ptr)
+            return self.entityFuncs.createEntity(rawPtr)
+        }
     }
 
     public func registerNewComponent<T>(type: T.Type, named: String) -> UInt64 {
@@ -72,9 +75,8 @@ public class NativeCore {
         }
     }
 
-    public func addComponentToEntity<T>(entity: UInt64, component: UInt64, data: UnsafeMutablePointer<T>) -> UInt64 {
-        let rawPtr = UnsafeMutableRawPointer(mutating: data)
-        return self.entityFuncs.addComponent(entity, component, UInt64(MemoryLayout<T>.size), rawPtr)
+    public func addComponentToEntity<T>(entity: UInt64, component: UInt64, data: UnsafeMutableRawPointer, type: T.Type) -> UInt64 {
+        return self.entityFuncs.addComponent(entity, component, UInt64(MemoryLayout<T>.size), data)
     }
 
     public func getComponentFromEntity(entity: UInt64, component: UInt64) -> UnsafeMutableRawPointer {
