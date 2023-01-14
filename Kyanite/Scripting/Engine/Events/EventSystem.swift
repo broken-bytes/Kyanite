@@ -16,7 +16,12 @@ public class EventSystem<T> {
         subscriptions.remove(at: id)
     }
 
+    public func flush() {
+        queue = []
+    }
+
     public func push(event: T) {
+        queue.append(event)
         for sub in subscriptions {
             sub(event)
         }

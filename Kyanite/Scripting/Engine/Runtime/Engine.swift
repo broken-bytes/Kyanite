@@ -1,4 +1,5 @@
 import Core
+import WinSDK
 
 internal class Engine {
     internal init() {
@@ -8,10 +9,14 @@ internal class Engine {
         NativeCore.shared.start(width: width, height: height, window: window, ctx: ctx, style: style, rootDir: rootDir)
         let entity = Entity(name: "Test")
         entity.addComponent(component: ColliderComponent())
+        InputSystem.shared.subscribe { event in 
+            OutputDebugStringA("\(event)")
+        }
     }
     
     internal func update(timestep: Float) {
         NativeCore.shared.update(tick: timestep)
+        InputSystem.shared.flush()
     }
 
     internal func onKeyChanged(key: UInt8, isPressed: Bool) {
@@ -19,7 +24,7 @@ internal class Engine {
     }
 
     internal func onMouseButtonChanged(button: UInt8, isPressed: Bool) {
-
+        InputSystem.shared.setMouseButton(button: InputSystem.MouseButton(rawValue: button)!, isPressed: isPressed)
     }
 
     internal func onAxisChanged(axis: UInt8, value: Float) {

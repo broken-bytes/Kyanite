@@ -41,6 +41,10 @@ std::vector<uint64_t> TextureIndices = {};
 // Width, Height, SDL Window, ImGui ctx, ImGui Style, Root Dir
 typedef void RuntimeStart(uint32_t, uint32_t, void*, void*, void*, const char*);
 typedef void RuntimeTick(float);
+typedef void RuntimeKeyUp(uint8_t);
+typedef void RuntimeKeyDown(uint8_t);
+typedef void RuntimeMouseUp(uint8_t);
+typedef void RuntimeMouseDown(uint8_t);
 
 struct Instance {
   SDL_Window *Window;
@@ -48,6 +52,10 @@ struct Instance {
   const char *Name;
   const char *Version;
   RuntimeTick* Tick;
+  RuntimeKeyUp* KeyUp;
+  RuntimeKeyDown* KeyDown;
+  RuntimeMouseUp* MouseUp;
+  RuntimeMouseDown* MouseDown;
 };
 
 float frametime = 0;
@@ -120,6 +128,10 @@ int main(int argc, char *argv[]) {
     auto lib = LoadLibraryA("Kyanite.dll");
     ((RuntimeStart*)GetProcAddress(lib, "start"))(W, H, GlobalInstance.Window, nullptr, nullptr, argv[1]);
     GlobalInstance.Tick = (RuntimeTick*)GetProcAddress(lib, "update");
+    GlobalInstance.KeyUp = (RuntimeKeyUp*)GetProcAddress(lib, "onKeyUp");
+    GlobalInstance.KeyDown = (RuntimeKeyDown*)GetProcAddress(lib, "onKeyDown");
+    GlobalInstance.MouseUp = (RuntimeMouseUp*)GetProcAddress(lib, "onMouseButtonUp");
+    GlobalInstance.MouseDown = (RuntimeMouseDown*)GetProcAddress(lib, "onMouseButtonDown");
 #endif
   // Setup Dear ImGui style
   SDL_Event event;
@@ -138,10 +150,12 @@ int main(int argc, char *argv[]) {
         // Handle any key presses here.
         break;
       case SDL_MOUSEBUTTONUP:
+        GlobalInstance.MouseUp(0);
         //io.AddMouseButtonEvent(0, 0);
         // Handle mouse clicks here.
         break;
       case SDL_MOUSEBUTTONDOWN:
+        GlobalInstance.MouseDown(0);
         //io.AddMouseButtonEvent(0, 1);
         // Handle mouse clicks here.
         break;

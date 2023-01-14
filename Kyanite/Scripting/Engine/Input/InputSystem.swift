@@ -1,7 +1,3 @@
-public protocol InputEvent {
-    
-}
-
 public class InputSystem: EventSystem<InputEvent> {
     public enum ButtonState {
         case none // When button is not held 
@@ -34,11 +30,12 @@ public class InputSystem: EventSystem<InputEvent> {
         mouseButtonStates[.sixth] = .none
     }
 
-    internal func flush() {
+    public override func flush() {
+        super.flush()
         // Reset the Input each frame. 
         // - All events are cleared
         // - Pressed and released messages removed and state is changed
-        
+
         // Check what state the mouse buttons are in 
         // - If the state is pressed that means we dit not get any release message, thus the button must still be held
         // - If the state is released that means we dit not get any pressed message, thus the button must still be released, thus none
@@ -59,5 +56,6 @@ public class InputSystem: EventSystem<InputEvent> {
 
     internal func setMouseButton(button: MouseButton, isPressed: Bool) {
         mouseButtonStates[button] = isPressed ? .pressed : .released
+        self.push(event: MouseInputEvent(button: button, isPressed: isPressed))
     }
 }
