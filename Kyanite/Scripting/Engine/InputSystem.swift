@@ -35,7 +35,21 @@ public class InputSystem: EventSystem<InputEvent> {
     }
 
     internal func flush() {
-
+        // Reset the Input each frame. 
+        // - All events are cleared
+        // - Pressed and released messages removed and state is changed
+        
+        // Check what state the mouse buttons are in 
+        // - If the state is pressed that means we dit not get any release message, thus the button must still be held
+        // - If the state is released that means we dit not get any pressed message, thus the button must still be released, thus none
+        for mbState in mouseButtonStates {
+            if mbState.value == .pressed {
+                mouseButtonStates[mbState.key] = .held
+            }
+            if mbState.value == .released {
+                mouseButtonStates[mbState.key] = .none
+            }
+        }
     }
 
     public func mouseButtonState(for button: MouseButton) -> ButtonState {
@@ -43,7 +57,7 @@ public class InputSystem: EventSystem<InputEvent> {
         return btn
     }
 
-    internal func setMouseButton(button: MouseButton, state: ButtonState) {
-
+    internal func setMouseButton(button: MouseButton, isPressed: Bool) {
+        mouseButtonStates[button] = isPressed ? .pressed : .released
     }
 }
