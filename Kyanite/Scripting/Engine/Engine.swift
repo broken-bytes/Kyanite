@@ -13,4 +13,20 @@ internal class Engine {
     internal func update(timestep: Float) {
         NativeCore.shared.update(tick: timestep)
     }
+
+    internal func onKeyChanged(key: UInt8, isPressed: Bool) {
+
+    }
+
+    internal func onMouseButtonChanged(button: UInt8, isPressed: Bool) {
+
+    }
+
+    internal func onAxisChanged(axis: UInt8, value: Float) {
+
+    }
+
+    internal func onMousePositionChanged(mouseX: UInt32, mouseY: UInt32) {
+
+    }
 }

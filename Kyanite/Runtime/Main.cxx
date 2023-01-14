@@ -127,14 +127,6 @@ int main(int argc, char *argv[]) {
   while (GlobalInstance.Running) {
     Tick();
     while (SDL_PollEvent(&event)) {
-      const uint8_t *keyboardState = SDL_GetKeyboardState(NULL);
-
-      if(keyboardState[	SDL_SCANCODE_CAPSLOCK]) {
-        OutputDebugString("Pressed");
-      } else {
-        OutputDebugString("Not Pressed");
-      }
-      
       switch (event.type) {
       case SDL_WINDOWEVENT:
         break;
@@ -143,7 +135,6 @@ int main(int argc, char *argv[]) {
         break;
 
       case SDL_KEYDOWN:
-        
         // Handle any key presses here.
         break;
       case SDL_MOUSEBUTTONUP:

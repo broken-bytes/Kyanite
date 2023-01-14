@@ -508,6 +508,8 @@ uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid) {
 
 uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data) {
   ecs_set_id(ECS, entity, id, size, data);
+
+  ecs_f32_t
   return 0;
 }
 
