@@ -3,13 +3,15 @@
 #include <SDL2/SDL.h>
 #include <stduuid/uuid.h>
 #include <string.h>
+#include <thread>
 #include "Engine.hxx"
 #include "Mesh.hxx"
+#include "MeshComponent.hxx"
 #include "Rendering/Interface.hxx"
 #include "Rendering/Vertex.hxx"
 #include "Core/AssetLoader.hxx"
-#include "Core/NativeRef.hxx"
 #include "Shader.hxx"
+#include "ResourceTracker.hxx"
 
 #include "glm/common.hpp"
 #include "glm/geometric.hpp"
@@ -36,34 +38,12 @@
 #include <flecs.h>
 
 
-std::vector<NativeRef*> _nativeRefs = {};
 std::unique_ptr<Renderer::Interface> Interface;
 
 ecs_world_t* ECS;
 ecs_entity_t Scene;
 
 // Internal Helpers
-
-// --- Reference Functions ---
- void AddRef(NativeRef* objc) {
-    objc->RefCount++;
- }
-
- void RemoveRef(NativeRef* objc) {
-    objc->RefCount--;
-
-    if(objc->Type != DYNAMIC) {
-        // We only want to clear dynamic references. Others stay in memory
-        return;
-    }
-    auto deleter = std::find_if(_nativeRefs.begin(), _nativeRefs.end(), [objc](NativeRef* e) { return strcmp(e->UUID, objc->UUID);});
-
-    if(deleter != _nativeRefs.end()) {
-        auto deleteFunc = (void (*)(const char*))objc->Deleter;
-        deleteFunc(objc->UUID);
-        _nativeRefs.erase(deleter);
-    }
- }
 
 void SetRootDir(const char* path) {
     AssetLoader::SetRootDir(path);
@@ -413,6 +393,7 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
 // --- Commands ---
  void Init(uint32_t resolutionX, uint32_t resolutionY, void* window, void* ctx, void* style) {
   ECS = ecs_init();
+  ecs_set_threads(ECS, std::thread::hardware_concurrency());
   Scene = ecs_new_id(ECS);
   auto context = ImGui::CreateContext();
   ImGui::SetCurrentContext(context);
@@ -462,12 +443,6 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
  void SetFogColor(float r, float g, float b, float a) {}
  void SetFogIntensity(float intensity) {}
  void SetFogMinDistance(float distance) {}
- void SetMeshPosition(NativeRef* ref, float x, float y, float z) {}
- void SetMeshScale(NativeRef* ref, float x, float y, float z) {}
- void SetMeshRotation(NativeRef* ref, float x, float y, float z) {}
- void TranslateMesh(NativeRef* mesh, float x, float y, float z) {}
- void ScaleMesh(NativeRef* mesh, float x, float y, float z) {}
- void RotateMesh(NativeRef* mesh, float x, float y, float z) {}
 
  void SetCamera(    
 	float xPos, 
@@ -508,8 +483,6 @@ uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid) {
 
 uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data) {
   ecs_set_id(ECS, entity, id, size, data);
-
-  ecs_f32_t
   return 0;
 }
 

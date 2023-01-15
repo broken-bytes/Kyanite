@@ -20,7 +20,6 @@ find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
 set(HEADERS 
     include/Core/AssetLoader.hxx
     include/Core/VirtualFileSystem.hxx
-    include/Core/NativeRef.hxx
     )   
 set(SRC 
     src/AssetLoader.cxx

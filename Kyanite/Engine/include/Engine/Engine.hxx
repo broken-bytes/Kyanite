@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <stdint.h>
+#include "ResourceTracker.hxx"
 
 #ifdef _WIN32
 #define DLL_EXPORT __declspec(dllexport)
@@ -123,19 +124,54 @@ struct ShaderInfo {
   ShaderJSONData Data;
 } typedef ShaderInfo;
 
-// --- Reference Functions ---
-DLL_EXPORT void AddRef(NativeRef *objc);
-DLL_EXPORT void RemoveRef(NativeRef *objc);
-// --- Create Functions ---
+
+#pragma region EXPORTED_API
+//NOTE - We are using void* Pointers instead of std::shared_ptr<TrackedResource> for the C-style exported API. 
+// Reasons: 
+// - Swift can only handle C-style types(for now)
+// - We cannot export C++ types from within a C API
+// - C++ name mangling is a mess
+// The void* pointer is still std::shared_ptr<TrackedResource> but cast to void* so Swift can keep a ref to it.
+
+#pragma region CONFIG_API
+DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window, void* ctx, void* style);
+DLL_EXPORT void Shutdown();
+DLL_EXPORT void SetMaxFrameRate(uint16_t maxFramerate);
+DLL_EXPORT void SetVSync(bool enabled);
+DLL_EXPORT void SetRootDir(const char* path);
+DLL_EXPORT void SetCursorPosition(uint32_t x, uint32_t y);
+#pragma endregion
+
+#pragma region SHADER_API
+DLL_EXPORT void SetMaterialTexture(void* material, const char* name, void* texture);
+DLL_EXPORT void SetMaterialPropertyInt(void* material, const char* name, int value);
+DLL_EXPORT void SetMaterialPropertyFloat(void* material, const char* name, float value);
+DLL_EXPORT void SetMaterialPropertyVector2(void* material,const char* name, float* value);
+DLL_EXPORT void SetMaterialPropertyVector3(void* material, const char* name, float* value);
+DLL_EXPORT void SetMaterialPropertyVector4(void* material, const char* name, float* value);
+#pragma endregion
+
+#pragma region ENTITY_API
+DLL_EXPORT uint64_t CreateEntity(const char* name);
+DLL_EXPORT uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid);
+DLL_EXPORT uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data);
+DLL_EXPORT const void* GetComponent(uint64_t entity, uint64_t id);
+DLL_EXPORT uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y);
+#pragma endregion
+
+#pragma region RENDERING_API
+#pragma endregion
+
+#pragma endregion
+DLL_EXPORT void SetClearColor(float r, float g, float b, float a);
+DLL_EXPORT void SetFogColor(float r, float g, float b, float a);
+DLL_EXPORT void SetFogIntensity(float intensity);
+DLL_EXPORT void SetFogMinDistance(float distance);
+#pragma region INTERNAL_API
+#pragma endregion
 
 // --- Setter Functions ---
-DLL_EXPORT void SetRootDir(const char* path);
-DLL_EXPORT void SetMaterialTexture(NativeRef* material, const char* name, NativeRef* texture);
-DLL_EXPORT void SetMaterialPropertyInt(NativeRef* material, const char* name, int value);
-DLL_EXPORT void SetMaterialPropertyFloat(NativeRef* material, const char* name, float value);
-DLL_EXPORT void SetMaterialPropertyVector2(NativeRef* material,const char* name, float* value);
-DLL_EXPORT void SetMaterialPropertyVector3(NativeRef* material, const char* name, float* value);
-DLL_EXPORT void SetMaterialPropertyVector4(NativeRef* material, const char* name, float* value);
+
 
 // --- Load Functions ---
 // Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if
@@ -158,29 +194,15 @@ DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info);
 DLL_EXPORT NativeRef *LoadMaterialGPU(const char* name, NativeRef *shader);
 
 // --- Commands ---
-DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window, void* ctx, void* style);
-DLL_EXPORT void Shutdown();
-DLL_EXPORT void SetMaxFrameRate(uint16_t maxFramerate);
-DLL_EXPORT void SetVSync(bool enabled);
+
 DLL_EXPORT void Update(float frameTime);
 DLL_EXPORT void PhysicsUpdate(float frameTime);
 DLL_EXPORT void DrawMesh(uint64_t entityId, NativeRef *mesh, NativeRef *material,
                          MeshDrawInfo info, Transform transform);
 
-DLL_EXPORT void SetClearColor(float r, float g, float b, float a);
-DLL_EXPORT void SetFogColor(float r, float g, float b, float a);
-DLL_EXPORT void SetFogIntensity(float intensity);
-DLL_EXPORT void SetFogMinDistance(float distance);
-DLL_EXPORT void SetMeshPosition(NativeRef *ref, float x, float y, float z);
-DLL_EXPORT void SetMeshScale(NativeRef *ref, float x, float y, float z);
-DLL_EXPORT void SetMeshRotation(NativeRef *ref, float x, float y, float z);
-DLL_EXPORT void TranslateMesh(NativeRef *mesh, float x, float y, float z);
-DLL_EXPORT void ScaleMesh(NativeRef *mesh, float x, float y, float z);
-DLL_EXPORT void RotateMesh(NativeRef *mesh, float x, float y, float z);
 DLL_EXPORT void SetCamera(float xPos, float yPos, float zPos, float xRotation,
                           float yRotation, float zRotation);
-DLL_EXPORT void SetCursorPosition(uint32_t x, uint32_t y);
-DLL_EXPORT uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y);
+
 
 // Entity system
 
@@ -191,11 +213,6 @@ enum COMPONENT_PROP_TYPE {
   COMPONENT_PROP_TYPE_BOOL,
   COMPONENT_PROP_TYPE_STRING
 } typedef COMPONENT_PROP_TYPE;
-
-DLL_EXPORT uint64_t CreateEntity(const char* name);
-DLL_EXPORT uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid);
-DLL_EXPORT uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data);
-DLL_EXPORT const void* GetComponent(uint64_t entity, uint64_t id);
 
 #ifdef __cplusplus
 }

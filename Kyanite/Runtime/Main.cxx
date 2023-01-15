@@ -137,6 +137,11 @@ int main(int argc, char *argv[]) {
   char keyName[30];
   SDL_Event event;
   SetConsoleOutputCP(1251); 
+
+  char* str = new char[20];
+  GetKeyboardLayoutNameA(str);
+
+  OutputDebugStringA(str);
   while (GlobalInstance.Running) {
     Tick();
     while (SDL_PollEvent(&event)) {
@@ -153,6 +158,7 @@ int main(int argc, char *argv[]) {
         break;
       case SDL_KEYDOWN:
       GlobalInstance.KeyDown(event.key.keysym.scancode, SDL_GetKeyName(event.key.keysym.sym));      
+              std::cout << +(SDL_GetKeyName(event.key.keysym.sym)) << std::endl;
         break;
       case SDL_MOUSEBUTTONUP:
         GlobalInstance.MouseUp(event.button.button);

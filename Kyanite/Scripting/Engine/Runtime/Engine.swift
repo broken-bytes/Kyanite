@@ -7,13 +7,6 @@ internal class Engine {
 
     internal func start(width: UInt32, height: UInt32, window: UnsafeMutableRawPointer, ctx: UnsafeMutableRawPointer, style: UnsafeMutableRawPointer, rootDir: UnsafeMutableRawPointer) {
         NativeCore.shared.start(width: width, height: height, window: window, ctx: ctx, style: style, rootDir: rootDir)
-        let entity = Entity(name: "Test")
-        entity.addComponent(component: ColliderComponent())
-        InputSystem.shared.subscribe { event in 
-            if event is MouseInputEvent {
-                
-            }
-        }
     }
     
     internal func update(timestep: Float) {
