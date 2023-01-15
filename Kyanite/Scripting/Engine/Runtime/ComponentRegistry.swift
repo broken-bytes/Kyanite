@@ -15,19 +15,19 @@ internal class ComponentRegistry {
 
     }
 
-    internal func register<T>(component: T.Type) -> UInt64 {
+    internal func register<T>(component: T.Type) throws -> UInt64 {
         let tempName = "\(component)"
-        let id = NativeCore.shared.registerNewComponent(type: type(of: component), named: tempName)
+        let id = try NativeCore.shared.registerNewComponent(type: type(of: component), named: tempName)
         mappings[tempName] = ComponentEntry(name: tempName, id: id)
 
         return id
     }
 
-    internal func resolve<T>(component: T.Type) -> UInt64 {
+    internal func resolve<T>(component: T.Type) throws -> UInt64 {
         if let entry = mappings["\(component)"] {
             return entry.id
         } else {
-            return register(component: component)
+            return try register(component: component)
         }
     }
  }
