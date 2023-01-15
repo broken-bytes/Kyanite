@@ -1,5 +1,5 @@
+import Foundation
 import Core
-import WinSDK
 
 internal class Engine {
     internal init() {
@@ -10,7 +10,9 @@ internal class Engine {
         let entity = Entity(name: "Test")
         entity.addComponent(component: ColliderComponent())
         InputSystem.shared.subscribe { event in 
-            OutputDebugStringA("\(event)")
+            if event is MouseInputEvent {
+                
+            }
         }
     }
     

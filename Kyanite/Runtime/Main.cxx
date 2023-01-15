@@ -11,7 +11,7 @@
 #include <SDL_vulkan.h>
 #endif
 
-
+#include <iostream>
 #include <array>
 #include <filesystem>
 #include <map>
@@ -134,8 +134,9 @@ int main(int argc, char *argv[]) {
     GlobalInstance.MouseDown = (RuntimeMouseDown*)GetProcAddress(lib, "onMouseButtonDown");
 #endif
   // Setup Dear ImGui style
+  char keyName[30];
   SDL_Event event;
-
+  SetConsoleOutputCP(1251); 
   while (GlobalInstance.Running) {
     Tick();
     while (SDL_PollEvent(&event)) {
@@ -146,16 +147,20 @@ int main(int argc, char *argv[]) {
         // HandleUserEvents(&event);
         break;
 
+      case SDL_KEYUP:
+        GlobalInstance.KeyUp(event.key.keysym.scancode);      
+        break;
       case SDL_KEYDOWN:
-        // Handle any key presses here.
+      GlobalInstance.KeyDown(event.key.keysym.scancode);      
+       std::cout << SDL_GetKeyName(event.key.keysym.sym) << std::endl;
         break;
       case SDL_MOUSEBUTTONUP:
-        GlobalInstance.MouseUp(0);
+        GlobalInstance.MouseUp(event.button.button);
         //io.AddMouseButtonEvent(0, 0);
         // Handle mouse clicks here.
         break;
       case SDL_MOUSEBUTTONDOWN:
-        GlobalInstance.MouseDown(0);
+        GlobalInstance.MouseDown(event.button.button);
         //io.AddMouseButtonEvent(0, 1);
         // Handle mouse clicks here.
         break;
