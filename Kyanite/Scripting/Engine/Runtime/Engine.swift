@@ -21,8 +21,8 @@ internal class Engine {
         InputSystem.shared.flush()
     }
 
-    internal func onKeyChanged(key: UInt8, isPressed: Bool) {
-
+    internal func onKeyChanged(key: UInt8, isPressed: Bool, name: String) {
+        InputSystem.shared.setKeyboardButton(button: InputSystem.KeyboardButton(rawValue: key)!, isPressed: isPressed, name: name)
     }
 
     internal func onMouseButtonChanged(button: UInt8, isPressed: Bool) {

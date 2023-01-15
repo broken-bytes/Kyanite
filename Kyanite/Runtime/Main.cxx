@@ -41,8 +41,8 @@ std::vector<uint64_t> TextureIndices = {};
 // Width, Height, SDL Window, ImGui ctx, ImGui Style, Root Dir
 typedef void RuntimeStart(uint32_t, uint32_t, void*, void*, void*, const char*);
 typedef void RuntimeTick(float);
-typedef void RuntimeKeyUp(uint8_t);
-typedef void RuntimeKeyDown(uint8_t);
+typedef void RuntimeKeyUp(uint8_t, const char*);
+typedef void RuntimeKeyDown(uint8_t, const char*);
 typedef void RuntimeMouseUp(uint8_t);
 typedef void RuntimeMouseDown(uint8_t);
 
@@ -148,11 +148,11 @@ int main(int argc, char *argv[]) {
         break;
 
       case SDL_KEYUP:
-        GlobalInstance.KeyUp(event.key.keysym.scancode);      
+        GlobalInstance.KeyUp(event.key.keysym.scancode, SDL_GetKeyName(event.key.keysym.sym));      
+        std::cout << +(SDL_GetKeyName(event.key.keysym.sym)) << std::endl;
         break;
       case SDL_KEYDOWN:
-      GlobalInstance.KeyDown(event.key.keysym.scancode);      
-       std::cout << SDL_GetKeyName(event.key.keysym.sym) << std::endl;
+      GlobalInstance.KeyDown(event.key.keysym.scancode, SDL_GetKeyName(event.key.keysym.sym));      
         break;
       case SDL_MOUSEBUTTONUP:
         GlobalInstance.MouseUp(event.button.button);

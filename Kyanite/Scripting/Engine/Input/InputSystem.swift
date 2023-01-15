@@ -14,7 +14,7 @@ public class InputSystem: EventSystem<InputEvent> {
         case thumb2
     }
 
-    public enum KeyboardButton {
+    public enum KeyboardButton : UInt8, CaseIterable {
         case a = 4
         case b = 5
         case c = 6
@@ -125,7 +125,6 @@ public class InputSystem: EventSystem<InputEvent> {
         case menu = 118    /**< Menu (show menu) */
         case keypadComma = 133
         case clear = 156
-        case keypadEnter = 158
         case separator = 159
         case leftControl = 224
         case leftShift = 225
@@ -142,6 +141,7 @@ public class InputSystem: EventSystem<InputEvent> {
     // MARK: Private state management props
 
     private var mouseButtonStates: [MouseButton : ButtonState] = [:]
+    private var keyboardButtonStates: [KeyboardButton : ButtonState] = [:]
 
     private override init() {
         mouseButtonStates[.left] = .none
@@ -149,6 +149,10 @@ public class InputSystem: EventSystem<InputEvent> {
         mouseButtonStates[.right] = .none
         mouseButtonStates[.thumb1] = .none
         mouseButtonStates[.thumb2] = .none
+
+        for key in KeyboardButton.allCases {
+            keyboardButtonStates[key] = .none
+        }
     }
 
     public override func flush() {
@@ -168,6 +172,15 @@ public class InputSystem: EventSystem<InputEvent> {
                 mouseButtonStates[mbState.key] = .none
             }
         }
+
+        for kbState in keyboardButtonStates {
+            if kbState.value == .pressed {
+                keyboardButtonStates[kbState.key] = .held
+            }
+            if kbState.value == .released {
+                keyboardButtonStates[kbState.key] = .none
+            }
+        }
     }
 
     public func mouseButtonState(for button: MouseButton) -> ButtonState {
@@ -178,5 +191,10 @@ public class InputSystem: EventSystem<InputEvent> {
     internal func setMouseButton(button: MouseButton, isPressed: Bool) {
         mouseButtonStates[button] = isPressed ? .pressed : .released
         self.push(event: MouseInputEvent(button: button, isPressed: isPressed))
+    }
+
+    internal func setKeyboardButton(button: KeyboardButton, isPressed: Bool, name: String) {
+        keyboardButtonStates[button] = isPressed ? .pressed : .released
+        self.push(event: KeyboardInputEvent(button: button, isPressed: isPressed, name: name))
     }
 }
