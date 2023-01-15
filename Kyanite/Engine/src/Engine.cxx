@@ -391,7 +391,7 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
 
 
 // --- Commands ---
- void Init(uint32_t resolutionX, uint32_t resolutionY, void* window, void* ctx, void* style) {
+ void Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
   ECS = ecs_init();
   ecs_set_threads(ECS, std::thread::hardware_concurrency());
   Scene = ecs_new_id(ECS);
@@ -400,7 +400,7 @@ DLL_EXPORT NativeRef* LoadMaterialGPU(const char* name, NativeRef* shader) {
   ImGuiIO &io = ImGui::GetIO();
   // Enable Gamepad Controls
   ImGui::StyleColorsDark();
-    Interface = std::make_unique<Renderer::Interface>(resolutionX, resolutionY, window, &context, Renderer::RenderBackendAPI::DirectX12);
+    Interface = std::make_unique<Renderer::Interface>(resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
  }
  
  void Shutdown() {}

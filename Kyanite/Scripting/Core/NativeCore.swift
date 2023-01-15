@@ -1,5 +1,5 @@
 // Core Funcs
-internal typealias Start = @convention(c) (UInt32, UInt32, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer) -> Void
+internal typealias Start = @convention(c) (UInt32, UInt32, UnsafeMutableRawPointer) -> Void
 internal typealias Update = @convention(c) (Float) -> Void
 internal typealias SetRootDir = @convention(c) (UnsafeMutableRawPointer) -> Void
 
@@ -48,8 +48,8 @@ public class NativeCore {
         )
     }
 
-    public func start(width: UInt32, height: UInt32, window: UnsafeMutableRawPointer, ctx: UnsafeMutableRawPointer, style: UnsafeMutableRawPointer, rootDir: UnsafeMutableRawPointer) {
-        self.coreFuncs.start(width, height, window, ctx, style)
+    public func start(width: UInt32, height: UInt32, window: UnsafeMutableRawPointer, rootDir: UnsafeMutableRawPointer) {
+        self.coreFuncs.start(width, height, window)
         self.coreFuncs.setRootDir(rootDir)
     }
 

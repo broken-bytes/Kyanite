@@ -104,8 +104,7 @@ struct LightBuffer {
 
 auto light = LightBuffer{};
 
-Interface::Interface(uint32_t width, uint32_t height, void *window, void* ctx,
-                     RenderBackendAPI type) {
+Interface::Interface(uint32_t width, uint32_t height, void *window, RenderBackendAPI type) {
   SDL_SysWMinfo wmInfo;
   SDL_VERSION(&wmInfo.version);
   SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window *>(window), &wmInfo);

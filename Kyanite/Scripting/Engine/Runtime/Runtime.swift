@@ -1,10 +1,19 @@
+#if os(Windows)
 import WinSDK
+#endif
 
 let engine = Engine()
 
-@_cdecl("start") public func start(width: UInt32, height: UInt32, window: UnsafeMutableRawPointer, ctx: UnsafeMutableRawPointer, style: UnsafeMutableRawPointer, rootDir: UnsafeMutableRawPointer) {
-    engine.start(width: width, height: height, window: window, ctx: ctx, style: style, rootDir: rootDir)
-    SetConsoleOutputCP(1251)
+@_cdecl("start") public func start(
+    width: UInt32,
+    height: UInt32, 
+    window: UnsafeMutableRawPointer, 
+    rootDir: UnsafeMutableRawPointer,
+    world: UnsafeMutableRawPointer
+) {
+    let rawStr = world.bindMemory(to: CChar.self, capacity: strlen(world))
+    let str = String(cString: rawStr)
+    engine.start(width: width, height: height, window: window, rootDir: rootDir, world: str)
 }
 
 @_cdecl("update") public func update(tick: Float) {

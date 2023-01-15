@@ -134,7 +134,7 @@ struct ShaderInfo {
 // The void* pointer is still std::shared_ptr<TrackedResource> but cast to void* so Swift can keep a ref to it.
 
 #pragma region CONFIG_API
-DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window, void* ctx, void* style);
+DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window);
 DLL_EXPORT void Shutdown();
 DLL_EXPORT void SetMaxFrameRate(uint16_t maxFramerate);
 DLL_EXPORT void SetVSync(bool enabled);
