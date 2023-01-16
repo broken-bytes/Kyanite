@@ -2,9 +2,8 @@
 
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <string>
-#include <memory.h>
+#include <memory>
 
 namespace ResourceTracker {
 	enum class ResourceLifespan {
@@ -14,10 +13,10 @@ namespace ResourceTracker {
 
 	struct TrackedResource {
 		std::string UUID;
-		std::uint64_t RefID;
-		std::uint16_t RefCount;
+		uint64_t RefID;
+		uint16_t RefCount;
 		ResourceLifespan Lifespan;
-		std::function<void(std::string)> Deleter;
+		std::function<void(uint64_t)> Deleter;
 	};
 
 	enum class TrackerExceptionCode {
@@ -33,7 +32,7 @@ namespace ResourceTracker {
 		}
 	};
 
-	auto Register(std::string uuid) -> std::shared_ptr<TrackedResource>;
-	auto Track(std::string uuid, ResourceLifespan lifespan) -> std::shared_ptr<TrackedResource>;
+	auto Register(std::string uuid, uint64_t internalRefId, ResourceLifespan lifespan, std::function<void(uint64_t)> deleter) -> std::shared_ptr<TrackedResource>;
+	auto Track(std::string uuid) -> std::shared_ptr<TrackedResource>;
 	auto Untrack(std::string uuid) -> void;
 }

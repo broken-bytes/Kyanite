@@ -21,6 +21,8 @@ add_library(
     SHARED
     src/Engine.cxx
     src/ResourceTracker.cxx
+    include/Engine/Engine.hxx
+    include/Engine/ResourceTracker.hxx
 )
 target_include_directories(
     Kyanite-Runtime

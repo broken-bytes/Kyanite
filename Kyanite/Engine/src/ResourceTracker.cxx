@@ -4,42 +4,47 @@
 #include <memory>
 #include <mutex>
 #include <stdexcept>
-#include <stdint.h>
+#include <string.h>
 #include <string>
 #include <vector>
 
+
 namespace ResourceTracker {
 	std::vector<std::shared_ptr<TrackedResource>> Resources = {};
-	std::mutex trackerLock = {};
-
-
-	auto Register(std::string uuid, uint64_t resourceId, ResourceLifespan lifespan, std::function<void(std::string)> deleter) -> std::shared_ptr<TrackedResource> {
-		auto res = std::make_shared<TrackedResource>(uuid, resourceId, 0, lifespan, deleter);
+	auto Register(std::string uuid, uint64_t internalRefId, ResourceLifespan lifespan, std::function<void(uint64_t)> deleter) -> std::shared_ptr<TrackedResource> {
+		auto resource = std::make_shared<TrackedResource>(uuid, internalRefId, 0, lifespan, deleter);
+		return resource;
 	}
 
 	auto Track(std::string uuid) -> std::shared_ptr<TrackedResource> {
-		std::scoped_lock lock{trackerLock};
-		auto resource = std::find_if(Resources.begin(), Resources.end(), [uuid](auto res) { return res.UUID == uuid; });
+		auto resource = std::find_if(Resources.begin(), Resources.end(), [uuid](std::shared_ptr<TrackedResource> res) {
+			return strcmp(uuid.c_str(), res->UUID.c_str());
+		});
 
-		if (resource != Resources.end()) {
-			resource->RefCount++;
-			return resource;
+		if(resource != Resources.end()) {
+			auto res = *resource;
+			res->RefCount;
+			return res;
 		}
-		
-		throw TrackerException(TrackerExceptionCode::UNBOUND_RESOURCE, "Resource not bound");
+
+		throw std::runtime_error("Resource not bound");
 	}
 
 	auto Untrack(std::string uuid) -> void {
-		std::scoped_lock lock{ trackerLock };
-		auto resource = std::find_if(Resources.begin(), Resources.end(), [uuid](auto res) { return res.UUID == uuid; });
+		auto resource = std::find_if(Resources.begin(), Resources.end(), [uuid](std::shared_ptr<TrackedResource> res) {
+			return strcmp(uuid.c_str(), res->UUID.c_str());
+		});
 
-		if (resource != Resources.end()) {
-			resource->RefCount--;
-
-			if (resource->Lifespan == ResourceLifespan::DYNAMIC && resource->RefCount <= 0) {
-				deleter->Deleter();
-				Resources.erase(deleter);
+		if(resource != Resources.end()) {
+			auto res = *resource;
+			res->RefCount--;
+			if(res->RefCount <= 0) {
+				res->Deleter(res->RefID);
 			}
+			return;
 		}
-    }
+
+		throw std::runtime_error("Resource not bound");
+
+	}
 } // namespace ResourceTracker

@@ -2,8 +2,6 @@
 #pragma once
 
 #include <cstdint>
-#include <stdint.h>
-#include "ResourceTracker.hxx"
 
 #ifdef _WIN32
 #define DLL_EXPORT __declspec(dllexport)
@@ -133,22 +131,29 @@ struct ShaderInfo {
 // - C++ name mangling is a mess
 // The void* pointer is still std::shared_ptr<TrackedResource> but cast to void* so Swift can keep a ref to it.
 
-#pragma region CONFIG_API
+#pragma region RUNTIME_API
 DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window);
 DLL_EXPORT void Shutdown();
+DLL_EXPORT void Update(float frameTime);
+DLL_EXPORT void PhysicsUpdate(float frameTime);
+#pragma endregion
+
+#pragma region CONFIG_API
 DLL_EXPORT void SetMaxFrameRate(uint16_t maxFramerate);
 DLL_EXPORT void SetVSync(bool enabled);
 DLL_EXPORT void SetRootDir(const char* path);
 DLL_EXPORT void SetCursorPosition(uint32_t x, uint32_t y);
+DLL_EXPORT void SetCamera(float xPos, float yPos, float zPos, float xRotation,
+                          float yRotation, float zRotation);
 #pragma endregion
 
 #pragma region SHADER_API
-DLL_EXPORT void SetMaterialTexture(void* material, const char* name, void* texture);
-DLL_EXPORT void SetMaterialPropertyInt(void* material, const char* name, int value);
-DLL_EXPORT void SetMaterialPropertyFloat(void* material, const char* name, float value);
-DLL_EXPORT void SetMaterialPropertyVector2(void* material,const char* name, float* value);
-DLL_EXPORT void SetMaterialPropertyVector3(void* material, const char* name, float* value);
-DLL_EXPORT void SetMaterialPropertyVector4(void* material, const char* name, float* value);
+DLL_EXPORT void SetMaterialTexture(uint64_t material, const char* name, uint64_t texture);
+DLL_EXPORT void SetMaterialPropertyInt(uint64_t material, const char* name, int value);
+DLL_EXPORT void SetMaterialPropertyFloat(uint64_t material, const char* name, float value);
+DLL_EXPORT void SetMaterialPropertyVector2(uint64_t material,const char* name, float* value);
+DLL_EXPORT void SetMaterialPropertyVector3(uint64_t material, const char* name, float* value);
+DLL_EXPORT void SetMaterialPropertyVector4(uint64_t material, const char* name, float* value);
 #pragma endregion
 
 #pragma region ENTITY_API
@@ -159,61 +164,36 @@ DLL_EXPORT const void* GetComponent(uint64_t entity, uint64_t id);
 DLL_EXPORT uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y);
 #pragma endregion
 
-#pragma region RENDERING_API
-#pragma endregion
-
 #pragma endregion
 DLL_EXPORT void SetClearColor(float r, float g, float b, float a);
 DLL_EXPORT void SetFogColor(float r, float g, float b, float a);
 DLL_EXPORT void SetFogIntensity(float intensity);
 DLL_EXPORT void SetFogMinDistance(float distance);
-#pragma region INTERNAL_API
-#pragma endregion
-
-// --- Setter Functions ---
-
-
-// --- Load Functions ---
-// Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if
-// not supported)
-DLL_EXPORT NativeRef *LoadMeshGPU(MeshInfo &info);
-// Loads a mesh into CPU memory (RAM)
-DLL_EXPORT ModelInfo LoadModelCPU(const char *path);
-DLL_EXPORT void FreeModelCPU(ModelInfo &info);
-// Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU
-// if not supported)
-DLL_EXPORT NativeRef *LoadTextureGPU(TextureInfo &info);
-// Loads a texture into CPU memory (RAM)
-DLL_EXPORT TextureInfo LoadTextureCPU(const char *path);
-DLL_EXPORT void FreeTextureCPU(TextureInfo &info);
-DLL_EXPORT ShaderInfo LoadShaderCPU(const char *path);
-// Loads a shader and compiles it
-DLL_EXPORT NativeRef *LoadShaderGPU(ShaderInfo &info);
-
-// Creates a new material in the renderpipeline and returns its ref
-DLL_EXPORT NativeRef *LoadMaterialGPU(const char* name, NativeRef *shader);
-
-// --- Commands ---
-
-DLL_EXPORT void Update(float frameTime);
-DLL_EXPORT void PhysicsUpdate(float frameTime);
-DLL_EXPORT void DrawMesh(uint64_t entityId, NativeRef *mesh, NativeRef *material,
-                         MeshDrawInfo info, Transform transform);
-
-DLL_EXPORT void SetCamera(float xPos, float yPos, float zPos, float xRotation,
-                          float yRotation, float zRotation);
-
-
-// Entity system
-
-enum COMPONENT_PROP_TYPE {
-  COMPONENT_PROP_TYPE_INT,
-  COMPONENT_PROP_TYPE_UINT,
-  COMPONENT_PROP_TYPE_FLOAT,
-  COMPONENT_PROP_TYPE_BOOL,
-  COMPONENT_PROP_TYPE_STRING
-} typedef COMPONENT_PROP_TYPE;
 
 #ifdef __cplusplus
 }
 #endif
+
+#pragma region INTERNAL_API
+// --- Load Functions ---
+// Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if
+// not supported)
+uint64_t LoadMeshGPU(MeshInfo &info);
+// Loads a mesh into CPU memory (RAM)
+ModelInfo LoadModelCPU(const char *path);
+
+void FreeModelCPU(ModelInfo &info);
+// Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU
+// if not supported)
+uint64_t  LoadTextureGPU(TextureInfo &info);
+// Loads a texture into CPU memory (RAM)
+TextureInfo LoadTextureCPU(const char *path);
+void FreeTextureCPU(TextureInfo &info);
+ShaderInfo LoadShaderCPU(const char *path);
+// Loads a shader and compiles it
+uint64_t LoadShaderGPU(ShaderInfo &info);
+// Creates a new material in the renderpipeline and returns its ref
+uint64_t LoadMaterialGPU(const char* name, uint64_t shader);
+void DrawMesh(uint64_t entityId, uint64_t mesh, uint64_t material, MeshDrawInfo info, Transform transform);
+
+#pragma endregion
