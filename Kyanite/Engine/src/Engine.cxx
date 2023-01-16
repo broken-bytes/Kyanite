@@ -35,6 +35,9 @@
 #define FLECS_SNAPSHOT
 #define FLECS_LOG
 #define FLECS_PIPELINE
+#define FLECS_CPP
+#define FLECS_REST
+#define FLECS_APP
 #include <flecs.h>
 
 struct EngineInstance {
@@ -57,7 +60,7 @@ EngineInstance Instance = {};
 
 #pragma region RUNTIME_API
 void Init(uint32_t resolutionX, uint32_t resolutionY, void *window) {
- Instance.ECS = ecs_init();
+  Instance.ECS = ecs_init();
   ecs_set_threads(Instance.ECS, std::thread::hardware_concurrency());
   Instance.Scene = ecs_new_id(Instance.ECS);
   auto context = ImGui::CreateContext();
@@ -67,9 +70,13 @@ void Init(uint32_t resolutionX, uint32_t resolutionY, void *window) {
   ImGui::StyleColorsDark();
   Instance.Renderer = std::make_unique<Renderer::Interface>(
       resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
+
+  auto world = reinterpret_cast<flecs::world*>(Instance.ECS);
+  world->set<flecs::Rest>({});
 }
 
-void Shutdown() {}
+void Shutdown() {
+}
 
 void Update(float frameTime) {
   Instance.Renderer->Update();
@@ -89,6 +96,7 @@ void Update(float frameTime) {
   ImGui::End();
   Instance.Renderer->MidFrame();
   Instance.Renderer->EndFrame();
+  ecs_progress(Instance.ECS, frameTime);
 }
 
 void PhysicsUpdate(float frameTime) {}
@@ -160,6 +168,26 @@ const void *GetComponent(uint64_t entity, uint64_t id) {
 uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y) {
   return Instance.Renderer->ReadMouseOverData(x, y);
 }
+
+uint64_t RegisterSystem(void *system, uint64_t *componentIds,
+                        size_t numComponents) {
+  ecs_system_desc_t desc = {};
+  typedef void (*iterFuncPtr)(ecs_iter_t *);
+  desc.callback = reinterpret_cast<iterFuncPtr>(system);
+  desc.query = {};
+  desc.query.filter = {};
+
+  for(int x = 0; x < numComponents; x++) {
+    desc.query.filter.terms[x].id = componentIds[x];
+  }
+
+  return ecs_system_init(Instance.ECS, &desc);
+}
+
+void* GetComponentData(void* iterator, size_t size, uint8_t index) {
+  return ecs_field_w_size((ecs_iter_t*)iterator, size, index);
+}
+
 #pragma endregion
 
 #pragma region RENDERING_API

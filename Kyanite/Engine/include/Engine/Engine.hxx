@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdint>
+#include <stdint.h>
 
 #ifdef _WIN32
 #define DLL_EXPORT __declspec(dllexport)
@@ -162,6 +163,8 @@ DLL_EXPORT uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const ch
 DLL_EXPORT uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data);
 DLL_EXPORT const void* GetComponent(uint64_t entity, uint64_t id);
 DLL_EXPORT uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y);
+DLL_EXPORT uint64_t RegisterSystem(void* system, uint64_t* componentIds, size_t numComponents);
+DLL_EXPORT void* GetComponentData(void* iterator, size_t size, uint8_t index);
 #pragma endregion
 
 #pragma endregion

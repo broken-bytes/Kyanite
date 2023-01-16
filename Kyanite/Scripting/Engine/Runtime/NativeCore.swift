@@ -10,6 +10,8 @@ internal typealias CreateEntity = @convention(c) (UnsafeMutableRawPointer) -> UI
 internal typealias RegisterComponent = @convention(c) (UInt64, UInt8, UnsafeMutableRawPointer) -> UInt64
 internal typealias AddComponent = @convention(c) (UInt64, UInt64, UInt64, UnsafeMutableRawPointer) -> UInt64
 internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
+internal typealias RegisterSystem = @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> Void
+internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8) -> Void
 
 
 internal struct CoreFuncs {
@@ -23,6 +25,8 @@ internal struct EntityFuncs {
     internal let registerComponent: RegisterComponent
     internal let addComponent: AddComponent
     internal let getComponent: GetComponent
+    internal let registerSystem: RegisterSystem
+    internal let getComponentSetFromIterator: GetComponentSetFromIterator
 }
 
 enum EntityError: Error {
@@ -51,7 +55,9 @@ internal class NativeCore {
             createEntity: self.lib.loadFunc(named: "CreateEntity"), 
             registerComponent: self.lib.loadFunc(named: "RegisterComponent"), 
             addComponent: self.lib.loadFunc(named: "AddComponent"), 
-            getComponent: self.lib.loadFunc(named: "GetComponent")
+            getComponent: self.lib.loadFunc(named: "GetComponent"),
+            registerSystem: self.lib.loadFunc(named: "RegisterSystem"),
+            getComponentSetFromIterator: self.lib.loadFunc(named: "GetComponentData")
         )
     }
 
@@ -152,5 +158,13 @@ internal class NativeCore {
 
     internal func getComponentFromEntity(entity: UInt64, component: UInt64) -> UnsafeMutableRawPointer {
         return self.entityFuncs.getComponent(entity, component)
+    }
+
+    internal func registerSystem(callback: @convention(c) (UnsafeMutableRawPointer) -> Void, archetype: [UInt64]) {
+        let addRawPointer = unsafeBitCast(callback, to: UnsafeMutableRawPointer.self)
+        archetype.withUnsafeBufferPointer { 
+            let rawPtr = UnsafeMutableRawPointer(mutating: $0.baseAddress)!
+            self.entityFuncs.registerSystem(addRawPointer, rawPtr, UInt64(archetype.count))
+        }
     }
 }

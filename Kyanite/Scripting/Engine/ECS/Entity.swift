@@ -18,7 +18,7 @@ public final class Entity {
         let ptr = UnsafeMutablePointer<T>.allocate(capacity: 1)
         ptr.initialize(to: component)
         let rawPtr = UnsafeMutableRawPointer(mutating: ptr)
-        NativeCore.shared.addComponentToEntity(entity: self.internalId, component: typeId, data: rawPtr, type: T.self)
+        _ = NativeCore.shared.addComponentToEntity(entity: self.internalId, component: typeId, data: rawPtr, type: T.self)
     }
 
     public func component<T>(of type: T.Type) -> UnsafeMutablePointer<T>? {

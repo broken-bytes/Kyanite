@@ -1,0 +1,7 @@
+name: Warrior
+uuid: bf20cda9-0207-4dda-8e76-38a892b5fe1b
+model: scene.gltf
+meshes:
+  - name: Bla
+  - name: Bla2
+  - name: Bla3

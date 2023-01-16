@@ -1,5 +1,12 @@
 import Foundation
 import Core
+import Math
+import WinSDK
+
+
+public func testSystem(iterator: UnsafeMutableRawPointer) {
+    OutputDebugStringA("TICK")
+}
 
 internal class Engine {
     internal init() {
@@ -16,6 +23,18 @@ internal class Engine {
         Task {
             try! await WorldManager.shared.loadWorld(name: world)
         }
+
+        let tId = try! NativeCore.shared.registerNewComponent(type: TransformComponent.self, named: "Transform")
+        let mId = try! NativeCore.shared.registerNewComponent(type: MeshComponent.self, named: "Mesh")
+
+        NativeCore.shared.registerSystem(callback: testSystem, archetype: [tId, mId])
+
+        let entity = Entity(name: "MainEnt")
+        entity.addComponent(component: TransformComponent(
+            position: Vector3(x: 0, y: 0, z: 0),
+            scale: Vector3(x: 0, y: 0, z: 0),
+            rotation: Vector3(x: 0, y: 0, z: 0)))
+        entity.addComponent(component: MeshComponent(internalRefId: 0))
     }
     
     internal func update(timestep: Float) {
