@@ -43,7 +43,7 @@ struct EngineInstance {
   ecs_entity_t Scene;
 };
 
-std::unique_ptr<EngineInstance> Instance;
+EngineInstance Instance = {};
 
 #pragma region EXPORTED_API
 // NOTE - We are using void* Pointers instead of
@@ -57,26 +57,26 @@ std::unique_ptr<EngineInstance> Instance;
 
 #pragma region RUNTIME_API
 void Init(uint32_t resolutionX, uint32_t resolutionY, void *window) {
-  Instance->ECS = ecs_init();
-  ecs_set_threads(Instance->ECS, std::thread::hardware_concurrency());
-  Instance->Scene = ecs_new_id(Instance->ECS);
+ Instance.ECS = ecs_init();
+  ecs_set_threads(Instance.ECS, std::thread::hardware_concurrency());
+  Instance.Scene = ecs_new_id(Instance.ECS);
   auto context = ImGui::CreateContext();
   ImGui::SetCurrentContext(context);
   ImGuiIO &io = ImGui::GetIO();
   // Enable Gamepad Controls
   ImGui::StyleColorsDark();
-  Instance->Renderer = std::make_unique<Renderer::Interface>(
+  Instance.Renderer = std::make_unique<Renderer::Interface>(
       resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
 }
 
 void Shutdown() {}
 
 void Update(float frameTime) {
-  Instance->Renderer->Update();
-  Instance->Renderer->StartFrame();
+  Instance.Renderer->Update();
+  Instance.Renderer->StartFrame();
   ImGui::Begin("Entities");
-  auto termIt = ecs_term_t{ecs_pair(EcsChildOf, Instance->Scene)};
-  ecs_iter_t it = ecs_term_iter(Instance->ECS, &termIt);
+  auto termIt = ecs_term_t{ecs_pair(EcsChildOf, Instance.Scene)};
+  ecs_iter_t it = ecs_term_iter(Instance.ECS, &termIt);
   // ecs_iter_poly(ECS, ECS, &it, NULL);
   while (ecs_iter_next(&it)) {
     for (int i = 0; i < it.count; i++) {
@@ -87,8 +87,8 @@ void Update(float frameTime) {
     }
   }
   ImGui::End();
-  Instance->Renderer->MidFrame();
-  Instance->Renderer->EndFrame();
+  Instance.Renderer->MidFrame();
+  Instance.Renderer->EndFrame();
 }
 
 void PhysicsUpdate(float frameTime) {}
@@ -105,14 +105,14 @@ void SetCursorPosition(uint32_t x, uint32_t y) {}
 
 void SetCamera(float xPos, float yPos, float zPos, float xRotation,
                float yRotation, float zRotation) {
-  Instance->Renderer->SetCamera({xPos, yPos, zPos},
+  Instance.Renderer->SetCamera({xPos, yPos, zPos},
                                 {xRotation, yRotation, zRotation});
 }
 #pragma endregion
 
 #pragma region SHADER_API
 void SetMaterialTexture(uint64_t material, const char *name, uint64_t texture) {
-  Instance->Renderer->SetMaterialTexture(material, name, texture);
+  Instance.Renderer->SetMaterialTexture(material, name, texture);
 }
 
 void SetMaterialPropertyInt(uint64_t material, const char *name, int value) {}
@@ -133,8 +133,8 @@ void SetMaterialPropertyVector4(uint64_t material, const char *name,
 
 #pragma region ENTITY_API
 uint64_t CreateEntity(const char *name) {
-  ecs_entity_t e = ecs_new_w_pair(Instance->ECS, EcsChildOf, Instance->Scene);
-  ecs_set_name(Instance->ECS, e, name);
+  ecs_entity_t e = ecs_new_w_pair(Instance.ECS, EcsChildOf, Instance.Scene);
+  ecs_set_name(Instance.ECS, e, name);
   return e;
 }
 
@@ -145,20 +145,20 @@ uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char *uuid) {
   desc.type.alignment = alignment;
   desc.type.name = uuid;
 
-  return ecs_component_init(Instance->ECS, &desc);
+  return ecs_component_init(Instance.ECS, &desc);
 }
 
 uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *data) {
-  ecs_set_id(Instance->ECS, entity, id, size, data);
+  ecs_set_id(Instance.ECS, entity, id, size, data);
   return 0;
 }
 
 const void *GetComponent(uint64_t entity, uint64_t id) {
-  return ecs_get_id(Instance->ECS, entity, id);
+  return ecs_get_id(Instance.ECS, entity, id);
 }
 
 uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y) {
-  return Instance->Renderer->ReadMouseOverData(x, y);
+  return Instance.Renderer->ReadMouseOverData(x, y);
 }
 #pragma endregion
 
@@ -180,7 +180,7 @@ void SetFogMinDistance(float distance) {}
 // Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if
 // not supported)
 uint64_t LoadMeshGPU(MeshInfo &info) {
-  auto index = Instance->Renderer->UploadMeshData(
+  auto index = Instance.Renderer->UploadMeshData(
       (Vertex *)info.Vertices, info.VerticesCount / 9, info.Indices,
       info.IndicesCount);
   return index;
@@ -219,7 +219,7 @@ void FreeModelCPU(ModelInfo &info) { delete[] info.Meshes; }
 // Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU
 // if not supported)
 uint64_t LoadTextureGPU(TextureInfo &info) {
-  return Instance->Renderer->UploadTextureData(info.Levels[0].Data, info.Levels[0].Width,
+  return Instance.Renderer->UploadTextureData(info.Levels[0].Data, info.Levels[0].Width,
                                       info.Levels[0].Height, 4);
 }
 
@@ -448,14 +448,14 @@ uint64_t LoadShaderGPU(ShaderInfo &info) {
     shader.ConstantBufferLayout.push_back(slot);
   }
 
-  auto index = Instance->Renderer->UploadShaderData(shader);
+  auto index = Instance.Renderer->UploadShaderData(shader);
 
   return index;
 }
 
 // Creates a new material in the renderpipeline and returns its ref
 uint64_t LoadMaterialGPU(const char *name, uint64_t shader) {
-  return Instance->Renderer->CreateMaterial(name, shader);
+  return Instance.Renderer->CreateMaterial(name, shader);
 }
 
 void DrawMesh(uint64_t entityId, uint64_t mesh, uint64_t material,
@@ -466,7 +466,7 @@ void DrawMesh(uint64_t entityId, uint64_t mesh, uint64_t material,
       glm::vec3(transform.Scale.X, transform.Scale.Y, transform.Scale.Z);
   glm::quat qRotation = glm::quat(transform.Rotation.Q, transform.Rotation.X,
                                   transform.Rotation.Y, transform.Rotation.Z);
-  Instance->Renderer->DrawMesh(entityId, mesh, material, info, position,
+  Instance.Renderer->DrawMesh(entityId, mesh, material, info, position,
                                qRotation, scale);
 }
 

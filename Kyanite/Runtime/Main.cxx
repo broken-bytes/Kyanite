@@ -38,8 +38,8 @@ std::vector<uint64_t> ShaderIndices = {};
 std::vector<uint64_t> MeshIndices = {};
 std::vector<uint64_t> TextureIndices = {};
 
-// Width, Height, SDL Window, ImGui ctx, ImGui Style, Root Dir
-typedef void RuntimeStart(uint32_t, uint32_t, void*, void*, void*, const char*);
+// Width, Height, SDL Window, Root Dir, World Name
+typedef void RuntimeStart(uint32_t, uint32_t, void*, const char*, const char*);
 typedef void RuntimeTick(float);
 typedef void RuntimeKeyUp(uint8_t, const char*);
 typedef void RuntimeKeyDown(uint8_t, const char*);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
   //SetRootDir(argv[1]);
 #if _WIN32
     auto lib = LoadLibraryA("Kyanite.dll");
-    ((RuntimeStart*)GetProcAddress(lib, "start"))(W, H, GlobalInstance.Window, nullptr, nullptr, argv[1]);
+    ((RuntimeStart*)GetProcAddress(lib, "start"))(W, H, GlobalInstance.Window, argv[1], "WORLD");
     GlobalInstance.Tick = (RuntimeTick*)GetProcAddress(lib, "update");
     GlobalInstance.KeyUp = (RuntimeKeyUp*)GetProcAddress(lib, "onKeyUp");
     GlobalInstance.KeyDown = (RuntimeKeyDown*)GetProcAddress(lib, "onKeyDown");
