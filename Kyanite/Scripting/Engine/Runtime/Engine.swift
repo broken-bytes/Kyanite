@@ -9,12 +9,11 @@ var entities: [Entity] = []
 public func testSystem(iterator: UnsafeMutableRawPointer) {
     var transform = NativeCore.shared.getComponentSet(iterator: iterator, type: TransformComponent.self, index: 1)
     var movement = NativeCore.shared.getComponentSet(iterator: iterator, type: MoveComponent.self, index: 2)
+    let deltaTime = NativeCore.shared.getSystemDeltaTime(iterator: iterator)
     
     for x in 0..<transform.count {
-        transform[x].position = add(left: transform[x].position, right: movement[x].movement)
+        transform[x].position = add(left: transform[x].position, right: mul(vector: movement[x].movement, value: deltaTime))
     }
-
-    Logger.shared.println(str: "\(transform[0])")
 
 }
 
@@ -46,7 +45,7 @@ internal class Engine {
 
 
         for x in 0..<100 {
-            let entity = Entity(name: "Entity: \(x)")
+            let entity = Entity(name: "Entity_\(x)")
             entity.addComponent(component: TransformComponent(
                 position: Vector3(x: 1, y: 2, z: 3),
                 scale: Vector3(x: 6, y: 5, z: 4),
@@ -64,11 +63,13 @@ internal class Engine {
     }
 
     internal func onKeyChanged(key: UInt8, isPressed: Bool, name: String) {
-        InputSystem.shared.setKeyboardButton(button: InputSystem.KeyboardButton(rawValue: key)!, isPressed: isPressed, name: name)
+        guard let keyData = InputSystem.KeyboardButton(rawValue: key) else { return }
+        InputSystem.shared.setKeyboardButton(button: keyData, isPressed: isPressed, name: name)
     }
 
     internal func onMouseButtonChanged(button: UInt8, isPressed: Bool) {
-        InputSystem.shared.setMouseButton(button: InputSystem.MouseButton(rawValue: button)!, isPressed: isPressed)
+        guard let keyData = InputSystem.MouseButton(rawValue: button) else { return }
+        InputSystem.shared.setMouseButton(button: keyData, isPressed: isPressed)
     }
 
     internal func onAxisChanged(axis: UInt8, value: Float) {

@@ -12,6 +12,7 @@ internal typealias AddComponent = @convention(c) (UInt64, UInt64, UInt64, Unsafe
 internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
 internal typealias RegisterSystem = @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> Void
 internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8, UnsafeMutablePointer<UInt64>) -> UnsafeMutableRawPointer
+internal typealias GetSystemDeltaTme = @convention(c) (UnsafeMutableRawPointer, UnsafeMutablePointer<Float>) -> Void
 
 
 internal struct CoreFuncs {
@@ -27,6 +28,7 @@ internal struct EntityFuncs {
     internal let getComponent: GetComponent
     internal let registerSystem: RegisterSystem
     internal let getComponentSetFromIterator: GetComponentSetFromIterator
+    internal let getSystemDeltaTime: GetSystemDeltaTme
 }
 
 enum EntityError: Error {
@@ -57,7 +59,8 @@ internal class NativeCore {
             addComponent: self.lib.loadFunc(named: "AddComponent"), 
             getComponent: self.lib.loadFunc(named: "GetComponent"),
             registerSystem: self.lib.loadFunc(named: "RegisterSystem"),
-            getComponentSetFromIterator: self.lib.loadFunc(named: "GetComponentData")
+            getComponentSetFromIterator: self.lib.loadFunc(named: "GetComponentData"),
+            getSystemDeltaTime: self.lib.loadFunc(named: "GetSystemDelta")
         )
     }
 
@@ -82,65 +85,6 @@ internal class NativeCore {
     }
 
     internal func registerNewComponent<T>(type: T.Type) throws -> UInt64 {
-            var layout = ComponentLayout()
-
-            let mirror = Mirror(reflecting: type)
-
-            for child in mirror.children {
-                // Go through every allowed type in order to check what type this prop is. Hacky but gets the job done for now
-                if let _ = child.value as? Int8 {
-                    layout.push(prop: .tiny)
-                    continue
-                }
-
-                if let _ = child.value as? UInt8 {
-                    layout.push(prop: .tiny)
-                    continue
-                }
-
-                if let _ = child.value as? Character {
-                    layout.push(prop: .small)
-                    continue
-                }
-
-                if let _ = child.value as? Int16 {
-                    layout.push(prop: .small)
-                    continue
-                }
-
-                if let _ = child.value as? UInt16 {
-                    layout.push(prop: .small)
-                    continue
-                }
-
-                if let _ = child.value as? Int32 {
-                    layout.push(prop: .regular)
-                    continue
-                }
-
-                if let _ = child.value as? UInt32 {
-                    layout.push(prop: .regular)
-                    continue
-                }
-
-                if let _ = child.value as? Float {
-                    layout.push(prop: .regular)
-                    continue
-                }
-
-                if let _ = child.value as? Int64 {
-                    layout.push(prop: .large)
-                    continue
-                }
-
-                if let _ = child.value as? UInt64 {
-                    layout.push(prop: .large)
-                    continue
-                }
-
-                throw EntityError.componentNotPoD(message: "The component contains an invalid field(\(child.label ?? "UNKNOWN")). Please only use POD structs are components")
-            }
-
         return "\(type)".withCString { 
             let rawPtr = UnsafeMutableRawPointer(mutating: $0)!
             return self.entityFuncs.registerComponent(UInt64(MemoryLayout<T>.size), UInt8(MemoryLayout<T>.alignment), rawPtr)   
@@ -180,5 +124,11 @@ internal class NativeCore {
         let dataBuff = UnsafeMutableBufferPointer(start: dataPtr, count: Int(count))
 
         return dataBuff
+    }
+
+    internal func getSystemDeltaTime(iterator: UnsafeMutableRawPointer) -> Float {
+        var delta: Float = 0.0
+        self.entityFuncs.getSystemDeltaTime(iterator, &delta)
+        return delta
     }
 }

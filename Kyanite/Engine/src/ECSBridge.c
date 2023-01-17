@@ -3,6 +3,36 @@
 ecs_world_t *ECS;
 ecs_entity_t Scene;
 
+void SetupBuiltinTypesMeta() {
+  ECS_COMPONENT(ECS, TransformComponent);
+  ECS_COMPONENT(ECS, Vector3Component);
+  ECS_COMPONENT(ECS, MeshComponent);
+  ecs_struct(ECS, {.entity = ecs_id(Vector3Component),
+                   .members = {{.name = "x", .type = ecs_id(ecs_f32_t)},
+                               {.name = "y", .type = ecs_id(ecs_f32_t)},
+                               {.name = "z", .type = ecs_id(ecs_f32_t)}}});
+
+  ecs_struct(ECS, {.entity = ecs_id(TransformComponent),
+                   .members = {
+                       {.name = "position", .type = ecs_id(Vector3Component)},
+                       {.name = "rotation", .type = ecs_id(Vector3Component)},
+                       {.name = "scale", .type = ecs_id(Vector3Component)},
+                   }});
+  ecs_struct(ECS, {.entity = ecs_id(MeshComponent),
+                   .members = {
+                       {.name = "internalRefId", .type = ecs_id(ecs_u64_t)},
+                   }});
+}
+
+void SetupBuiltinTypesComponents() {
+
+}
+
+void SetupBuiltinTypes() {
+  SetupBuiltinTypesComponents();
+  SetupBuiltinTypesMeta();
+}
+
 void ECS_Init(uint8_t numThreads) {
   ECS = ecs_init();
   ECS_IMPORT(ECS, FlecsMonitor);
@@ -13,6 +43,8 @@ void ECS_Init(uint8_t numThreads) {
 
   ecs_add_id(ECS, Scene, sceneTag);
   ecs_set_name(ECS, Scene, "Scene");
+  SetupBuiltinTypes();
+  ecs_log_set_level(1);
 }
 
 void ECS_Update(float frametime) {
@@ -71,4 +103,8 @@ void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* c
     ecs_iter_t* it = (ecs_iter_t*)iterator;
     *count =  it->count;
     return ecs_field_w_size((ecs_iter_t*)iterator, size, index);
+}
+
+void ECS_GetSystemDeltaTime(void* iterator, float* deltaTime) {
+  *deltaTime = ((ecs_iter_t*)iterator)->delta_time;
 }

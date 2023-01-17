@@ -81,24 +81,9 @@ constexpr int H = 1080;
 
 #ifdef _WIN32
 
-bool bAttachToConsole()
+void bAttachToConsole()
 {
-    if (!AttachConsole(ATTACH_PARENT_PROCESS))
-    {
-        if (GetLastError() != ERROR_ACCESS_DENIED) //already has a console
-        {
-            if (!AttachConsole(GetCurrentProcessId()))
-            {
-                DWORD dwLastError = GetLastError();
-                if (dwLastError != ERROR_ACCESS_DENIED) //already has a console
-                {
-                    return false;
-                }
-            }
-        }
-    }
-
-    return true;
+  AllocConsole();
 }
 
 #endif
@@ -180,11 +165,9 @@ int main(int argc, char *argv[]) {
 
       case SDL_KEYUP:
         GlobalInstance.KeyUp(event.key.keysym.scancode, SDL_GetKeyName(event.key.keysym.sym));      
-        std::cout << +(SDL_GetKeyName(event.key.keysym.sym)) << std::endl;
         break;
       case SDL_KEYDOWN:
       GlobalInstance.KeyDown(event.key.keysym.scancode, SDL_GetKeyName(event.key.keysym.sym));      
-              std::cout << +(SDL_GetKeyName(event.key.keysym.sym)) << std::endl;
         break;
       case SDL_MOUSEBUTTONUP:
         GlobalInstance.MouseUp(event.button.button);

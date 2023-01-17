@@ -1,7 +1,6 @@
 #include "Engine.hxx"
 #include "Core/AssetLoader.hxx"
 #include "Mesh.hxx"
-#include "MeshComponent.hxx"
 #include "Rendering/Interface.hxx"
 #include "Rendering/Vertex.hxx"
 #include "ResourceTracker.hxx"
@@ -154,6 +153,10 @@ uint64_t RegisterSystem(const char* name, void *system, uint64_t *componentIds,
 
 void* GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count) {
   return ECS_GetComponentData(iterator, size, index, count);
+}
+
+void GetSystemDelta(void* iterator, float* delta) {
+  ECS_GetSystemDeltaTime(iterator, delta);
 }
 
 #pragma endregion

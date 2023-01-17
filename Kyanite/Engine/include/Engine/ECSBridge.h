@@ -17,6 +17,22 @@
 extern "C" {
 #endif
 
+struct Vector3Component {
+  float x;
+  float y;
+  float z;
+} typedef Vector3Component;
+
+struct TransformComponent {
+  Vector3Component Position;
+  Vector3Component Rotation;
+  Vector3Component Scale;
+} typedef TransformComponent;
+
+struct MeshComponent {
+  uint64_t internalId;
+} typedef MeshComponent;
+
 void ECS_Init(uint8_t);
 void ECS_Update(float frametime);
 ecs_world_t* ECS_GetWorld(void);
@@ -28,6 +44,7 @@ uint64_t ECS_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *dat
 const void* ECS_GetComponent(uint64_t entity, uint64_t id);
 uint64_t ECS_RegisterSystem(const char* name, void *system, uint64_t *componentIds, size_t numComponents);
 void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count);
+void ECS_GetSystemDeltaTime(void* iterator, float* deltaTime);
 #ifdef __cplusplus
 }
 #endif
