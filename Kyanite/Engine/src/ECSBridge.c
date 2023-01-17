@@ -67,6 +67,8 @@ uint64_t ECS_RegisterSystem(const char* name, void *system, uint64_t *componentI
   return ecs_system_init(ECS, &desc);
 }
 
-void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index) {
+void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count) {
+    ecs_iter_t* it = (ecs_iter_t*)iterator;
+    *count =  it->count;
     return ecs_field_w_size((ecs_iter_t*)iterator, size, index);
 }

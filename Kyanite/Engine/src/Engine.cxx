@@ -152,8 +152,8 @@ uint64_t RegisterSystem(const char* name, void *system, uint64_t *componentIds,
   return ECS_RegisterSystem(name, system, componentIds, numComponents);
 }
 
-void* GetComponentData(void* iterator, size_t size, uint8_t index) {
-  return ECS_GetComponentData(iterator, size, index);
+void* GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count) {
+  return ECS_GetComponentData(iterator, size, index, count);
 }
 
 #pragma endregion

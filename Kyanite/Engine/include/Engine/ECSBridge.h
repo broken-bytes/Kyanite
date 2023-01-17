@@ -27,7 +27,7 @@ uint64_t ECS_RegisterComponent(uint64_t size, uint8_t alignment, const char *uui
 uint64_t ECS_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *data);
 const void* ECS_GetComponent(uint64_t entity, uint64_t id);
 uint64_t ECS_RegisterSystem(const char* name, void *system, uint64_t *componentIds, size_t numComponents);
-void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index);
+void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count);
 #ifdef __cplusplus
 }
 #endif

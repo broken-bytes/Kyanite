@@ -11,7 +11,7 @@ internal typealias RegisterComponent = @convention(c) (UInt64, UInt8, UnsafeMuta
 internal typealias AddComponent = @convention(c) (UInt64, UInt64, UInt64, UnsafeMutableRawPointer) -> UInt64
 internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
 internal typealias RegisterSystem = @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> Void
-internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8) -> UnsafeMutableRawPointer
+internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8, UnsafeMutablePointer<UInt64>) -> UnsafeMutableRawPointer
 
 
 internal struct CoreFuncs {
@@ -170,5 +170,15 @@ internal class NativeCore {
                 self.entityFuncs.registerSystem(rawPtrStrName, addRawPointer, rawPtr, UInt64(arch.count))
             }
         }
+    }
+
+    internal func getComponentSet<T: Component>(iterator: UnsafeMutableRawPointer, type: T.Type, index: UInt8) -> UnsafeMutableBufferPointer<T> {
+        var count: UInt64 = 0
+        let data = self.entityFuncs.getComponentSetFromIterator(iterator, UInt64(MemoryLayout<T>.size), index, &count)
+
+        let dataPtr = data.bindMemory(to: T.self, capacity: Int(count))
+        let dataBuff = UnsafeMutableBufferPointer(start: dataPtr, count: Int(count))
+
+        return dataBuff
     }
 }
