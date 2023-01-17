@@ -24,10 +24,13 @@ internal class Engine {
             try! await WorldManager.shared.loadWorld(name: world)
         }
 
-        let tId = try! NativeCore.shared.registerNewComponent(type: TransformComponent.self, named: "Transform")
-        let mId = try! NativeCore.shared.registerNewComponent(type: MeshComponent.self, named: "Mesh")
+        try! ComponentRegistry.shared.register(component: TransformComponent.self)
+        try! ComponentRegistry.shared.register(component: MeshComponent.self)
+        try! ComponentRegistry.shared.register(component: RigidbodyComponent.self)
+        try! ComponentRegistry.shared.register(component: SpriteComponent.self)
 
-        NativeCore.shared.registerSystem(callback: testSystem, archetype: [tId, mId])
+        NativeCore.shared.registerSystem(name: "RenderingSystem", callback: testSystem, TransformComponent.self, MeshComponent.self)
+        NativeCore.shared.registerSystem(name: "PhysicsSystem", callback: testSystem, TransformComponent.self, RigidbodyComponent.self)
 
         let entity = Entity(name: "MainEnt")
         entity.addComponent(component: TransformComponent(

@@ -1,5 +1,3 @@
-import Rendering
-
 public struct CameraComponent: Component {
     public var fov: Float
     public var nearClipPlane: Float

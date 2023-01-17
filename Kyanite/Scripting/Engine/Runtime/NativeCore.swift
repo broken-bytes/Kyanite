@@ -10,8 +10,8 @@ internal typealias CreateEntity = @convention(c) (UnsafeMutableRawPointer) -> UI
 internal typealias RegisterComponent = @convention(c) (UInt64, UInt8, UnsafeMutableRawPointer) -> UInt64
 internal typealias AddComponent = @convention(c) (UInt64, UInt64, UInt64, UnsafeMutableRawPointer) -> UInt64
 internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
-internal typealias RegisterSystem = @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> Void
-internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8) -> Void
+internal typealias RegisterSystem = @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> Void
+internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8) -> UnsafeMutableRawPointer
 
 
 internal struct CoreFuncs {
@@ -81,12 +81,7 @@ internal class NativeCore {
         }
     }
 
-    internal func registerNewComponent<T>(type: T.Type, named: String) throws -> UInt64 {
-        guard let nameRaw = named.data(using: .utf8) else { 
-            throw EntityError.invalidName(message: "The name of the component is invalid. Type: \(type)")
-        }
-        return try withUnsafePointer(to: nameRaw) { ptr in 
-            let rawPtr = UnsafeMutableRawPointer(mutating: ptr)
+    internal func registerNewComponent<T>(type: T.Type) throws -> UInt64 {
             var layout = ComponentLayout()
 
             let mirror = Mirror(reflecting: type)
@@ -146,9 +141,9 @@ internal class NativeCore {
                 throw EntityError.componentNotPoD(message: "The component contains an invalid field(\(child.label ?? "UNKNOWN")). Please only use POD structs are components")
             }
 
-            return layout.layout.withUnsafeBytes { bytes in 
-                return self.entityFuncs.registerComponent(UInt64(MemoryLayout<T>.size), UInt8(MemoryLayout<T>.alignment), rawPtr)
-            }
+        return "\(type)".withCString { 
+            let rawPtr = UnsafeMutableRawPointer(mutating: $0)!
+            return self.entityFuncs.registerComponent(UInt64(MemoryLayout<T>.size), UInt8(MemoryLayout<T>.alignment), rawPtr)   
         }
     }
 
@@ -160,11 +155,20 @@ internal class NativeCore {
         return self.entityFuncs.getComponent(entity, component)
     }
 
-    internal func registerSystem(callback: @convention(c) (UnsafeMutableRawPointer) -> Void, archetype: [UInt64]) {
+    internal func registerSystem(name: String, callback: @convention(c) (UnsafeMutableRawPointer) -> Void, _ archetype: Component.Type...) {
+        let arch: [UInt64] = archetype.map { 
+            return try! ComponentRegistry.shared.resolveType(type: $0)
+        }
+
         let addRawPointer = unsafeBitCast(callback, to: UnsafeMutableRawPointer.self)
-        archetype.withUnsafeBufferPointer { 
-            let rawPtr = UnsafeMutableRawPointer(mutating: $0.baseAddress)!
-            self.entityFuncs.registerSystem(addRawPointer, rawPtr, UInt64(archetype.count))
+        guard let rawStr = name.data(using: .utf8) else { fatalError("Failed to create data from system name") }
+
+        return name.withCString { cStr in       
+            return arch.withUnsafeBufferPointer { 
+                let rawPtr = UnsafeMutableRawPointer(mutating: $0.baseAddress)!
+                let rawPtrStrName = UnsafeMutableRawPointer(mutating: cStr)!
+                self.entityFuncs.registerSystem(rawPtrStrName, addRawPointer, rawPtr, UInt64(arch.count))
+            }
         }
     }
 }

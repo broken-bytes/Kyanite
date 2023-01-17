@@ -27,18 +27,7 @@
 
 #include "imgui.h"
 
-#define FLECS_CUSTOM_BUILD // Don't build all addons
-#define FLECS_SYSTEM
-#define FLECS_META
-#define FLECS_META_C
-#define FLECS_EXPR
-#define FLECS_SNAPSHOT
-#define FLECS_LOG
-#define FLECS_PIPELINE
-#define FLECS_CPP
-#define FLECS_REST
-#define FLECS_APP
-#include <flecs.h>
+#include "ECSBridge.h"
 
 struct EngineInstance {
   std::unique_ptr<Renderer::Interface> Renderer;
@@ -47,6 +36,7 @@ struct EngineInstance {
 };
 
 EngineInstance Instance = {};
+
 
 #pragma region EXPORTED_API
 // NOTE - We are using void* Pointers instead of
@@ -60,9 +50,7 @@ EngineInstance Instance = {};
 
 #pragma region RUNTIME_API
 void Init(uint32_t resolutionX, uint32_t resolutionY, void *window) {
-  Instance.ECS = ecs_init();
-  ecs_set_threads(Instance.ECS, std::thread::hardware_concurrency());
-  Instance.Scene = ecs_new_id(Instance.ECS);
+ 
   auto context = ImGui::CreateContext();
   ImGui::SetCurrentContext(context);
   ImGuiIO &io = ImGui::GetIO();
@@ -71,8 +59,7 @@ void Init(uint32_t resolutionX, uint32_t resolutionY, void *window) {
   Instance.Renderer = std::make_unique<Renderer::Interface>(
       resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
 
-  auto world = reinterpret_cast<flecs::world*>(Instance.ECS);
-  world->set<flecs::Rest>({});
+  ECS_Init(std::thread::hardware_concurrency());
 }
 
 void Shutdown() {
@@ -82,8 +69,8 @@ void Update(float frameTime) {
   Instance.Renderer->Update();
   Instance.Renderer->StartFrame();
   ImGui::Begin("Entities");
-  auto termIt = ecs_term_t{ecs_pair(EcsChildOf, Instance.Scene)};
-  ecs_iter_t it = ecs_term_iter(Instance.ECS, &termIt);
+  auto termIt = ecs_term_t{ecs_pair(EcsChildOf, ECS_GetScene())};
+  ecs_iter_t it = ecs_term_iter(ECS_GetWorld(), &termIt);
   // ecs_iter_poly(ECS, ECS, &it, NULL);
   while (ecs_iter_next(&it)) {
     for (int i = 0; i < it.count; i++) {
@@ -96,7 +83,7 @@ void Update(float frameTime) {
   ImGui::End();
   Instance.Renderer->MidFrame();
   Instance.Renderer->EndFrame();
-  ecs_progress(Instance.ECS, frameTime);
+  ECS_Update(frameTime);
 }
 
 void PhysicsUpdate(float frameTime) {}
@@ -141,51 +128,32 @@ void SetMaterialPropertyVector4(uint64_t material, const char *name,
 
 #pragma region ENTITY_API
 uint64_t CreateEntity(const char *name) {
-  ecs_entity_t e = ecs_new_w_pair(Instance.ECS, EcsChildOf, Instance.Scene);
-  ecs_set_name(Instance.ECS, e, name);
-  return e;
+  return ECS_CreateEntity(name);
 }
 
 uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char *uuid) {
-  ecs_component_desc_t desc = {};
-  desc.type = {};
-  desc.type.size = size;
-  desc.type.alignment = alignment;
-  desc.type.name = uuid;
-
-  return ecs_component_init(Instance.ECS, &desc);
+  return ECS_RegisterComponent(size, alignment, uuid);
 }
 
 uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *data) {
-  ecs_set_id(Instance.ECS, entity, id, size, data);
-  return 0;
+  return ECS_AddComponent(entity, id, size, data);
 }
 
 const void *GetComponent(uint64_t entity, uint64_t id) {
-  return ecs_get_id(Instance.ECS, entity, id);
+ return ECS_GetComponent(entity, id);
 }
 
 uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y) {
   return Instance.Renderer->ReadMouseOverData(x, y);
 }
 
-uint64_t RegisterSystem(void *system, uint64_t *componentIds,
+uint64_t RegisterSystem(const char* name, void *system, uint64_t *componentIds,
                         size_t numComponents) {
-  ecs_system_desc_t desc = {};
-  typedef void (*iterFuncPtr)(ecs_iter_t *);
-  desc.callback = reinterpret_cast<iterFuncPtr>(system);
-  desc.query = {};
-  desc.query.filter = {};
-
-  for(int x = 0; x < numComponents; x++) {
-    desc.query.filter.terms[x].id = componentIds[x];
-  }
-
-  return ecs_system_init(Instance.ECS, &desc);
+  return ECS_RegisterSystem(name, system, componentIds, numComponents);
 }
 
 void* GetComponentData(void* iterator, size_t size, uint8_t index) {
-  return ecs_field_w_size((ecs_iter_t*)iterator, size, index);
+  return ECS_GetComponentData(iterator, size, index);
 }
 
 #pragma endregion

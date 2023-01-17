@@ -1,5 +1,3 @@
-import Rendering
-
 public struct SpriteComponent: Component {
     public let sprite: Sprite
 

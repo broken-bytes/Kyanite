@@ -78,6 +78,31 @@ Instance GlobalInstance = {};
 constexpr int W = 1920;
 constexpr int H = 1080;
 
+
+#ifdef _WIN32
+
+bool bAttachToConsole()
+{
+    if (!AttachConsole(ATTACH_PARENT_PROCESS))
+    {
+        if (GetLastError() != ERROR_ACCESS_DENIED) //already has a console
+        {
+            if (!AttachConsole(GetCurrentProcessId()))
+            {
+                DWORD dwLastError = GetLastError();
+                if (dwLastError != ERROR_ACCESS_DENIED) //already has a console
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+#endif
+
 auto Tick() -> void {
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -125,6 +150,7 @@ int main(int argc, char *argv[]) {
   //Init(W, H, (void *)GlobalInstance.Window);
   //SetRootDir(argv[1]);
 #if _WIN32
+    bAttachToConsole();
     auto lib = LoadLibraryA("Kyanite.dll");
     ((RuntimeStart*)GetProcAddress(lib, "start"))(W, H, GlobalInstance.Window, argv[1], "WORLD");
     GlobalInstance.Tick = (RuntimeTick*)GetProcAddress(lib, "update");

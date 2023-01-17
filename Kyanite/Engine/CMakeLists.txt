@@ -21,8 +21,10 @@ add_library(
     SHARED
     src/Engine.cxx
     src/ResourceTracker.cxx
+    src/ECSBridge.c
     include/Engine/Engine.hxx
     include/Engine/ResourceTracker.hxx
+    include/Engine/ECSBridge.h
 )
 target_include_directories(
     Kyanite-Runtime

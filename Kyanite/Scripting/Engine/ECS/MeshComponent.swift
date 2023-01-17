@@ -1,5 +1,5 @@
 public struct MeshComponent : Component {
-    private let internalRefId: UInt64
+    private var internalRefId: UInt64
 
     public init(mesh: Mesh) {
         internalRefId = mesh.internalRefId
