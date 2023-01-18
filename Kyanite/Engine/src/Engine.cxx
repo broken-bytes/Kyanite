@@ -32,6 +32,8 @@ struct EngineInstance {
   std::unique_ptr<Renderer::Interface> Renderer;
   ecs_world_t *ECS;
   ecs_entity_t Scene;
+  ImGuiIO IO;
+  ImGuiContext* CTX;
 };
 
 EngineInstance Instance = {};
@@ -50,9 +52,8 @@ EngineInstance Instance = {};
 #pragma region RUNTIME_API
 void Init(uint32_t resolutionX, uint32_t resolutionY, void *window) {
  
-  auto context = ImGui::CreateContext();
-  ImGui::SetCurrentContext(context);
-  ImGuiIO &io = ImGui::GetIO();
+  Instance.CTX = ImGui::CreateContext();
+  ImGui::SetCurrentContext(Instance.CTX);
   // Enable Gamepad Controls
   ImGui::StyleColorsDark();
   Instance.Renderer = std::make_unique<Renderer::Interface>(
@@ -157,6 +158,61 @@ void* GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count
 
 void GetSystemDelta(void* iterator, float* delta) {
   ECS_GetSystemDeltaTime(iterator, delta);
+}
+
+#pragma endregion
+
+#pragma region IMGUI_API
+void IMGUI_NotifyMouseDown(uint8_t button) {
+     ImGui::GetIO().AddMouseButtonEvent(button, 0);
+     printf("Mouse button pressed: %i\n", button);
+}
+
+void IMGUI_NotifyMouseUp(uint8_t button) {
+    ImGui::GetIO().AddMouseButtonEvent(button, 1);
+    printf("Mouse button released: %i\n", button);
+
+}
+
+void IMGUI_NotifyMouseMove(int32_t x, int32_t y) {
+   ImGui::GetIO().AddMousePosEvent(x, y);
+   printf("Received Mouse Update: %i %i\n", x, y);
+}
+
+void IMGUI_StartWindow(const char *name) {
+  ImGui::Begin(name);
+}
+
+void IMGUI_EndWindow() {
+
+}
+
+void IMGUI_StartChild() {
+
+}
+
+void IMGUI_EndChild() {
+
+}
+
+void IMGUI_DrawFloatField(const char *title, float *value) {
+
+}
+
+void IMGUI_DrawFloat2Field(const char *title, float *value) {
+
+}
+
+void IMGUI_DrawFloat3Field(const char *title, float *value) {
+
+}
+
+void IMGUI_DrawIntField(const char *title, int *value) {
+
+}
+
+void IMGUI_DrawColorPicker(const char *title, float *color) {
+
 }
 
 #pragma endregion

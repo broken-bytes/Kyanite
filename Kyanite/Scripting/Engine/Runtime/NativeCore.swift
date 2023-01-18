@@ -13,12 +13,17 @@ internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutab
 internal typealias RegisterSystem = @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> Void
 internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8, UnsafeMutablePointer<UInt64>) -> UnsafeMutableRawPointer
 internal typealias GetSystemDeltaTme = @convention(c) (UnsafeMutableRawPointer, UnsafeMutablePointer<Float>) -> Void
-
+internal typealias SetMouseButtonDown = @convention(c) (UInt8) -> Void
+internal typealias SetMouseButtonUp = @convention(c) (UInt8) -> Void
+internal typealias SetMouseMoved = @convention(c) (Int32, Int32) -> Void
 
 internal struct CoreFuncs {
     internal let start: Start
     internal let update: Update
     internal let setRootDir: SetRootDir
+    internal let setMouseUp: SetMouseButtonUp
+    internal let setMouseDown: SetMouseButtonDown
+    internal let setMouseMoved: SetMouseMoved
 }
 
 internal struct EntityFuncs {
@@ -50,7 +55,10 @@ internal class NativeCore {
         coreFuncs = CoreFuncs(
             start: self.lib.loadFunc(named: "Init"), 
             update: self.lib.loadFunc(named: "Update"),
-            setRootDir: self.lib.loadFunc(named: "SetRootDir")
+            setRootDir: self.lib.loadFunc(named: "SetRootDir"),
+            setMouseUp: self.lib.loadFunc(named: "IMGUI_NotifyMouseUp"),
+            setMouseDown: self.lib.loadFunc(named: "IMGUI_NotifyMouseDown"),
+            setMouseMoved: self.lib.loadFunc(named: "IMGUI_NotifyMouseMove")
         )
 
         entityFuncs = EntityFuncs(
@@ -130,5 +138,17 @@ internal class NativeCore {
         var delta: Float = 0.0
         self.entityFuncs.getSystemDeltaTime(iterator, &delta)
         return delta
+    }
+
+    internal func setMouseUp(button: UInt8) {
+        self.coreFuncs.setMouseUp(button)
+    }
+
+    internal func setMouseDown(button: UInt8) {
+        self.coreFuncs.setMouseDown(button)
+    }
+
+    internal func setMouseMoved(x: Int32, y: Int32) {
+        self.coreFuncs.setMouseMoved(x, y)
     }
 }

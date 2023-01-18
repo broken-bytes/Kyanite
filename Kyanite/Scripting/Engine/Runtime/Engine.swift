@@ -90,7 +90,7 @@ internal class Engine {
 
     }
 
-    internal func onMousePositionChanged(mouseX: UInt32, mouseY: UInt32) {
-
+    internal func onMousePositionChanged(mouseX: Int32, mouseY: Int32) {
+        InputSystem.shared.setMouseMoved(x: mouseX, y: mouseY)
     }
 }

@@ -44,6 +44,6 @@ let engine = Engine()
     engine.onAxisChanged(axis: axis, value: value)
 }
 
-@_cdecl("onMousePositionChanged") public func onMousePositionChanged(mouseX: UInt32, mouseY: UInt32) {
+@_cdecl("onMouseMoved") public func onMousePositionChanged(mouseX: Int32, mouseY: Int32) {
     engine.onMousePositionChanged(mouseX: mouseX, mouseY: mouseY)
 }

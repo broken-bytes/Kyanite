@@ -168,6 +168,21 @@ DLL_EXPORT void* GetComponentData(void* iterator, size_t size, uint8_t index, si
 DLL_EXPORT void GetSystemDelta(void* iterator, float* delta);
 #pragma endregion
 
+#pragma region IMGUI_API
+DLL_EXPORT void IMGUI_NotifyMouseDown(uint8_t button);
+DLL_EXPORT void IMGUI_NotifyMouseUp(uint8_t button);
+DLL_EXPORT void IMGUI_NotifyMouseMove(int32_t x, int32_t y);
+DLL_EXPORT void IMGUI_StartWindow(const char* name);
+DLL_EXPORT void IMGUI_EndWindow();
+DLL_EXPORT void IMGUI_StartChild();
+DLL_EXPORT void IMGUI_EndChild();
+DLL_EXPORT void IMGUI_DrawFloatField(const char* title, float* value);
+DLL_EXPORT void IMGUI_DrawFloat2Field(const char* title, float* value);
+DLL_EXPORT void IMGUI_DrawFloat3Field(const char* title, float* value);
+DLL_EXPORT void IMGUI_DrawIntField(const char* title, int* value);
+DLL_EXPORT void IMGUI_DrawColorPicker(const char* title, float* color);
+#pragma endregion
+
 #pragma endregion
 DLL_EXPORT void SetClearColor(float r, float g, float b, float a);
 DLL_EXPORT void SetFogColor(float r, float g, float b, float a);

@@ -1,5 +1,5 @@
 public struct MaterialComponent: Component {
-    @EditorExposed private let internalRefId: UInt64
+    private let internalRefId: UInt64
 
     public init(mesh: Material) {
         internalRefId = mesh.internalRefId

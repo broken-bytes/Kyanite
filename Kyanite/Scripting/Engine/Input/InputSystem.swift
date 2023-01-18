@@ -7,7 +7,7 @@ public class InputSystem: EventSystem<InputEvent> {
     }
 
     public enum MouseButton: UInt8 {
-        case left
+        case left = 1
         case middle
         case right
         case thumb1
@@ -135,6 +135,11 @@ public class InputSystem: EventSystem<InputEvent> {
         case RightAlt = 230
         case RightMeta = 231
     }
+
+    public struct MouseMovement {
+        let x: Int32
+        let y: Int32
+    }
     
     public static let shared = InputSystem()
 
@@ -142,6 +147,8 @@ public class InputSystem: EventSystem<InputEvent> {
 
     private var mouseButtonStates: [MouseButton : ButtonState] = [:]
     private var keyboardButtonStates: [KeyboardButton : ButtonState] = [:]
+    private var lastMousePos: MouseMovement = MouseMovement(x: 0, y: 0)
+    private var mouseMovement: MouseMovement = MouseMovement(x: 0, y: 0)
 
     private override init() {
         mouseButtonStates[.left] = .none
@@ -160,6 +167,19 @@ public class InputSystem: EventSystem<InputEvent> {
         // Reset the Input each frame. 
         // - All events are cleared
         // - Pressed and released messages removed and state is changed
+
+        // Pass the inputs to IMGUI before clearing
+        NativeCore.shared.setMouseMoved(x: lastMousePos.x, y: lastMousePos.y)
+
+        for mbState in mouseButtonStates {
+            if mbState.value == .pressed {
+                NativeCore.shared.setMouseDown(button: mbState.key.rawValue - 1)
+            }
+            if mbState.value == .released {
+                NativeCore.shared.setMouseUp(button: mbState.key.rawValue - 1)
+            }
+        }
+
 
         // Check what state the mouse buttons are in 
         // - If the state is pressed that means we dit not get any release message, thus the button must still be held
@@ -181,6 +201,8 @@ public class InputSystem: EventSystem<InputEvent> {
                 keyboardButtonStates[kbState.key] = .none
             }
         }
+
+        mouseMovement = MouseMovement(x: 0, y: 0)
     }
 
     public func mouseButtonState(for button: MouseButton) -> ButtonState {
@@ -201,5 +223,10 @@ public class InputSystem: EventSystem<InputEvent> {
     internal func setKeyboardButton(button: KeyboardButton, isPressed: Bool, name: String) {
         keyboardButtonStates[button] = isPressed ? .pressed : .released
         self.push(event: KeyboardInputEvent(button: button, isPressed: isPressed, name: name))
+    }
+
+    internal func setMouseMoved(x: Int32, y: Int32) {
+        mouseMovement = MouseMovement(x: x - mouseMovement.x, y: y - mouseMovement.y)
+        lastMousePos = MouseMovement(x: x, y: y)
     }
 }

@@ -1,7 +1,5 @@
 #include <SDL_events.h>
 #include <SDL_keycode.h>
-#include <imgui_impl_sdl.h>
-#include <imgui_impl_win32.h>
 #if _WIN32
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
@@ -45,6 +43,7 @@ typedef void RuntimeKeyUp(uint8_t, const char*);
 typedef void RuntimeKeyDown(uint8_t, const char*);
 typedef void RuntimeMouseUp(uint8_t);
 typedef void RuntimeMouseDown(uint8_t);
+typedef void RuntimeMouseMoved(int32_t, int32_t);
 
 struct Instance {
   SDL_Window *Window;
@@ -56,6 +55,7 @@ struct Instance {
   RuntimeKeyDown* KeyDown;
   RuntimeMouseUp* MouseUp;
   RuntimeMouseDown* MouseDown;
+  RuntimeMouseMoved* MouseMoved;
 };
 
 float frametime = 0;
@@ -143,6 +143,7 @@ int main(int argc, char *argv[]) {
     GlobalInstance.KeyDown = (RuntimeKeyDown*)GetProcAddress(lib, "onKeyDown");
     GlobalInstance.MouseUp = (RuntimeMouseUp*)GetProcAddress(lib, "onMouseButtonUp");
     GlobalInstance.MouseDown = (RuntimeMouseDown*)GetProcAddress(lib, "onMouseButtonDown");
+    GlobalInstance.MouseMoved = (RuntimeMouseMoved*)GetProcAddress(lib, "onMouseMoved");
 #endif
   // Setup Dear ImGui style
   char keyName[30];
@@ -188,6 +189,8 @@ int main(int argc, char *argv[]) {
         //io.AddMousePosEvent(event.motion.x, event.motion.y);
         camY = event.motion.xrel;
         camZ = event.motion.yrel;
+        GlobalInstance.MouseMoved(event.motion.x, event.motion.y);
+        
       default:
         break;
       } // End switch
