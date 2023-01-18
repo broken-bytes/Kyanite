@@ -94,3 +94,8 @@ iOSInjectionProject/
 vcpkg_installed/
 
 .cache/
+
+# Node
+out
+node_modules
+yarn.lock
