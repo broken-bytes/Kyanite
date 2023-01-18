@@ -184,7 +184,12 @@ public class InputSystem: EventSystem<InputEvent> {
     }
 
     public func mouseButtonState(for button: MouseButton) -> ButtonState {
-        guard let btn = mouseButtonStates[button] else { fatalError("Failed to read mouse data") }
+        guard let btn = mouseButtonStates[button] else { return .none }
+        return btn
+    }
+
+    public func buttonState(for button: KeyboardButton) -> ButtonState {
+        guard let btn = keyboardButtonStates[button] else { return .none }
         return btn
     }
 

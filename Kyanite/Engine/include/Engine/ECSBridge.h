@@ -33,6 +33,10 @@ struct MeshComponent {
   uint64_t internalId;
 } typedef MeshComponent;
 
+struct MaterialComponent {
+  uint64_t internalId;
+} typedef MaterialComponent;
+
 void ECS_Init(uint8_t);
 void ECS_Update(float frametime);
 ecs_world_t* ECS_GetWorld(void);

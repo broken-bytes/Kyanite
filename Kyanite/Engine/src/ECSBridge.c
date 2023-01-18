@@ -7,6 +7,7 @@ void SetupBuiltinTypesMeta() {
   ECS_COMPONENT(ECS, TransformComponent);
   ECS_COMPONENT(ECS, Vector3Component);
   ECS_COMPONENT(ECS, MeshComponent);
+  ECS_COMPONENT(ECS, MaterialComponent);
   ecs_struct(ECS, {.entity = ecs_id(Vector3Component),
                    .members = {{.name = "x", .type = ecs_id(ecs_f32_t)},
                                {.name = "y", .type = ecs_id(ecs_f32_t)},
@@ -19,6 +20,10 @@ void SetupBuiltinTypesMeta() {
                        {.name = "scale", .type = ecs_id(Vector3Component)},
                    }});
   ecs_struct(ECS, {.entity = ecs_id(MeshComponent),
+                   .members = {
+                       {.name = "internalRefId", .type = ecs_id(ecs_u64_t)},
+                   }});
+    ecs_struct(ECS, {.entity = ecs_id(MaterialComponent),
                    .members = {
                        {.name = "internalRefId", .type = ecs_id(ecs_u64_t)},
                    }});

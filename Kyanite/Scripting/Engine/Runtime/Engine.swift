@@ -1,9 +1,6 @@
 import Foundation
 import Core
 import Math
-
-
-
 var entities: [Entity] = []
 
 public func testSystem(iterator: UnsafeMutableRawPointer) {
@@ -33,15 +30,30 @@ internal class Engine {
             try! await WorldManager.shared.loadWorld(name: world)
         }
 
+        //REVIEW - This is just for testing purposes
+        //!SECTION DUMMY_DATA
+        // Actual projects will generate below code based on user scripts
+
         try! ComponentRegistry.shared.register(component: TransformComponent.self)
         try! ComponentRegistry.shared.register(component: MeshComponent.self)
         try! ComponentRegistry.shared.register(component: RigidbodyComponent.self)
         try! ComponentRegistry.shared.register(component: SpriteComponent.self)
         try! ComponentRegistry.shared.register(component: MoveComponent.self)
+        try! ComponentRegistry.shared.register(component: PlayerComponent.self)
+        //!SECTION
 
-        NativeCore.shared.registerSystem(name: "RenderingSystem", callback: {it in }, TransformComponent.self, MeshComponent.self)
-        NativeCore.shared.registerSystem(name: "PhysicsSystem", callback: {it in }, TransformComponent.self, RigidbodyComponent.self)
         NativeCore.shared.registerSystem(name: "MovementSystem", callback: testSystem, TransformComponent.self, MoveComponent.self)
+        NativeCore.shared.registerSystem(name: "PlayerInputSystem", callback: { it in 
+            var movement = NativeCore.shared.getComponentSet(iterator: it, type: MoveComponent.self, index: 2)
+            var newMovement = Vector3(x: 0, y: 0, z: 0)
+            if InputSystem.shared.buttonState(for: .w) == .pressed {
+                newMovement = Vector3(x: newMovement.x, y: 0, z: 1)
+            }
+
+            movement[0].movement = newMovement
+
+
+        }, PlayerComponent.self, MoveComponent.self)
 
 
         for x in 0..<100 {
@@ -55,6 +67,8 @@ internal class Engine {
 
             entities.append(entity)
         }
+
+        entities[0].addComponent(component: PlayerComponent(id: 0))
     }
     
     internal func update(timestep: Float) {
