@@ -3,7 +3,8 @@ import Core
 // Core Funcs
 internal typealias Start = @convention(c) (UInt32, UInt32, UnsafeMutableRawPointer) -> Void
 internal typealias Update = @convention(c) (Float) -> Void
-internal typealias EndUpdate = @convention(c) () -> Void
+internal typealias StartRender = @convention(c) () -> Void
+internal typealias EndRender = @convention(c) () -> Void
 internal typealias SetRootDir = @convention(c) (UnsafeMutableRawPointer) -> Void
 internal typealias SetResized = @convention(c) (UInt32, UInt32) -> Void
 
@@ -24,7 +25,8 @@ internal typealias EndIMGUIWindow = @convention(c) () -> Void
 internal struct CoreFuncs {
     internal let start: Start
     internal let update: Update
-    internal let endUpdate: EndUpdate
+    internal let startRender: StartRender
+    internal let endRender: EndRender
     internal let setRootDir: SetRootDir
     internal let setMouseUp: SetMouseButtonUp
     internal let setMouseDown: SetMouseButtonDown
@@ -67,7 +69,8 @@ internal class NativeCore {
         coreFuncs = CoreFuncs(
             start: self.lib.loadFunc(named: "Init"), 
             update: self.lib.loadFunc(named: "Update"),
-            endUpdate: self.lib.loadFunc(named: "EndUpdate"),
+            startRender: self.lib.loadFunc(named: "StartRender"),
+            endRender: self.lib.loadFunc(named: "EndRender"),
             setRootDir: self.lib.loadFunc(named: "SetRootDir"),
             setMouseUp: self.lib.loadFunc(named: "IMGUI_NotifyMouseUp"),
             setMouseDown: self.lib.loadFunc(named: "IMGUI_NotifyMouseDown"),
@@ -98,10 +101,11 @@ internal class NativeCore {
 
     internal func update(tick: Float) {
         self.coreFuncs.update(tick)
+        self.coreFuncs.startRender()
     }
 
     internal func endUpdate() {
-        self.coreFuncs.endUpdate()
+        self.coreFuncs.endRender()
     }
 
     internal func setRootDir(str: UnsafeMutableRawPointer) {
@@ -173,10 +177,6 @@ internal class NativeCore {
 
     internal func setMouseMoved(x: Int32, y: Int32) {
         self.coreFuncs.setMouseMoved(x, y)
-        "TestWindow".withCString {
-            self.imguiFuncs.startWindow($0)
-        }
-        self.imguiFuncs.endWindow()
     }
 
     internal func setResized(width: UInt32, height: UInt32) {

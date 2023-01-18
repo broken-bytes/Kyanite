@@ -30,45 +30,45 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .executableTarget(
             name: "Generator-Executable",
-            path: "./Kyanite/Scripting/Generator"
+            path: "./Generator"
         ),
 
         .target(
             name: "Audio",
-            path: "./Kyanite/Scripting/Audio"
+            path: "./Audio"
         ),
 
         .executableTarget(
             name: "MetaBuilder-Executable",
-            path: "./Kyanite/Scripting/MetaBuilder"
+            path: "./MetaBuilder"
         ),
 
         .target(
             name: "Core",
-            path: "./Kyanite/Scripting/Core"    
+            path: "./Core"    
         ),
 
         .target(
             name: "Editor",
             dependencies: ["Core"],
-            path: "./Kyanite/Scripting/Editor"
+            path: "./Editor"
         ),
 
         .target(
             name: "Math",
-            path: "./Kyanite/Scripting/Math"    
+            path: "./Math"    
         ),
 
         .target(
             name: "Physics",
             dependencies: ["Math"],
-            path: "./Kyanite/Scripting/Physics"    
+            path: "./Physics"    
         ),
 
         .target(
             name: "Engine",
             dependencies: ["Core", "Audio", "Math", "Physics"],
-            path: "./Kyanite/Scripting/Engine"
+            path: "./Engine"
         ),
     ]
 )

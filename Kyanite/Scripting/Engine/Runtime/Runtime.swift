@@ -16,8 +16,8 @@ let engine = Engine()
     engine.start(width: width, height: height, window: window, rootDir: rootDir, world: str)
 }
 
-@_cdecl("update") public func update(tick: Float) {
-    engine.update(timestep: tick)
+@_cdecl("update") public func update() {
+    engine.update()
 }
 
 @_cdecl("onKeyUp") public func onKeyUpHandler(key: UInt8, name: UnsafeMutableRawPointer) {

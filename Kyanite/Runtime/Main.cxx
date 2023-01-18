@@ -38,7 +38,7 @@ std::vector<uint64_t> TextureIndices = {};
 
 // Width, Height, SDL Window, Root Dir, World Name
 typedef void RuntimeStart(uint32_t, uint32_t, void*, const char*, const char*);
-typedef void RuntimeTick(float);
+typedef void RuntimeTick();
 typedef void RuntimeKeyUp(uint8_t, const char*);
 typedef void RuntimeKeyDown(uint8_t, const char*);
 typedef void RuntimeMouseUp(uint8_t);
@@ -93,15 +93,8 @@ void bAttachToConsole()
 #endif
 
 auto Tick() -> void {
-  auto start = std::chrono::high_resolution_clock::now();
-
-  auto end = std::chrono::high_resolution_clock::now();
-  frametime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
-                  .count();
-
   ticks++;
-
-  GlobalInstance.Tick(frametime);
+  GlobalInstance.Tick();
 }
 
 struct TestComponent {

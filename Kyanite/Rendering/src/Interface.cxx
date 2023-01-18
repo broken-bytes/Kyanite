@@ -384,8 +384,6 @@ auto Interface::EndFrame() -> void {
   _computeCommandList->Reset(_computeAllocator, nullptr);
 }
 
-auto Interface::Update() -> void {}
-
 auto Interface::Resize(uint32_t width, uint32_t height) -> void {
     // Flush the GPU first -> It has to be idle
     FlushGPU();

@@ -15,6 +15,9 @@ public func testSystem(iterator: UnsafeMutableRawPointer) {
 }
 
 internal class Engine {
+    private var deltaTime: Float = 0
+    private var cpuTime: Float = 0
+    private var gpuTime: Float = 0    
     internal init() {
     }
 
@@ -71,10 +74,20 @@ internal class Engine {
         entities[0].addComponent(component: PlayerComponent(id: 0))
     }
     
-    internal func update(timestep: Float) {
-        NativeCore.shared.update(tick: timestep)
+    internal func update() {
+        var start = Date()
+        NativeCore.shared.update(tick: deltaTime)
         InputSystem.shared.flush()
+
+        var delta: TimeInterval = start.distance(to: Date())
+
+        Logger.shared.println(str: "CPU Time: \(delta)")
+        start = Date()
+
         NativeCore.shared.endUpdate()
+        delta = start.distance(to: Date())
+
+        Logger.shared.println(str: "GPU Time: \(delta)")
     }
 
     internal func onKeyChanged(key: UInt8, isPressed: Bool, name: String) {

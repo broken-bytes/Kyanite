@@ -49,7 +49,6 @@ namespace Renderer {
 		auto StartFrame() -> void;
 		auto MidFrame() -> void;
 		auto EndFrame() -> void;
-		auto Update() -> void;
 		auto Resize(std::uint32_t width, std::uint32_t height) -> void;
 		auto CreateMaterial(std::string name, uint64_t shaderId) -> uint64_t;
 		auto MaterialPushTexture(uint64_t textureId) -> void;
