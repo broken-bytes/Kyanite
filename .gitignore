@@ -99,3 +99,9 @@ vcpkg_installed/
 out
 node_modules
 yarn.lock
+
+# Visual Studio
+**/bin/
+**/obj/
+**/.vs/
+
