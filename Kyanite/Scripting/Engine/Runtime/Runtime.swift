@@ -47,3 +47,7 @@ let engine = Engine()
 @_cdecl("onMouseMoved") public func onMousePositionChanged(mouseX: Int32, mouseY: Int32) {
     engine.onMousePositionChanged(mouseX: mouseX, mouseY: mouseY)
 }
+
+@_cdecl("onViewportResized") public func onViewportResized(width: UInt32, height: UInt32) {
+    engine.onViewportResized(width: width, height: height)
+}

@@ -74,6 +74,8 @@ list(APPEND HEADERS
     internal/d3d12/D3D12TextureBuffer.hxx
     internal/d3d12/D3D12UploadBuffer.hxx
     internal/d3d12/D3D12VertexBuffer.hxx
+    internal/d3d12/Utils.hxx
+
 )
 list(APPEND SRC 
     src/d3d12/D3D12Allocator.cxx

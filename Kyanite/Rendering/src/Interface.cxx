@@ -386,7 +386,27 @@ auto Interface::EndFrame() -> void {
 
 auto Interface::Update() -> void {}
 
-auto Interface::Resize(uint32_t width, uint32_t height) -> void {}
+auto Interface::Resize(uint32_t width, uint32_t height) -> void {
+    // Flush the GPU first -> It has to be idle
+    FlushGPU();
+    _windowDimension = {width, height};
+
+    _depthBuffer = _device->CreateDepthBuffer(_windowDimension, "Depth Buffer");
+    _device->CreateDepthStencilView(_dsvHeap->CpuHandleFor(0), _depthBuffer);
+    for (int x = 0; x < FRAME_COUNT; x++) {
+        _frames[x]->ResetRenderTarget();
+    }
+    _swapChain->Resize(FRAME_COUNT, width, height);
+
+    for (uint32_t x = 0; x < FRAME_COUNT; x++) {
+        auto rt = _swapChain->GetBuffer(x);
+        auto rtHandle = _rtvHeap->CpuHandleFor(x);
+        _device->CreateRenderTargetView(rtHandle, rt);
+        _frames[x]->SetRenderTarget(rt);
+    }
+
+    _frameIndex = _swapChain->CurrentBackBufferIndex();
+}
 
 auto Interface::CreateMaterial(std::string name, uint64_t shaderId) -> uint64_t {
   auto mat = std::make_shared<Material>();
@@ -405,7 +425,7 @@ auto Interface::CreateMaterial(std::string name, uint64_t shaderId) -> uint64_t 
     // multiple of 255 bytes as well
     buffSize = ((mat->Shader->ConstantBufferLayout.size() * 16) + 255) & ~255;
     _materialCBVs.insert(
-        {_materials.size(), _device->CreateUploadBuffer(buffSize)});
+        {_materials.size(), _device->CreateUploadBuffer(buffSize, name.c_str())});
 
     _device->CreateConstantBufferView(_srvHeap,
                                       _materialCBVs.at(_materials.size()),
@@ -457,16 +477,16 @@ auto Interface::UploadMeshData(Vertex *vertices, size_t vCount, Index *indices,
   }
 
   size_t vertSize = vertBuffer.size() * sizeof(Vertex);
-  auto vertUpload = _device->CreateUploadBuffer(vertSize);
+  auto vertUpload = _device->CreateUploadBuffer(vertSize, "UploadBuffer");
   size_t indSize = indBuffer.size() * sizeof(uint32_t);
-  auto indUpload = _device->CreateUploadBuffer(indSize);
+  auto indUpload = _device->CreateUploadBuffer(indSize, "UploadBuffer");
 
   _uploadBuffers.push_back(vertUpload);
   _uploadBuffers.push_back(indUpload);
 
   auto vao = std::make_shared<VertexArrayObject>(
-      _resourceCounter, _device->CreateVertexBuffer(vertBuffer),
-      _device->CreateIndexBuffer(indBuffer));
+      _resourceCounter, _device->CreateVertexBuffer(vertBuffer, "VertexBuffer"),
+      _device->CreateIndexBuffer(indBuffer, "IndexBuffer"));
   _uploadCommandList->UpdateSubresources(vao->VertexBuffer, vertUpload,
                                          vertices,
                                          vertBuffer.size() * sizeof(Vertex), 1);
@@ -489,8 +509,8 @@ auto Interface::UploadTextureData(uint8_t *data, uint16_t width,
                                   uint16_t height, uint8_t channels)
     -> uint64_t {
   auto texBuff =
-      _device->CreateTextureBuffer(width, height, channels, 0, Renderer::RGBA);
-  auto uploadBuffer = _device->CreateUploadBuffer(width * height * channels);
+      _device->CreateTextureBuffer(width, height, channels, 0, Renderer::RGBA, "TextureBuffer");
+  auto uploadBuffer = _device->CreateUploadBuffer(width * height * channels, "TextureUploadBuffer");
 
   _uploadCommandList->Transition(static_pointer_cast<TextureBuffer>(texBuff),
                                  ResourceState::COMMON,
@@ -730,8 +750,8 @@ auto Interface::CreatePipeline() -> void {
   _samplerHeap = _device->CreateSamplerHeap(128);
   _meshesToDraw = {};
 
-  _depthBuffer = _device->CreateDepthBuffer(_windowDimension);
-  _mouseOverDepthBuffer = _device->CreateDepthBuffer({_windowDimension.x, _windowDimension.y});
+  _depthBuffer = _device->CreateDepthBuffer(_windowDimension, "Depth Buffer");
+  _mouseOverDepthBuffer = _device->CreateDepthBuffer({_windowDimension.x, _windowDimension.y}, "Mouse Over Depth Buffer");
 
   auto depthHandle = _dsvHeap->CpuHandleFor(0);
   _device->CreateDepthStencilView(depthHandle, _depthBuffer);
@@ -769,7 +789,9 @@ auto Interface::CreatePipeline() -> void {
   for (int x = 0; x < FRAME_COUNT; x++) {
     _mouseOverBuffer[x] = _device->CreateTextureBuffer(
         _windowDimension.x, _windowDimension.y, 4, 1, TextureFormat::RGBA_UINT, "MouseOverBuffer");
-    _mouseOverRTV[x] = _device->CreateRenderTarget(_mouseOverBuffer[x]);
+    std::stringstream str;
+    str << "Frame Buffer" << x;
+    _mouseOverRTV[x] = _device->CreateRenderTarget(_mouseOverBuffer[x], str.str());
     auto rtHandle = _rtvHeap->CpuHandleFor(FRAME_COUNT + x);
 
     _mouseOverCommandList->Transition(_mouseOverBuffer[x], ResourceState::COMMON,
@@ -827,14 +849,14 @@ auto Interface::CreatePipeline() -> void {
   for (uint32_t x = 0; x < FRAME_COUNT; x++) {
     _cbAllocator[x] = _device->CreateCommandAllocator(DIRECT);
     _lightDataBuffer[x] =
-        _device->CreateUploadBuffer((sizeof(LightBuffer) + 255) & ~255);
+        _device->CreateUploadBuffer((sizeof(LightBuffer) + 255) & ~255, "Light Buffer");
     _cbAllocator[x]->Reset();
 
     _device->CreateConstantBufferView(_srvHeap, _lightDataBuffer[x],
                                       _srvHeap->CpuHandleFor(_srvCounter++));
   }
 
-  _entitySelectionBuffer = _device->CreateUploadBuffer(((sizeof(uint32_t) * 4) + 255) & ~255);
+  _entitySelectionBuffer = _device->CreateUploadBuffer(((sizeof(uint32_t) * 4) + 255) & ~255, "EntitySelection Buffer");
 
   _device->CreateConstantBufferView(_srvHeap, _entitySelectionBuffer,  _srvHeap->CpuHandleFor(_srvCounter) );
   _entitySelectionCBVId = _srvCounter++;
@@ -900,6 +922,18 @@ auto Interface::WaitForGPU(std::shared_ptr<CommandQueue> queue) -> void {
   _fence->Wait(_frames[_frameIndex]->FenceValue(), _fenceEvent);
   // Increment the fence value for the current frame.
   auto _ = _frames[_frameIndex]->IncrementFenceValue();
+}
+
+auto Interface::FlushGPU() -> void {
+    for (int x = 0; x < FRAME_COUNT; x++)
+    {
+        _mainQueue->Signal(_fence, _frames[x]->FenceValue());
+        // Wait until the fence has been processed.
+        _fence->SetOnCompletion(_frames[x]->FenceValue(), _fenceEvent);
+        _fence->Wait(_frames[x]->FenceValue(), _fenceEvent);
+        // Increment the fence value for the current frame.
+        auto _ = _frames[x]->IncrementFenceValue();
+    }
 }
 
 } // namespace Renderer

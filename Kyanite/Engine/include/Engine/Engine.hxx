@@ -137,6 +137,7 @@ DLL_EXPORT void Init(uint32_t resolutionX, uint32_t resolutionY, void *window);
 DLL_EXPORT void Shutdown();
 DLL_EXPORT void Update(float frameTime);
 DLL_EXPORT void EndUpdate();
+DLL_EXPORT void Resize(uint32_t width, uint32_t height);
 #pragma endregion
 
 #pragma region CONFIG_API

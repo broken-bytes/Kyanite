@@ -2,6 +2,7 @@
 #include <dxgi.h>
 #include <dxgi1_6.h>
 #include <memory>
+#include <sstream>
 #include <wrl.h>
 #include <d3d12/D3D12CommandQueue.hxx>
 #include <d3d12/D3D12RenderTarget.hxx>
@@ -69,7 +70,15 @@ namespace Renderer {
 	auto D3D12SwapChain::GetBuffer(std::uint8_t frameIndex)->std::shared_ptr<RenderTarget> {
 		Microsoft::WRL::ComPtr<ID3D12Resource> rt;
 		_swapChain->GetBuffer(frameIndex, IID_PPV_ARGS(&rt));
-		return std::make_shared<D3D12RenderTarget>(rt);
+		std::stringstream str;
+		str << "Frame Buffer" << frameIndex;
+		return std::make_shared<D3D12RenderTarget>(rt, str.str());
+	}
+
+	auto D3D12SwapChain::Resize(uint8_t frameCount, uint32_t width, uint32_t height) -> void {
+		DXGI_SWAP_CHAIN_DESC desc = {};
+		_swapChain->GetDesc(&desc);
+		_swapChain->ResizeBuffers(frameCount, width, height, desc.BufferDesc.Format, desc.Flags);
 	}
 
 }

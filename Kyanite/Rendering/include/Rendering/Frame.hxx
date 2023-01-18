@@ -36,7 +36,13 @@ namespace Renderer {
             return _renderTarget;
         }
 
-        virtual auto ResetRenderTarget() -> void = 0;
+        virtual auto ResetRenderTarget() -> void {
+            _renderTarget->Reset();
+        }
+
+        virtual auto SetRenderTarget(std::shared_ptr<Renderer::RenderTarget> renderTarget) -> void {
+            _renderTarget = renderTarget;
+        }
 
 		[[nodiscard]] auto FenceValue(std::uint64_t value) -> const std::uint64_t {
             this->_fenceValue = value;
@@ -50,7 +56,7 @@ namespace Renderer {
         protected:		
         std::uint64_t _fenceValue = 0;
 
-        private:
+        protected:
             std::shared_ptr<Renderer::Allocator> _allocator;
             std::shared_ptr<Renderer::RenderTarget> _renderTarget;
     };

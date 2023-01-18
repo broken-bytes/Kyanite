@@ -44,6 +44,7 @@ typedef void RuntimeKeyDown(uint8_t, const char*);
 typedef void RuntimeMouseUp(uint8_t);
 typedef void RuntimeMouseDown(uint8_t);
 typedef void RuntimeMouseMoved(int32_t, int32_t);
+typedef void RuntimeViewportResized(uint32_t, uint32_t);
 
 struct Instance {
   SDL_Window *Window;
@@ -56,6 +57,9 @@ struct Instance {
   RuntimeMouseUp* MouseUp;
   RuntimeMouseDown* MouseDown;
   RuntimeMouseMoved* MouseMoved;
+  RuntimeViewportResized* ViewportResized;
+  uint32_t Width;
+  uint32_t Height;
 };
 
 float frametime = 0;
@@ -130,6 +134,7 @@ int main(int argc, char *argv[]) {
 #else
                                             SDL_WINDOW_SHOWN
 #endif
+      | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_RESIZABLE
   );
 
   //Init(W, H, (void *)GlobalInstance.Window);
@@ -144,21 +149,28 @@ int main(int argc, char *argv[]) {
     GlobalInstance.MouseUp = (RuntimeMouseUp*)GetProcAddress(lib, "onMouseButtonUp");
     GlobalInstance.MouseDown = (RuntimeMouseDown*)GetProcAddress(lib, "onMouseButtonDown");
     GlobalInstance.MouseMoved = (RuntimeMouseMoved*)GetProcAddress(lib, "onMouseMoved");
+    GlobalInstance.ViewportResized = (RuntimeViewportResized*)GetProcAddress(lib, "onViewportResized");
 #endif
   // Setup Dear ImGui style
-  char keyName[30];
   SDL_Event event;
   SetConsoleOutputCP(1251); 
 
-  char* str = new char[20];
-  GetKeyboardLayoutNameA(str);
-
-  OutputDebugStringA(str);
   while (GlobalInstance.Running) {
     Tick();
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_WINDOWEVENT:
+          if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+              int width = event.window.data1;
+              int height = event.window.data2;
+
+              if (width != GlobalInstance.Width || height != GlobalInstance.Height) {
+                  GlobalInstance.Width = width;
+                  GlobalInstance.Height = height;
+
+                  GlobalInstance.ViewportResized(width, height);
+              }
+          }
         break;
       case SDL_USEREVENT:
         // HandleUserEvents(&event);

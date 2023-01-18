@@ -94,4 +94,8 @@ internal class Engine {
     internal func onMousePositionChanged(mouseX: Int32, mouseY: Int32) {
         InputSystem.shared.setMouseMoved(x: mouseX, y: mouseY)
     }
+
+    internal func onViewportResized(width: UInt32, height: UInt32) {
+        NativeCore.shared.setResized(width: width, height: height)
+    }
 }

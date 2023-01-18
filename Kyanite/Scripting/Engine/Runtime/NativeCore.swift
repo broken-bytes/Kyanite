@@ -5,6 +5,7 @@ internal typealias Start = @convention(c) (UInt32, UInt32, UnsafeMutableRawPoint
 internal typealias Update = @convention(c) (Float) -> Void
 internal typealias EndUpdate = @convention(c) () -> Void
 internal typealias SetRootDir = @convention(c) (UnsafeMutableRawPointer) -> Void
+internal typealias SetResized = @convention(c) (UInt32, UInt32) -> Void
 
 // Entity Funcs
 internal typealias CreateEntity = @convention(c) (UnsafeMutableRawPointer) -> UInt64
@@ -28,6 +29,7 @@ internal struct CoreFuncs {
     internal let setMouseUp: SetMouseButtonUp
     internal let setMouseDown: SetMouseButtonDown
     internal let setMouseMoved: SetMouseMoved
+    internal let setResized: SetResized
 }
 
 internal struct EntityFuncs {
@@ -69,7 +71,8 @@ internal class NativeCore {
             setRootDir: self.lib.loadFunc(named: "SetRootDir"),
             setMouseUp: self.lib.loadFunc(named: "IMGUI_NotifyMouseUp"),
             setMouseDown: self.lib.loadFunc(named: "IMGUI_NotifyMouseDown"),
-            setMouseMoved: self.lib.loadFunc(named: "IMGUI_NotifyMouseMove")
+            setMouseMoved: self.lib.loadFunc(named: "IMGUI_NotifyMouseMove"),
+            setResized: self.lib.loadFunc(named: "Resize")
         )
 
         entityFuncs = EntityFuncs(
@@ -174,5 +177,9 @@ internal class NativeCore {
             self.imguiFuncs.startWindow($0)
         }
         self.imguiFuncs.endWindow()
+    }
+
+    internal func setResized(width: UInt32, height: UInt32) {
+        self.coreFuncs.setResized(width, height)
     }
 }

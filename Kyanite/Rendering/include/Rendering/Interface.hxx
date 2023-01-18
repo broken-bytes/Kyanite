@@ -172,6 +172,6 @@ namespace Renderer {
 		auto MoveToNextFrame() -> void;
 		auto GenerateMipMaps() -> void;
 		auto WaitForGPU(std::shared_ptr<CommandQueue> queue) -> void;
-
+		auto FlushGPU() -> void;
     };
 }

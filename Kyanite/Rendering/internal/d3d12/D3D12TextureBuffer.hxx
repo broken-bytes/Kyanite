@@ -16,7 +16,8 @@ namespace Renderer {
 		friend class D3D12Device;
 		
 		D3D12TextureBuffer(
-			Microsoft::WRL::ComPtr<ID3D12Resource> buffer
+			Microsoft::WRL::ComPtr<ID3D12Resource> buffer,
+			std::string name
 		);
 		virtual auto Raw() ->ID3D12Resource* {
 			return _buffer.Get();

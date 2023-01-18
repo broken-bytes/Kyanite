@@ -5,11 +5,11 @@ namespace Renderer {
 	D3D12Frame::D3D12Frame(
 		std::shared_ptr<Renderer::Allocator> allocator,
 		std::shared_ptr<Renderer::RenderTarget> renderTarget
-	): Frame(allocator, renderTarget) {
+	) : Frame(allocator, renderTarget) {
 
 	}
 
-	auto D3D12Frame::ResetRenderTarget() -> void {
-
+	auto SetRendertarget(std::shared_ptr<Renderer::RenderTarget> renderTarget) -> void {
+		
 	}
 }

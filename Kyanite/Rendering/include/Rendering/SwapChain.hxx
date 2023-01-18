@@ -21,6 +21,7 @@ namespace Renderer {
         virtual auto Swap() -> void = 0;
         [[nodiscard]] virtual auto CurrentBackBufferIndex() -> const std::uint64_t = 0;
         [[nodiscard]] virtual auto GetBuffer(std::uint8_t frameIndex)->std::shared_ptr<RenderTarget> = 0;
+        virtual auto Resize(uint8_t frameCount, uint32_t width, uint32_t height) -> void = 0;
         private:
     };
 }

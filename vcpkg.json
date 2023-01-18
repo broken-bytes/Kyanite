@@ -15,7 +15,8 @@
       "features": [
         "dx12-binding",
         "sdl2-binding",
-        "win32-binding"
+        "win32-binding",
+        "docking-experimental"
       ]
     },
     "jsoncons",

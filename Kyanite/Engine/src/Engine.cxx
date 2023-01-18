@@ -24,7 +24,7 @@
 #include "glm/trigonometric.hpp"
 #include "glm/vec4.hpp"
 
-#include "imgui.h"
+#include <imgui.h>
 
 #include "ECSBridge.h"
 
@@ -34,10 +34,21 @@ struct EngineInstance {
   ecs_entity_t Scene;
   ImGuiIO IO;
   ImGuiContext* CTX;
+  ImFont* BaseText;
 };
 
 EngineInstance Instance = {};
 
+void SetupImGui() {
+    Instance.CTX = ImGui::CreateContext();
+    ImGui::SetCurrentContext(Instance.CTX);
+    auto io = ImGui::GetIO();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    Instance.BaseText = io.Fonts->AddFontFromFileTTF("H:\\Projects\\Kyanite\\Resources\\fonts\\Metrophobic-Regular.ttf", 24.0f);
+
+    // Enable Gamepad Controls
+    ImGui::StyleColorsDark();
+}
 
 #pragma region EXPORTED_API
 // NOTE - We are using void* Pointers instead of
@@ -51,11 +62,7 @@ EngineInstance Instance = {};
 
 #pragma region RUNTIME_API
 void Init(uint32_t resolutionX, uint32_t resolutionY, void *window) {
- 
-  Instance.CTX = ImGui::CreateContext();
-  ImGui::SetCurrentContext(Instance.CTX);
-  // Enable Gamepad Controls
-  ImGui::StyleColorsDark();
+  SetupImGui();
   Instance.Renderer = std::make_unique<Renderer::Interface>(
       resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
 
@@ -68,6 +75,31 @@ void Shutdown() {
 void Update(float frameTime) {
   Instance.Renderer->Update();
   Instance.Renderer->StartFrame();
+  ImGui::PushFont(Instance.BaseText);
+  ImGuiWindowFlags maindockWindowFlags = 0;
+
+  // etc.
+  bool showMainDockWindow = true;
+  bool fullscreen = true;
+  ImGuiDockNodeFlags dockFlags = ImGuiDockNodeFlags_None;
+  ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+  ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->Pos);
+  ImGui::SetNextWindowSize(viewport->Size);
+  ImGui::SetNextWindowViewport(viewport->ID);
+
+  windowFlags |= ImGuiWindowFlags_NoTitleBar 
+      | ImGuiWindowFlags_NoCollapse
+      | ImGuiWindowFlags_NoResize
+      | ImGuiWindowFlags_NoMove
+      | ImGuiWindowFlags_NoBringToFrontOnFocus
+      | ImGuiWindowFlags_NoNavFocus;
+
+  ImGui::Begin("Main Dock", &showMainDockWindow, windowFlags);
+
+  ImGuiID dockId = ImGui::GetID("Dockspace");
+  ImGui::DockSpace(dockId, { 0,0 }, dockFlags);
+
   ImGui::Begin("Entities");
   auto termIt = ecs_term_t{ecs_pair(EcsChildOf, ECS_GetScene())};
   ecs_iter_t it = ecs_term_iter(ECS_GetWorld(), &termIt);
@@ -81,12 +113,18 @@ void Update(float frameTime) {
     }
   }
   ImGui::End();
+  ImGui::End();
+  ImGui::PopFont();
   ECS_Update(frameTime);
 }
 
 void EndUpdate() {
     Instance.Renderer->MidFrame();
     Instance.Renderer->EndFrame();
+}
+
+void Resize(uint32_t width, uint32_t height) {
+    Instance.Renderer->Resize(width, height);
 }
 
 #pragma endregion

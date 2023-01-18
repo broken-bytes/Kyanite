@@ -16,8 +16,5 @@ namespace Renderer {
 			std::shared_ptr<Renderer::Allocator> allocator,
 			std::shared_ptr<Renderer::RenderTarget> renderTarget
 		);
-
-		virtual auto ResetRenderTarget() -> void;
-
 	};
 }

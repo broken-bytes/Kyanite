@@ -58,9 +58,9 @@ namespace Renderer {
 		[[nodiscard]] virtual auto CreateUnorderedAccessHeap(size_t count) -> std::shared_ptr<Heap>;
 		[[nodiscard]] virtual auto CreateDepthStencilHeap(size_t count) -> std::shared_ptr<Heap>;
 		[[nodiscard]] virtual auto CreateSamplerHeap(size_t count) -> std::shared_ptr<Heap>;
-        [[nodiscard]] virtual auto CreateVertexBuffer(std::vector<Vertex> vertices) -> std::shared_ptr<Renderer::Buffer>;
-		[[nodiscard]] virtual auto CreateIndexBuffer(std::vector<uint32_t> indices)->std::shared_ptr<Renderer::Buffer>;
-		[[nodiscard]] virtual auto CreateUploadBuffer(size_t sizeInBytes)->std::shared_ptr<Renderer::UploadBuffer>;
+        [[nodiscard]] virtual auto CreateVertexBuffer(std::vector<Vertex> vertices, std::string name) -> std::shared_ptr<Renderer::Buffer>;
+		[[nodiscard]] virtual auto CreateIndexBuffer(std::vector<uint32_t> indices, std::string name)->std::shared_ptr<Renderer::Buffer>;
+		[[nodiscard]] virtual auto CreateUploadBuffer(size_t sizeInBytes, std::string name)->std::shared_ptr<Renderer::UploadBuffer>;
         [[nodiscard]] virtual auto CreateVertexArrayObject(Renderer::VertexBuffer* vertexBuffer, Renderer::IndexBuffer* indexBuffer) -> std::shared_ptr<VertexArrayObject>;
         [[nodiscard]] virtual auto CreateCommandQueue() -> std::shared_ptr<CommandQueue>;
         [[nodiscard]] virtual auto CreateTextureBuffer(
@@ -69,7 +69,7 @@ namespace Renderer {
 			uint8_t channels,
 			uint8_t mipLevels,
 			TextureFormat format,
-			const char* name = "TextureBuffer"
+			std::string name
 		)->std::shared_ptr<Renderer::TextureBuffer>;
 
 		[[nodiscard]] virtual auto CreateReadbackBuffer(size_t sizeInBytes) -> std::shared_ptr<ReadbackBuffer>;
@@ -95,7 +95,8 @@ namespace Renderer {
 		)->std::shared_ptr<GraphicsPipelineState>;
 
 		[[nodiscard]] virtual auto CreateDepthBuffer(
-			glm::vec2 dimensions
+			glm::vec2 dimensions,
+			std::string name
 		)->std::shared_ptr<Buffer>;
 
 		virtual auto CreateDepthStencilView(
@@ -104,7 +105,7 @@ namespace Renderer {
 		) -> void;
         [[nodiscard]] virtual auto CreateFrame(std::shared_ptr<Allocator> allocator, std::shared_ptr<RenderTarget> renderTarget) -> std::shared_ptr<Frame>;
 		[[nodiscard]] virtual auto CreateFence(std::uint64_t fenceValue) -> std::shared_ptr<Fence>;
-		[[nodiscard]] virtual auto CreateRenderTarget(std::shared_ptr<TextureBuffer> texture) -> std::shared_ptr<RenderTarget>;
+		[[nodiscard]] virtual auto CreateRenderTarget(std::shared_ptr<TextureBuffer> texture, std::string name) -> std::shared_ptr<RenderTarget>;
 		[[nodiscard]] virtual auto CreateRenderTargetView(std::shared_ptr<DescriptorHandle> handle, std::shared_ptr<RenderTarget> target)->std::shared_ptr<RenderTarget>;
 		virtual auto CreateShaderResourceView(std::shared_ptr<TextureBuffer> buffer, std::shared_ptr<DescriptorHandle> handle) -> void;
 		virtual auto CreateConstantBufferView(std::shared_ptr<Heap> heap, std::shared_ptr<UploadBuffer> buffer, std::shared_ptr<DescriptorHandle> cpuHandle) -> void;

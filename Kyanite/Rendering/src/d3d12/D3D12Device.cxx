@@ -147,7 +147,7 @@ auto D3D12Device::CreateSamplerHeap(size_t count) -> std::shared_ptr<Heap> {
   return std::make_shared<D3D12Heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
                                      count);
 }
-auto D3D12Device::CreateVertexBuffer(std::vector<Vertex> vertices)
+auto D3D12Device::CreateVertexBuffer(std::vector<Vertex> vertices, std::string name)
     -> std::shared_ptr<Renderer::Buffer> {
   auto len = sizeof(Vertex);
   const uint32_t vertexBufferSize = vertices.size() * sizeof(Vertex);
@@ -160,7 +160,6 @@ auto D3D12Device::CreateVertexBuffer(std::vector<Vertex> vertices)
   _device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
                                    &resourceDesc, D3D12_RESOURCE_STATE_COMMON,
                                    nullptr, IID_PPV_ARGS(&buffer));
-  buffer->SetName(L"VertexBuffer");
 
   D3D12_VERTEX_BUFFER_VIEW view = {};
   view.BufferLocation = buffer->GetGPUVirtualAddress();
@@ -168,10 +167,10 @@ auto D3D12Device::CreateVertexBuffer(std::vector<Vertex> vertices)
   view.SizeInBytes = vertexBufferSize;
 
   return std::make_shared<D3D12Buffer<D3D12_VERTEX_BUFFER_VIEW>>(
-      buffer, view, vertices.size());
+      buffer, view, vertices.size(), name);
 }
 
-auto D3D12Device::CreateIndexBuffer(std::vector<uint32_t> indices)
+auto D3D12Device::CreateIndexBuffer(std::vector<uint32_t> indices, std::string name)
     -> std::shared_ptr<Renderer::Buffer> {
   const uint32_t indexBufferSize = indices.size() * sizeof(uint32_t);
   auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -183,7 +182,6 @@ auto D3D12Device::CreateIndexBuffer(std::vector<uint32_t> indices)
   _device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
                                    &resourceDesc, D3D12_RESOURCE_STATE_COMMON,
                                    nullptr, IID_PPV_ARGS(&buffer));
-  buffer->SetName(L"IndexBuffer");
 
   D3D12_INDEX_BUFFER_VIEW view = {};
   view.BufferLocation = buffer->GetGPUVirtualAddress();
@@ -191,10 +189,10 @@ auto D3D12Device::CreateIndexBuffer(std::vector<uint32_t> indices)
   view.SizeInBytes = indexBufferSize;
 
   return std::make_shared<D3D12Buffer<D3D12_INDEX_BUFFER_VIEW>>(buffer, view,
-                                                                indices.size());
+                                                                indices.size(), name);
 }
 
-auto D3D12Device::CreateUploadBuffer(size_t sizeInBytes)
+auto D3D12Device::CreateUploadBuffer(size_t sizeInBytes, std::string name)
     -> std::shared_ptr<Renderer::UploadBuffer> {
   Microsoft::WRL::ComPtr<ID3D12Resource> buffer;
 
@@ -206,7 +204,7 @@ auto D3D12Device::CreateUploadBuffer(size_t sizeInBytes)
       &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc,
       D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&buffer));
 
-  auto uBuffer = std::make_shared<D3D12UploadBuffer>(buffer);
+  auto uBuffer = std::make_shared<D3D12UploadBuffer>(buffer, name);
   uBuffer->Count = sizeInBytes;
 
   return uBuffer;
@@ -222,7 +220,7 @@ auto D3D12Device::CreateCommandQueue() -> std::shared_ptr<CommandQueue> {
 }
 auto D3D12Device::CreateTextureBuffer(uint16_t width, uint16_t height,
                                       uint8_t channels, uint8_t mipLevels,
-                                      TextureFormat format, const char *name)
+                                      TextureFormat format, std::string name)
     -> std::shared_ptr<Renderer::TextureBuffer> {
   Microsoft::WRL::ComPtr<ID3D12Resource> buffer;
 
@@ -259,13 +257,7 @@ auto D3D12Device::CreateTextureBuffer(uint16_t width, uint16_t height,
                                    &textureDesc, D3D12_RESOURCE_STATE_COMMON,
                                    &clear, IID_PPV_ARGS(&buffer));
 
-  wchar_t wName[30];
-
-  size_t len = 0;
-  mbstowcs_s(&len, wName, name, strlen(name));
-  buffer->SetName(wName);
-
-  return std::make_shared<D3D12TextureBuffer>(buffer);
+  return std::make_shared<D3D12TextureBuffer>(buffer, name);
 }
 
 auto D3D12Device::CreateReadbackBuffer(size_t sizeInBytes)
@@ -315,7 +307,7 @@ auto D3D12Device::CreatePipelineState(
       *this, rootSignature, inputLayout, shaderBinding, format, 0, topology);
 }
 
-auto D3D12Device::CreateDepthBuffer(glm::vec2 dimensions)
+auto D3D12Device::CreateDepthBuffer(glm::vec2 dimensions, std::string name)
     -> std::shared_ptr<Buffer> {
   D3D12_CLEAR_VALUE optimizedClearValue = {};
   optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
@@ -340,7 +332,7 @@ auto D3D12Device::CreateDepthBuffer(glm::vec2 dimensions)
     throw std::runtime_error("Failed to create Depth Buffer");
   }
   return std::make_shared<D3D12Buffer<D3D12_DEPTH_STENCIL_VIEW_DESC>>(buffer,
-                                                                      view, 0);
+                                                                      view, 0, name);
 }
 
 auto D3D12Device::CreateDepthStencilView(
@@ -366,10 +358,10 @@ auto D3D12Device::CreateFence(std::uint64_t fenceValue)
   return std::make_shared<D3D12Fence>(*this, fenceValue);
 }
 
-auto D3D12Device::CreateRenderTarget(std::shared_ptr<TextureBuffer> texture)
+auto D3D12Device::CreateRenderTarget(std::shared_ptr<TextureBuffer> texture, std::string name)
     -> std::shared_ptr<RenderTarget> {
   auto buff = static_pointer_cast<D3D12TextureBuffer>(texture)->Raw();
-  return std::make_shared<D3D12RenderTarget>(buff);
+  return std::make_shared<D3D12RenderTarget>(buff, name);
 }
 
 auto D3D12Device::CreateRenderTargetView(
