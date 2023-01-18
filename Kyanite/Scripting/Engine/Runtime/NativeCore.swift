@@ -3,6 +3,7 @@ import Core
 // Core Funcs
 internal typealias Start = @convention(c) (UInt32, UInt32, UnsafeMutableRawPointer) -> Void
 internal typealias Update = @convention(c) (Float) -> Void
+internal typealias EndUpdate = @convention(c) () -> Void
 internal typealias SetRootDir = @convention(c) (UnsafeMutableRawPointer) -> Void
 
 // Entity Funcs
@@ -16,10 +17,13 @@ internal typealias GetSystemDeltaTme = @convention(c) (UnsafeMutableRawPointer, 
 internal typealias SetMouseButtonDown = @convention(c) (UInt8) -> Void
 internal typealias SetMouseButtonUp = @convention(c) (UInt8) -> Void
 internal typealias SetMouseMoved = @convention(c) (Int32, Int32) -> Void
+internal typealias StartIMGUIWindow = @convention(c) (UnsafePointer<Int8>) -> Void
+internal typealias EndIMGUIWindow = @convention(c) () -> Void
 
 internal struct CoreFuncs {
     internal let start: Start
     internal let update: Update
+    internal let endUpdate: EndUpdate
     internal let setRootDir: SetRootDir
     internal let setMouseUp: SetMouseButtonUp
     internal let setMouseDown: SetMouseButtonDown
@@ -36,6 +40,11 @@ internal struct EntityFuncs {
     internal let getSystemDeltaTime: GetSystemDeltaTme
 }
 
+internal struct IMGUIFuncs {
+    internal let startWindow: StartIMGUIWindow
+    internal let endWindow: EndIMGUIWindow
+}
+
 enum EntityError: Error {
     case componentNotPoD(message: String)
     case invalidName(message: String)
@@ -48,6 +57,7 @@ internal class NativeCore {
 
     private let coreFuncs: CoreFuncs
     private let entityFuncs: EntityFuncs
+    private let imguiFuncs: IMGUIFuncs
 
     private init() {
         lib = Library.loadLibrary(at: "Kyanite-Runtime.dll")
@@ -55,6 +65,7 @@ internal class NativeCore {
         coreFuncs = CoreFuncs(
             start: self.lib.loadFunc(named: "Init"), 
             update: self.lib.loadFunc(named: "Update"),
+            endUpdate: self.lib.loadFunc(named: "EndUpdate"),
             setRootDir: self.lib.loadFunc(named: "SetRootDir"),
             setMouseUp: self.lib.loadFunc(named: "IMGUI_NotifyMouseUp"),
             setMouseDown: self.lib.loadFunc(named: "IMGUI_NotifyMouseDown"),
@@ -70,6 +81,11 @@ internal class NativeCore {
             getComponentSetFromIterator: self.lib.loadFunc(named: "GetComponentData"),
             getSystemDeltaTime: self.lib.loadFunc(named: "GetSystemDelta")
         )
+
+        imguiFuncs = IMGUIFuncs(
+            startWindow: self.lib.loadFunc(named: "IMGUI_StartWindow"), 
+            endWindow: self.lib.loadFunc(named: "IMGUI_EndWindow")
+        )
     }
 
     internal func start(width: UInt32, height: UInt32, window: UnsafeMutableRawPointer, rootDir: UnsafeMutableRawPointer) {
@@ -79,6 +95,10 @@ internal class NativeCore {
 
     internal func update(tick: Float) {
         self.coreFuncs.update(tick)
+    }
+
+    internal func endUpdate() {
+        self.coreFuncs.endUpdate()
     }
 
     internal func setRootDir(str: UnsafeMutableRawPointer) {
@@ -150,5 +170,9 @@ internal class NativeCore {
 
     internal func setMouseMoved(x: Int32, y: Int32) {
         self.coreFuncs.setMouseMoved(x, y)
+        "TestWindow".withCString {
+            self.imguiFuncs.startWindow($0)
+        }
+        self.imguiFuncs.endWindow()
     }
 }

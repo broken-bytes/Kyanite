@@ -81,12 +81,14 @@ void Update(float frameTime) {
     }
   }
   ImGui::End();
-  Instance.Renderer->MidFrame();
-  Instance.Renderer->EndFrame();
   ECS_Update(frameTime);
 }
 
-void PhysicsUpdate(float frameTime) {}
+void EndUpdate() {
+    Instance.Renderer->MidFrame();
+    Instance.Renderer->EndFrame();
+}
+
 #pragma endregion
 
 #pragma region CONFIG_API
@@ -184,7 +186,7 @@ void IMGUI_StartWindow(const char *name) {
 }
 
 void IMGUI_EndWindow() {
-
+  ImGui::End();
 }
 
 void IMGUI_StartChild() {

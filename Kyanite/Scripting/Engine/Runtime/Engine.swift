@@ -74,6 +74,7 @@ internal class Engine {
     internal func update(timestep: Float) {
         NativeCore.shared.update(tick: timestep)
         InputSystem.shared.flush()
+        NativeCore.shared.endUpdate()
     }
 
     internal func onKeyChanged(key: UInt8, isPressed: Bool, name: String) {
