@@ -5,15 +5,21 @@ import WinSDK
 let engine = Engine()
 
 @_cdecl("start") public func start(
+    argumentCount: UInt32,
+    argumentVector: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>>,
     width: UInt32,
     height: UInt32, 
-    window: UnsafeMutableRawPointer, 
-    rootDir: UnsafeMutableRawPointer,
-    world: UnsafeMutableRawPointer
+    window: UnsafeMutableRawPointer
 ) {
-    let rawStr = world.bindMemory(to: CChar.self, capacity: strlen(world))
-    let str = String(cString: rawStr)
-    engine.start(width: width, height: height, window: window, rootDir: rootDir, world: str)
+    var args: [String] = []
+
+    for x in 0..<argumentCount {
+        let ptr = argumentVector[Int(x)]
+        args.append(String(cString: ptr))
+        Logger.shared.println(str: String(cString: ptr))
+    }
+
+    engine.start(args: args, width: width, height: height, window: window)
 }
 
 @_cdecl("update") public func update() {

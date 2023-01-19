@@ -5,7 +5,7 @@ internal typealias Start = @convention(c) (UInt32, UInt32, UnsafeMutableRawPoint
 internal typealias Update = @convention(c) (Float) -> Void
 internal typealias StartRender = @convention(c) () -> Void
 internal typealias EndRender = @convention(c) () -> Void
-internal typealias SetRootDir = @convention(c) (UnsafeMutableRawPointer) -> Void
+internal typealias SetRootDir = @convention(c) (UnsafePointer<Int8>) -> Void
 internal typealias SetResized = @convention(c) (UInt32, UInt32) -> Void
 
 // Entity Funcs
@@ -94,7 +94,7 @@ internal class NativeCore {
         )
     }
 
-    internal func start(width: UInt32, height: UInt32, window: UnsafeMutableRawPointer, rootDir: UnsafeMutableRawPointer) {
+    internal func start(width: UInt32, height: UInt32, window: UnsafeMutableRawPointer, rootDir: UnsafePointer<Int8>) {
         self.coreFuncs.start(width, height, window)
         self.coreFuncs.setRootDir(rootDir)
     }
@@ -108,7 +108,7 @@ internal class NativeCore {
         self.coreFuncs.endRender()
     }
 
-    internal func setRootDir(str: UnsafeMutableRawPointer) {
+    internal func setRootDir(str: UnsafePointer<Int8>) {
         self.coreFuncs.setRootDir(str)
     }
 

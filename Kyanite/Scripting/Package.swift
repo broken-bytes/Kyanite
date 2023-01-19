@@ -11,14 +11,6 @@ let package = Package(
             type: .dynamic,
             targets: ["Editor"]
         ),
-        .executable(
-            name: "Generator",
-            targets: ["Generator-Executable"]
-        ),
-        .executable(
-            name: "MetaBuilder",
-            targets: ["MetaBuilder-Executable"]
-        ),
         .library(
             name: "Kyanite",
             type: .dynamic,
@@ -26,23 +18,10 @@ let package = Package(
         )
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
-        .executableTarget(
-            name: "Generator-Executable",
-            path: "./Generator"
-        ),
-
         .target(
             name: "Audio",
             path: "./Audio"
         ),
-
-        .executableTarget(
-            name: "MetaBuilder-Executable",
-            path: "./MetaBuilder"
-        ),
-
         .target(
             name: "Core",
             path: "./Core"    
