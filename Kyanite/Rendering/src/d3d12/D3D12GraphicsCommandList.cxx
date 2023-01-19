@@ -262,4 +262,46 @@ namespace Renderer {
 		::UpdateSubresources(_commandList.Get(), static_pointer_cast<D3D12TextureBuffer>(dst)->Raw(), static_pointer_cast<D3D12UploadBuffer>(src)->Buffer.Get(), 0, 0, 1, &subData);
 	}
 
+	auto D3D12GraphicsCommandList::Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<RenderTarget> from, std::shared_ptr<TextureBuffer> to) -> void {
+		auto d3dTexBuff = static_pointer_cast<D3D12TextureBuffer>(to);
+		auto d3d3Ren = static_pointer_cast<D3D12RenderTarget>(from);
+		D3D12_BOX sourceRegion;
+		sourceRegion.left = startX;
+		sourceRegion.top = startY;
+		sourceRegion.right = width;
+		sourceRegion.bottom = height;
+		sourceRegion.front = 0;
+		sourceRegion.back = 1;
+		CD3DX12_TEXTURE_COPY_LOCATION dst(d3dTexBuff->Raw(), 0);
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT foot{};
+		foot.Footprint.Depth = 1;
+		foot.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		foot.Footprint.Width = width;
+		foot.Footprint.RowPitch = foot.Footprint.Depth * foot.Footprint.Height;
+		CD3DX12_TEXTURE_COPY_LOCATION src(d3d3Ren->Resource(), foot);
+		src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+	
+		_commandList->CopyTextureRegion(&dst, startX, startY, 0, &src, &sourceRegion);
+	}
+
+	auto D3D12GraphicsCommandList::Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<TextureBuffer> from, std::shared_ptr<TextureBuffer> to) -> void {
+		auto d3dTexBuff = static_pointer_cast<D3D12TextureBuffer>(to);
+		auto d3d3Ren = static_pointer_cast<D3D12TextureBuffer>(from);
+		D3D12_BOX sourceRegion;
+		sourceRegion.left = startX;
+		sourceRegion.top = startY;
+		sourceRegion.right = width;
+		sourceRegion.bottom = height;
+		sourceRegion.front = 0;
+		sourceRegion.back = 4;
+		CD3DX12_TEXTURE_COPY_LOCATION dst(d3dTexBuff->Raw(), 0);
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT foot{};
+		foot.Footprint.Depth = 4;
+		foot.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		foot.Footprint.Width = width;
+		foot.Footprint.RowPitch = foot.Footprint.Depth * foot.Footprint.Height;
+		CD3DX12_TEXTURE_COPY_LOCATION src(d3d3Ren->Raw(), foot);
+
+		_commandList->CopyTextureRegion(&dst, startX, startY, 0, &src, &sourceRegion);
+	}
 }

@@ -62,6 +62,8 @@ namespace Renderer {
 
 		virtual auto Copy(std::shared_ptr<RenderTarget> from, std::shared_ptr<ReadbackBuffer> to) -> void override;
 		virtual auto Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<TextureBuffer> from, std::shared_ptr<ReadbackBuffer> to) -> void;
+		virtual auto Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<TextureBuffer> from, std::shared_ptr<TextureBuffer>) -> void;
+		virtual auto Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<RenderTarget> from, std::shared_ptr<TextureBuffer> to) -> void;
 
 		auto Native() const ->ID3D12GraphicsCommandList5*;
 

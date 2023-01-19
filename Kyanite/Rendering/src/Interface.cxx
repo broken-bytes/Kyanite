@@ -363,6 +363,15 @@ auto Interface::MidFrame() -> void {
   _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
                            ResourceState::RENDER_TARGET,
                            ResourceState::PRESENT);
+   
+  auto copyBackBuffFrameIndex = _frameIndex - 1;
+  if (copyBackBuffFrameIndex < 0) {
+      copyBackBuffFrameIndex = FRAME_COUNT - 1;
+  }
+  if (copyBackBuffFrameIndex > FRAME_COUNT - 1) {
+      copyBackBuffFrameIndex = 0;
+  }
+  _commandList->Copy(0, 0, _windowDimension.x, _windowDimension.y, _frames[copyBackBuffFrameIndex]->RenderTarget(), _textures[0]);
 
   _mouseOverCommandList->Close();
   _commandList->Close();
@@ -404,6 +413,10 @@ auto Interface::Resize(uint32_t width, uint32_t height) -> void {
     }
 
     _frameIndex = _swapChain->CurrentBackBufferIndex();
+
+    _textures[0] = _device->CreateTextureBuffer(_windowDimension.x, _windowDimension.y, 4, 0, Renderer::RGBA, "Current Back Buffer");
+    
+    _device->CreateShaderResourceView(_textures[0], _srvHeap->CpuHandleFor(0));
 }
 
 auto Interface::CreateMaterial(std::string name, uint64_t shaderId) -> uint64_t {
@@ -714,7 +727,7 @@ auto Interface::ReadMouseOverData(uint32_t x, uint32_t y) -> uint32_t {
 }
 
 auto Interface::GetOutputTexture() -> uint64_t {
-    return _rtvHeap->GpuHandleFor(_frameIndex)->Address();
+    return _srvHeap->GpuHandleFor(_frameIndex)->Address();
 }
 
 auto Interface::SetMeshProperties() -> void {}
@@ -805,6 +818,25 @@ auto Interface::CreatePipeline() -> void {
   _mouseOverRowPitchActual = (int)(_windowDimension.x * 4);
   _mouseOverRowPitchRequired = (((int)(_windowDimension.x * 4)) + 255) & ~255; 
   _mouseOverPadding = _mouseOverRowPitchActual - _mouseOverRowPitchRequired;
+
+  // Create SRV Texture that allows us to Write the Back Buffer to a shader visible texture
+  auto backBufferTex =
+      _device->CreateTextureBuffer(_windowDimension.x, _windowDimension.y, 4, 0, Renderer::RGBA, "Current Back Buffer");
+
+  _uploadCommandList->Transition(static_pointer_cast<TextureBuffer>(backBufferTex),
+      ResourceState::COMMON,
+      ResourceState::COPY_DEST);
+
+  auto index = _srvCounter++;
+  _device->CreateShaderResourceView(backBufferTex,
+      _srvHeap->CpuHandleFor(index));
+  backBufferTex->GPUHandle = _srvHeap->GpuHandleFor(index);
+  _uploadCommandList->Transition(static_pointer_cast<TextureBuffer>(backBufferTex),
+      ResourceState::COPY_DEST,
+      ResourceState::PIXEL_SHADER);
+
+  _textures.push_back(backBufferTex);
+
 
   //_copyCommandList->Close();
   _commandList->Close();

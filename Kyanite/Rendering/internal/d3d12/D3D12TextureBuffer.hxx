@@ -19,6 +19,7 @@ namespace Renderer {
 			Microsoft::WRL::ComPtr<ID3D12Resource> buffer,
 			std::string name
 		);
+
 		virtual auto Raw() ->ID3D12Resource* {
 			return _buffer.Get();
 		}

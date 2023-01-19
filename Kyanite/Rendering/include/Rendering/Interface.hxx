@@ -33,7 +33,7 @@
 
 
 namespace Renderer {
-    constexpr uint8_t FRAME_COUNT = 2;
+    constexpr uint8_t FRAME_COUNT = 3;
 	
 	typedef uint32_t Index;
 	enum RenderBackendAPI {

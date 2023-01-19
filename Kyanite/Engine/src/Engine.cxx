@@ -119,6 +119,8 @@ void StartRender() {
 
 	ImGui::Begin("DirectX12 Texture Test");
 	// Note that we pass the GPU SRV handle here, *not* the CPU handle. We're passing the internal pointer value, cast to an ImTextureID
+	auto handle = GetOutputTexture();
+	ImGui::Image((ImTextureID)handle, ImVec2((float)256, (float)256));
 	ImGui::End();
 
 }

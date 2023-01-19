@@ -97,7 +97,8 @@ namespace Renderer {
 
 		virtual auto Copy(std::shared_ptr<RenderTarget> from, std::shared_ptr<ReadbackBuffer> to) -> void = 0;
 		virtual auto Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<TextureBuffer> from, std::shared_ptr<ReadbackBuffer> to) -> void = 0;
-
+		virtual auto Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<TextureBuffer> from, std::shared_ptr<TextureBuffer> to) -> void = 0;
+		virtual auto Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<RenderTarget> from, std::shared_ptr<TextureBuffer> to) -> void = 0;
 
 #pragma endregion
         private:
