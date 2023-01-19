@@ -2,10 +2,18 @@ import Foundation
 import Core
 import Math
 
+#if _EDITOR
+import Editor
+#endif
+
 internal class Engine {
+    #if _EDITOR
+    private let editor = Editor()
+    #endif
     private var deltaTime: Float = 0
     private var cpuTime: Float = 0
     private var gpuTime: Float = 0    
+
     internal init() {
     }
 
@@ -18,22 +26,22 @@ internal class Engine {
         args[1].withCString {
             NativeCore.shared.start(width: width, height: height, window: window, rootDir: $0)
         }
+
+        #if _EDITOR
+        editor.start()
+        #endif
     }
     
     internal func update() {
+        #if _EDITOR
+        editor.update()
+        #endif
         var start = Date()
         NativeCore.shared.update(tick: deltaTime)
         InputSystem.shared.flush()
-
-        var delta: TimeInterval = start.distance(to: Date())
-
-        Logger.shared.println(str: "CPU Time: \(delta)")
-        start = Date()
-
         NativeCore.shared.endUpdate()
-        delta = start.distance(to: Date())
-
-        Logger.shared.println(str: "GPU Time: \(delta)")
+        var delta: TimeInterval = start.distance(to: Date())
+        Timing.shared.deltaTime = Float(delta)
     }
 
     internal func onKeyChanged(key: UInt8, isPressed: Bool, name: String) {

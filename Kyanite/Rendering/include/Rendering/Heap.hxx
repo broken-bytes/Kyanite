@@ -13,7 +13,7 @@ namespace Renderer {
 
         }
 
-        virtual auto CpuHandleFor(std::uint32_t index) -> std::shared_ptr<DescriptorHandle> = 0;
-        virtual auto GpuHandleFor(std::uint32_t index) -> std::shared_ptr<DescriptorHandle> = 0;
+        virtual auto CpuHandleFor(std::uint32_t index) -> std::shared_ptr<CPUDescriptorHandle> = 0;
+        virtual auto GpuHandleFor(std::uint32_t index) -> std::shared_ptr<GPUDescriptorHandle> = 0;
     };
 }

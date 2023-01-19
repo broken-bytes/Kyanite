@@ -117,6 +117,10 @@ void StartRender() {
 	}
 	ImGui::End();
 
+	ImGui::Begin("DirectX12 Texture Test");
+	// Note that we pass the GPU SRV handle here, *not* the CPU handle. We're passing the internal pointer value, cast to an ImTextureID
+	ImGui::End();
+
 }
 
 void EndRender() {
@@ -129,6 +133,10 @@ void EndRender() {
 
 void Resize(uint32_t width, uint32_t height) {
 	Instance.Renderer->Resize(width, height);
+}
+
+uint64_t GetOutputTexture() {
+	return Instance.Renderer->GetOutputTexture();
 }
 
 #pragma endregion

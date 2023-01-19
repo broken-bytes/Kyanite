@@ -713,6 +713,10 @@ auto Interface::ReadMouseOverData(uint32_t x, uint32_t y) -> uint32_t {
   return (mouseOverData[index]);
 }
 
+auto Interface::GetOutputTexture() -> uint64_t {
+    return _rtvHeap->GpuHandleFor(_frameIndex)->Address();
+}
+
 auto Interface::SetMeshProperties() -> void {}
 
 auto Interface::SetCamera(glm::vec3 position, glm::vec3 rotation) -> void {
@@ -875,14 +879,10 @@ auto Interface::CreatePipeline() -> void {
   SDL_GetWindowWMInfo(reinterpret_cast<SDL_Window *>(_window), &wmInfo);
   HWND hwnd = wmInfo.info.win.window;
   ImGui_ImplWin32_Init(hwnd);
-  auto cpuHandle =
-      static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(
-          _srvHeap->CpuHandleFor(_srvCounter));
-  auto gpuHandle =
-      static_pointer_cast<DescriptorHandleT<D3D12_GPU_DESCRIPTOR_HANDLE>>(
-          _srvHeap->GpuHandleFor(_srvCounter));
+  auto cpuHandle = _srvHeap->CpuHandleFor(_srvCounter);
+  auto gpuHandle = _srvHeap->GpuHandleFor(_srvCounter);
   ImGui_ImplDX12_Init(device, FRAME_COUNT, DXGI_FORMAT_R8G8B8A8_UNORM, heap,
-                      cpuHandle->Handle(), gpuHandle->Handle());
+      D3D12_CPU_DESCRIPTOR_HANDLE{ cpuHandle->Address() }, D3D12_GPU_DESCRIPTOR_HANDLE{ gpuHandle->Address() });
   _srvCounter++;
 #endif
 }

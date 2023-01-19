@@ -1,24 +1,27 @@
 public class Editor {
     private var windows: [EditorWindow] = []
 
-    func start(hwnd: UnsafeMutableRawPointer) {
+    public init() {
+
+    }
+
+    public func start() {
         windows.append(Outliner())
         windows.append(Profiler())
         windows.append(Universe())
-        windows.append(Viewport(hwnd: hwnd))
     }
 
-    func tick(lastTick: Float) {
+    public func update() {
 
     }
 
-    func editorTick() {
+    public func editorUpdate() {
         for window in windows {
             window.draw()
         }
     }
 
-    func end() {
+    public func end() {
 
     }
 }

@@ -55,13 +55,13 @@ namespace Renderer {
 		};
 
 		[[nodiscard]] 
-		virtual auto CPUHandleForHeapStart() -> DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE> {
-			return { _heap->GetCPUDescriptorHandleForHeapStart()};
+		virtual auto CPUHandleForHeapStart() -> CPUDescriptorHandle {
+			return { _heap->GetCPUDescriptorHandleForHeapStart().ptr};
 		};
 
 		[[nodiscard]]
-		virtual auto GPUHandleForHeapStart() -> DescriptorHandleT<D3D12_GPU_DESCRIPTOR_HANDLE>{
-			return { _heap->GetGPUDescriptorHandleForHeapStart()};
+		virtual auto GPUHandleForHeapStart() -> GPUDescriptorHandle {
+			return { _heap->GetGPUDescriptorHandleForHeapStart().ptr};
 		};
 
 		[[nodiscard]]
@@ -69,16 +69,16 @@ namespace Renderer {
 			return _heap.Get();
 		}
 
-		virtual auto CpuHandleFor(std::uint32_t index) -> std::shared_ptr<DescriptorHandle> {
+		virtual auto CpuHandleFor(std::uint32_t index) -> std::shared_ptr<CPUDescriptorHandle> {
 			CD3DX12_CPU_DESCRIPTOR_HANDLE handle(_heap->GetCPUDescriptorHandleForHeapStart(), index, _increment);
-			auto desc = std::make_shared<DescriptorHandleT<CD3DX12_CPU_DESCRIPTOR_HANDLE>>(handle);
+			auto desc = std::make_shared<CPUDescriptorHandle>(handle.ptr);
 			return desc;
 		}
 
-		virtual auto GpuHandleFor(std::uint32_t index) ->  std::shared_ptr<DescriptorHandle> {
+		virtual auto GpuHandleFor(std::uint32_t index) ->  std::shared_ptr<GPUDescriptorHandle> {
 			assert(_desc.Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 			CD3DX12_GPU_DESCRIPTOR_HANDLE handle(_heap->GetGPUDescriptorHandleForHeapStart(), index, _increment);
-			auto desc = std::make_shared<DescriptorHandleT<CD3DX12_GPU_DESCRIPTOR_HANDLE>>(handle);
+			auto desc = std::make_shared<GPUDescriptorHandle>(handle.ptr);
 			return desc;
 		}
 

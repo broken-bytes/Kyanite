@@ -336,16 +336,12 @@ auto D3D12Device::CreateDepthBuffer(glm::vec2 dimensions, std::string name)
 }
 
 auto D3D12Device::CreateDepthStencilView(
-    std::shared_ptr<DescriptorHandle> handle, std::shared_ptr<Buffer> buffer)
+    std::shared_ptr<CPUDescriptorHandle> handle, std::shared_ptr<Buffer> buffer)
     -> void {
   auto dBuff =
       static_pointer_cast<D3D12Buffer<D3D12_DEPTH_STENCIL_VIEW_DESC>>(buffer);
   auto view = dBuff->View;
-  _device->CreateDepthStencilView(
-      dBuff->Buffer.Get(), &view,
-      static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(
-          handle)
-          ->Handle());
+  _device->CreateDepthStencilView(dBuff->Buffer.Get(), &view, D3D12_CPU_DESCRIPTOR_HANDLE { handle->Address()});
 }
 auto D3D12Device::CreateFrame(std::shared_ptr<Allocator> allocator,
                               std::shared_ptr<RenderTarget> renderTarget)
@@ -368,10 +364,7 @@ auto D3D12Device::CreateRenderTargetView(
     std::shared_ptr<DescriptorHandle> handle,
     std::shared_ptr<RenderTarget> target) -> std::shared_ptr<RenderTarget> {
   _device->CreateRenderTargetView(
-      static_pointer_cast<D3D12RenderTarget>(target)->Resource(), nullptr,
-      static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(
-          handle)
-          ->Handle());
+      static_pointer_cast<D3D12RenderTarget>(target)->Resource(), nullptr, D3D12_CPU_DESCRIPTOR_HANDLE { handle->Address() });
   return nullptr;
 }
 
@@ -385,10 +378,7 @@ auto D3D12Device::CreateShaderResourceView(
   srvDesc.Texture2D.MipLevels = 1;
 
   _device->CreateShaderResourceView(
-      static_pointer_cast<D3D12TextureBuffer>(buffer)->Raw(), &srvDesc,
-      static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(
-          handle)
-          ->Handle());
+      static_pointer_cast<D3D12TextureBuffer>(buffer)->Raw(), &srvDesc, D3D12_CPU_DESCRIPTOR_HANDLE{ handle->Address() });
 }
 
 auto D3D12Device::CreateConstantBufferView(
@@ -399,11 +389,9 @@ auto D3D12Device::CreateConstantBufferView(
   desc.SizeInBytes = buffer->Size();
   desc.BufferLocation = dBuffer->Buffer->GetGPUVirtualAddress();
 
-  auto cHandle =
-      static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(
-          cpuHandle);
+  auto cHandle = D3D12_CPU_DESCRIPTOR_HANDLE{ cpuHandle->Address() };
 
-  _device->CreateConstantBufferView(&desc, cHandle->Handle());
+  _device->CreateConstantBufferView(&desc, cHandle);
 }
 
 auto D3D12Device::CreateMipMaps(

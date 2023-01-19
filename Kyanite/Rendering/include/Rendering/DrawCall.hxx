@@ -13,6 +13,6 @@ namespace Renderer {
 		std::uint64_t MaterialId;
 		glm::mat4 Transform;
 		RendererLayer RenderLayer;
-		DescriptorHandle RenderTarget;
+		GPUDescriptorHandle* RenderTarget;
 	};
 }

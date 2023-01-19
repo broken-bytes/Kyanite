@@ -70,6 +70,7 @@ namespace Renderer {
 		auto SetCamera(glm::vec3 position, glm::vec3 rotation) -> void;
 		auto SetCursorPosition(std::array<uint32_t, 2> position) -> void;
 		auto ReadMouseOverData(uint32_t x, uint32_t y) -> uint32_t;
+		auto GetOutputTexture() -> uint64_t;
 	protected:
 		void* _window;
 		void* _context;

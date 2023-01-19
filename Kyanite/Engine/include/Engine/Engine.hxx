@@ -139,6 +139,7 @@ DLL_EXPORT void Update(float frameTime);
 DLL_EXPORT void StartRender();
 DLL_EXPORT void EndRender();
 DLL_EXPORT void Resize(uint32_t width, uint32_t height);
+DLL_EXPORT uint64_t GetOutputTexture();
 #pragma endregion
 
 #pragma region CONFIG_API

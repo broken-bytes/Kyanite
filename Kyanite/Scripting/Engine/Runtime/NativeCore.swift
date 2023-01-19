@@ -55,7 +55,11 @@ enum EntityError: Error {
 }
 
 internal class NativeCore {
+    #if _EDITOR_RUNTIME
+    internal static var shared: NativeCore! = nil
+    #else
     internal static let shared = NativeCore()
+    #endif
 
     private let lib: Library
 

@@ -8,7 +8,7 @@
 namespace Renderer {
     class TextureBuffer: public Buffer {
         public:
-            std::shared_ptr<DescriptorHandle> GPUHandle;
+            std::shared_ptr<GPUDescriptorHandle> GPUHandle;
         TextureBuffer() {}
         virtual ~TextureBuffer() {
 

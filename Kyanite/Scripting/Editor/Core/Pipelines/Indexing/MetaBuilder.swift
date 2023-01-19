@@ -5,7 +5,6 @@
 //  Created by Kulina, Marcel on 12.09.22.
 //
 
-@main
 struct MetaBuilder {
     static func main() {
         generate()

@@ -14,23 +14,23 @@ namespace Renderer {
 		D3D12GraphicsCommandList(CommandType type, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList5> commandList);
 		virtual auto Close() -> void override;
         virtual auto Reset(std::shared_ptr<Allocator> allocator, std::shared_ptr<GraphicsPipelineState> pipelineState) -> void override;
-        virtual auto ClearRenderTarget(std::shared_ptr<DescriptorHandle> target, glm::vec4 color) -> void override;
-		virtual auto ClearDepthTarget(std::shared_ptr<DescriptorHandle> target, float depth) -> void override;
+        virtual auto ClearRenderTarget(std::shared_ptr<CPUDescriptorHandle> target, glm::vec4 color) -> void override;
+		virtual auto ClearDepthTarget(std::shared_ptr<CPUDescriptorHandle> target, float depth) -> void override;
 		virtual auto SetPipelineState(std::shared_ptr<GraphicsPipelineState> state) -> void override;
 		virtual auto SetGraphicsRootSignature(std::shared_ptr<GraphicsRootSignature> signature) -> void override;
 		virtual auto SetDescriptorHeaps(std::vector<std::shared_ptr<Heap>> heaps) -> void override;
 		virtual auto SetGraphicsRootConstantBuffer(std::shared_ptr<UploadBuffer> heap, void* data, size_t sizeInBytes, uint8_t* address) -> void override;
 		virtual auto SetGraphicsRootDescriptorTable(
 			std::uint32_t index,
-			std::shared_ptr<DescriptorHandle> handle
+			std::shared_ptr<GPUDescriptorHandle> handle
 		) -> void override;
 		virtual auto SetGraphicsRootConstants(std::uint64_t index, std::size_t count, void* data, std::size_t offset) -> void override;
 		virtual auto SetTopology(GraphicsPipelineStateTopology topology) -> void override;
 		virtual auto SetViewport(Viewport viewport) -> void override;
 		virtual auto SetScissorRect(Rect rect) -> void override;
 		virtual auto SetRenderTarget(
-			std::shared_ptr<DescriptorHandle> rtvHandle,
-			std::shared_ptr<DescriptorHandle> dsvHandle
+			std::shared_ptr<CPUDescriptorHandle> rtvHandle,
+			std::shared_ptr<CPUDescriptorHandle> dsvHandle
 		) -> void override;
 		virtual auto SetVertexBuffer(
 			std::shared_ptr<Buffer> buffer

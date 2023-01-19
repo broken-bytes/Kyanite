@@ -100,7 +100,7 @@ namespace Renderer {
 		)->std::shared_ptr<Buffer> = 0;
 
 		virtual auto CreateDepthStencilView(
-			std::shared_ptr<DescriptorHandle> handle,
+			std::shared_ptr<CPUDescriptorHandle> handle,
 			std::shared_ptr<Buffer> buffer
 		) -> void = 0;
         [[nodiscard]] virtual auto CreateFrame(std::shared_ptr<Allocator> allocator, std::shared_ptr<RenderTarget> renderTarget) -> std::shared_ptr<Frame> = 0;

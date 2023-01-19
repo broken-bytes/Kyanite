@@ -1,9 +1,6 @@
-#if os(Windows)
-import WinSDK
-#endif
-
 let engine = Engine()
 
+#if _EDITOR || _RUNTIME
 @_cdecl("start") public func start(
     argumentCount: UInt32,
     argumentVector: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>>,
@@ -26,15 +23,13 @@ let engine = Engine()
     engine.update()
 }
 
-@_cdecl("onKeyUp") public func onKeyUpHandler(key: UInt8, name: UnsafeMutableRawPointer) {
-    let rawStr = name.bindMemory(to: CChar.self, capacity: strlen(name))
-    let str = String(cString: rawStr)
+@_cdecl("onKeyUp") public func onKeyUpHandler(key: UInt8, name: UnsafeMutablePointer<UInt8>) {
+    let str = String(cString: name)
     engine.onKeyChanged(key: key, isPressed: false, name: str)
 }
 
-@_cdecl("onKeyDown") public func onKeyDownHandler(key: UInt8, name: UnsafeMutableRawPointer) {
-    let rawStr = name.bindMemory(to: CChar.self, capacity: strlen(name))
-    let str = String(cString: rawStr)
+@_cdecl("onKeyDown") public func onKeyDownHandler(key: UInt8, name: UnsafeMutablePointer<UInt8>) {
+    let str = String(cString: name)
     engine.onKeyChanged(key: key, isPressed: true, name: str)
 }
 
@@ -57,3 +52,12 @@ let engine = Engine()
 @_cdecl("onViewportResized") public func onViewportResized(width: UInt32, height: UInt32) {
     engine.onViewportResized(width: width, height: height)
 }
+#endif
+
+
+#if _EDITOR_RUNTIME
+@_cdecl("start") public func start(nativeCore: UnsafeMutableRawPointer) {
+    let core = nativeCore.load(as: NativeCore.self)
+    NativeCore.shared = core
+}
+#endif

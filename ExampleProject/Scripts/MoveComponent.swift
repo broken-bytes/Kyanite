@@ -1,4 +1,5 @@
 import Math
+import Engine
 
 public struct MoveComponent: Component {
     public var movement: Vector3

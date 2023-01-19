@@ -32,19 +32,19 @@ namespace Renderer {
 		_commandList->Reset(static_pointer_cast<D3D12Allocator>(allocator)->Native(), pipeline? pipeline-> Native() : nullptr);
 	}
 
-	auto D3D12GraphicsCommandList::ClearRenderTarget(std::shared_ptr<DescriptorHandle> target, glm::vec4 color) -> void {
+	auto D3D12GraphicsCommandList::ClearRenderTarget(std::shared_ptr<CPUDescriptorHandle> target, glm::vec4 color) -> void {
 		float arr[] = {color.x, color.y, color.z, color.w};
 		_commandList->ClearRenderTargetView(
-			static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(target)->Handle(),
+			D3D12_CPU_DESCRIPTOR_HANDLE { target->Address() },
 			arr,
 			0,
 			nullptr
 		);
 	}
 
-	auto D3D12GraphicsCommandList::ClearDepthTarget(std::shared_ptr<DescriptorHandle> target, float depth) -> void {
+	auto D3D12GraphicsCommandList::ClearDepthTarget(std::shared_ptr<CPUDescriptorHandle> target, float depth) -> void {
 		_commandList->ClearDepthStencilView(
-			static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(target)->Handle(),
+			D3D12_CPU_DESCRIPTOR_HANDLE{ target->Address() },
 			D3D12_CLEAR_FLAG_DEPTH,
 			depth,
 			0,
@@ -79,9 +79,9 @@ namespace Renderer {
 	
 	auto D3D12GraphicsCommandList::SetGraphicsRootDescriptorTable(
 		std::uint32_t index,
-		std::shared_ptr<DescriptorHandle> handle
+		std::shared_ptr<GPUDescriptorHandle> handle
 	) -> void {
-		auto dhandle = static_pointer_cast<DescriptorHandleT<D3D12_GPU_DESCRIPTOR_HANDLE>>(handle)->Handle();
+		auto dhandle = D3D12_GPU_DESCRIPTOR_HANDLE{ handle->Address() };
 		_commandList->SetGraphicsRootDescriptorTable(index, dhandle);
 	}
 	
@@ -115,11 +115,11 @@ namespace Renderer {
 	}
 	
 	auto D3D12GraphicsCommandList::SetRenderTarget(
-		std::shared_ptr<DescriptorHandle> rtvHandle,
-		std::shared_ptr<DescriptorHandle> dsvHandle
+		std::shared_ptr<CPUDescriptorHandle> rtvHandle,
+		std::shared_ptr<CPUDescriptorHandle> dsvHandle
 	) -> void {
-		auto rHandle = static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(rtvHandle)->Handle();
-		auto dHandle = static_pointer_cast<DescriptorHandleT<D3D12_CPU_DESCRIPTOR_HANDLE>>(dsvHandle)->Handle();
+		auto rHandle = D3D12_CPU_DESCRIPTOR_HANDLE{rtvHandle->Address()};
+		auto dHandle = D3D12_CPU_DESCRIPTOR_HANDLE{ dsvHandle->Address() };
 		_commandList->OMSetRenderTargets(
 			1,
 			&rHandle,
