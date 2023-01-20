@@ -24,8 +24,13 @@ let package = Package(
 
         .target(
             name: "Editor",
-            dependencies: ["Core"],
+            dependencies: ["Core", "SQLite"],
             path: "./Editor"
+        ),
+
+        .target(
+            name: "SQLite",
+            path: "./SQLite"
         ),
 
         .target(

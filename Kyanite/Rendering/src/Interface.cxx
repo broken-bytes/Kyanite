@@ -404,9 +404,6 @@ auto Interface::MidFrame() -> void {
   }
 
   _nextFrameIndex = copyBackBuffFrameIndex;
-  std::cout << "NEXT" << std::endl;
-  std::cout << "Frame: " << _frameIndex << std::endl;
-  std::cout << "Copy : " << copyBackBuffFrameIndex << std::endl;
   
   _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
       ResourceState::RENDER_TARGET,
