@@ -23,6 +23,7 @@
 #include <debugapi.h>
 #include <dxgiformat.h>
 #include <glm/ext/quaternion_transform.hpp>
+#include <thread>
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -52,6 +53,7 @@
 #include <clocale>
 
 #include "d3d12/D3D12Heap.hxx"
+#include <iostream>
 
 float xPos = 1;
 float yPos = 50;
@@ -170,6 +172,8 @@ auto Interface::StartFrame() -> void {
   _frames[_frameIndex]->Allocator()->Reset();
   _mouseOverAllocator->Reset();
   _commandList->Reset(_frames[_frameIndex]->Allocator(), nullptr);
+  _imguiAllocator->Reset();
+  _imguiCommandList->Reset(_imguiAllocator, nullptr);
   _mouseOverCommandList->Reset(_mouseOverAllocator, nullptr);
   _cbAllocator[_frameIndex]->Reset();
   _cbCommandList->Reset(_cbAllocator[_frameIndex], nullptr);
@@ -177,6 +181,7 @@ auto Interface::StartFrame() -> void {
 
 auto Interface::MidFrame() -> void {
   _commandList->SetDescriptorHeaps({_srvHeap});
+  _imguiCommandList->SetDescriptorHeaps({ _srvHeap });
   _mouseOverCommandList->SetDescriptorHeaps({_srvHeap});
 
   auto sun = SunLight{sunColor, {xPos, yPos, zPos, 1}, true};
@@ -269,6 +274,7 @@ auto Interface::MidFrame() -> void {
     // Copy Resulting Render Texture to a readbackbuffer in order for CPU to detect the mouse over.
     _mouseOverCommandList->Copy(0, 0, _windowDimension.x, _windowDimension.y, _mouseOverBuffer[_frameIndex], _mouseOverReadbackBuffer);
   }
+
   // --- Display Render Pass ---
   {
     clearColor = {0, 0.2, 0.2, 1};
@@ -349,35 +355,76 @@ auto Interface::MidFrame() -> void {
       _commandList->SetVertexBuffer(vao->VertexBuffer);
       _commandList->SetIndexBuffer(vao->IndexBuffer);
       _commandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
+
+      _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
+          ResourceState::RENDER_TARGET,
+          ResourceState::PRESENT);
     }
   }
 
-  ImGui::Render();
+  // ImGui Render Pass
+  {
+      _imguiCommandList->Transition(
+          _frames[_frameIndex]->RenderTarget(),
+          ResourceState::PRESENT,
+          ResourceState::RENDER_TARGET);
+
+      auto dsvHandle = _dsvHeap->CpuHandleFor(0);
+      auto rtvHandle = _rtvHeap->CpuHandleFor(_frameIndex);
+      _imguiCommandList->SetRenderTarget(rtvHandle, dsvHandle);
+      _imguiCommandList->SetTopology(GraphicsPipelineStateTopology::POLYGON);
+      _imguiCommandList->SetViewport(_viewport);
+      _imguiCommandList->ClearRenderTarget(rtvHandle, clearColor);
+      _imguiCommandList->ClearDepthTarget(dsvHandle);
+      _imguiCommandList->SetScissorRect(_scissorRect);
+      ImGui::Render();
+
 #if _WIN32
-  auto cmdList =
-      static_pointer_cast<D3D12GraphicsCommandList>(_commandList)->Native();
-  ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
+      auto cmdList =
+          static_pointer_cast<D3D12GraphicsCommandList>(_imguiCommandList)->Native();
+      ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
 #endif
 
-  // Indicate that the back buffer will now be used to present.
-  _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
-                           ResourceState::RENDER_TARGET,
-                           ResourceState::PRESENT);
-   
-  auto copyBackBuffFrameIndex = _frameIndex - 1;
-  if (copyBackBuffFrameIndex < 0) {
-      copyBackBuffFrameIndex = FRAME_COUNT - 1;
+      _imguiCommandList->Transition(
+          _frames[_frameIndex]->RenderTarget(),
+          ResourceState::RENDER_TARGET,
+          ResourceState::PRESENT
+      );
   }
-  if (copyBackBuffFrameIndex > FRAME_COUNT - 1) {
+
+  // Indicate that the back buffer will now be used to present.
+  bool copyFrameSet = false;
+  auto copyBackBuffFrameIndex = _frameIndex;
+  if (copyBackBuffFrameIndex >= FRAME_COUNT - 1) {
+      copyFrameSet = true;
       copyBackBuffFrameIndex = 0;
   }
-  _commandList->Copy(0, 0, _windowDimension.x, _windowDimension.y, _frames[copyBackBuffFrameIndex]->RenderTarget(), _textures[0]);
+  if (!copyFrameSet && copyBackBuffFrameIndex <= 0) {
+      copyBackBuffFrameIndex = FRAME_COUNT - 1;
+  }
+
+  _nextFrameIndex = copyBackBuffFrameIndex;
+  std::cout << "NEXT" << std::endl;
+  std::cout << "Frame: " << _frameIndex << std::endl;
+  std::cout << "Copy : " << copyBackBuffFrameIndex << std::endl;
+  
+  _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
+      ResourceState::RENDER_TARGET,
+      ResourceState::COPY_SOURCE);
+  
+  _commandList->Copy(0, 0, _windowDimension.x, _windowDimension.y, _frames[_frameIndex]->RenderTarget(), _textures[_nextFrameIndex]);
+
+
+  _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
+      ResourceState::COPY_SOURCE,
+      ResourceState::PRESENT);
 
   _mouseOverCommandList->Close();
   _commandList->Close();
+  _imguiCommandList->Close();
   _cbCommandList->Close();
 
-  _mainQueue->ExecuteCommandLists({_mouseOverCommandList, _commandList });
+  _mainQueue->ExecuteCommandLists({_mouseOverCommandList, _commandList, _imguiCommandList });
 
   // Present the frame.
   _swapChain->Swap();
@@ -415,8 +462,10 @@ auto Interface::Resize(uint32_t width, uint32_t height) -> void {
     _frameIndex = _swapChain->CurrentBackBufferIndex();
 
     _textures[0] = _device->CreateTextureBuffer(_windowDimension.x, _windowDimension.y, 4, 0, Renderer::RGBA, "Current Back Buffer");
+    _textures[1] = _device->CreateTextureBuffer(_windowDimension.x, _windowDimension.y, 4, 0, Renderer::RGBA, "Current Back Buffer");
     
     _device->CreateShaderResourceView(_textures[0], _srvHeap->CpuHandleFor(0));
+    _device->CreateShaderResourceView(_textures[1], _srvHeap->CpuHandleFor(1));
 }
 
 auto Interface::CreateMaterial(std::string name, uint64_t shaderId) -> uint64_t {
@@ -730,6 +779,10 @@ auto Interface::GetOutputTexture() -> uint64_t {
     return _srvHeap->GpuHandleFor(_frameIndex)->Address();
 }
 
+auto Interface::SetMainViewport(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height) -> void{
+    _viewport = { (float)startX, (float)startY, (float)width, (float)height, 0.0f, 1.0f };
+}
+
 auto Interface::SetMeshProperties() -> void {}
 
 auto Interface::SetCamera(glm::vec3 position, glm::vec3 rotation) -> void {
@@ -759,6 +812,7 @@ auto Interface::CreatePipeline() -> void {
 
   _rtvHeap = _device->CreateRenderTargetHeap(32);
   _srvHeap = _device->CreateShaderResourceHeap(128);
+  _imGuiSrv = _device->CreateShaderResourceHeap(64);
   _uavHeap = _device->CreateUnorderedAccessHeap(100);
   _cbvHeap = _device->CreateConstantBufferHeap(128);
   _dsvHeap = _device->CreateDepthStencilHeap(2);
@@ -793,9 +847,12 @@ auto Interface::CreatePipeline() -> void {
   _fence = _device->CreateFence(_frames[0]->FenceValue());
   _uploadFence = _device->CreateFence(_uploadFenceValue);
 
+  _imguiAllocator = _device->CreateCommandAllocator(DIRECT);
   _uploadAllocator = _device->CreateCommandAllocator(DIRECT);
   _commandList = _device->CreateCommandList(
-      DIRECT, _frames[_frameIndex]->Allocator(), "CommandList");
+      DIRECT, _frames[_frameIndex]->Allocator(), "Main CommandList");
+  _imguiCommandList = _device->CreateCommandList(
+      DIRECT, _imguiAllocator, "ImGui Command List");
   _mouseOverCommandList = _device->CreateCommandList(
       DIRECT, _mouseOverAllocator, "Mouse Over CommandList");
   _uploadCommandList =
@@ -821,27 +878,34 @@ auto Interface::CreatePipeline() -> void {
 
   // Create SRV Texture that allows us to Write the Back Buffer to a shader visible texture
   auto backBufferTex =
-      _device->CreateTextureBuffer(_windowDimension.x, _windowDimension.y, 4, 0, Renderer::RGBA, "Current Back Buffer");
+      _device->CreateTextureBuffer(_windowDimension.x, _windowDimension.y, 4, 0, Renderer::RGBA, "Back Buffer Texture");
+  auto frontBufferTex =
+      _device->CreateTextureBuffer(_windowDimension.x, _windowDimension.y, 4, 0, Renderer::RGBA, "Front Buffer Texture");
 
   _uploadCommandList->Transition(static_pointer_cast<TextureBuffer>(backBufferTex),
       ResourceState::COMMON,
       ResourceState::COPY_DEST);
 
-  auto index = _srvCounter++;
+  auto index = _srvCounter += 2;
   _device->CreateShaderResourceView(backBufferTex,
-      _srvHeap->CpuHandleFor(index));
-  backBufferTex->GPUHandle = _srvHeap->GpuHandleFor(index);
+      _srvHeap->CpuHandleFor(0));
+  _device->CreateShaderResourceView(frontBufferTex,
+      _srvHeap->CpuHandleFor(1));
+  backBufferTex->GPUHandle = _srvHeap->GpuHandleFor(0);
+  frontBufferTex->GPUHandle = _srvHeap->GpuHandleFor(1);
   _uploadCommandList->Transition(static_pointer_cast<TextureBuffer>(backBufferTex),
       ResourceState::COPY_DEST,
       ResourceState::PIXEL_SHADER);
 
   _textures.push_back(backBufferTex);
+  _textures.push_back(frontBufferTex);
 
 
   //_copyCommandList->Close();
   _commandList->Close();
   _mouseOverCommandList->Close();
   _uploadCommandList->Close();
+  _imguiCommandList->Close();
   auto commandLists = {_mouseOverCommandList, _commandList };
   _mainQueue->ExecuteCommandLists(commandLists);
 

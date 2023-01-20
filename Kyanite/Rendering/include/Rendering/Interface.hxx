@@ -33,7 +33,7 @@
 
 
 namespace Renderer {
-    constexpr uint8_t FRAME_COUNT = 3;
+    constexpr uint8_t FRAME_COUNT = 2;
 	
 	typedef uint32_t Index;
 	enum RenderBackendAPI {
@@ -71,6 +71,7 @@ namespace Renderer {
 		auto SetCursorPosition(std::array<uint32_t, 2> position) -> void;
 		auto ReadMouseOverData(uint32_t x, uint32_t y) -> uint32_t;
 		auto GetOutputTexture() -> uint64_t;
+		auto SetMainViewport(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height) -> void;
 	protected:
 		void* _window;
 		void* _context;
@@ -89,6 +90,7 @@ namespace Renderer {
 		std::shared_ptr<Heap> _samplerHeap;
 		std::shared_ptr<Heap> _cbvHeap;
 		std::shared_ptr<Heap> _srvHeap;
+		std::shared_ptr<Heap> _imGuiSrv;
 		uint64_t _srvCounter = 0;
 		std::shared_ptr<Heap> _uavHeap;
 		std::shared_ptr<Heap> _dsvHeap;
@@ -103,6 +105,9 @@ namespace Renderer {
 		std::shared_ptr<GraphicsCommandList> _cbCommandList;
 		std::array<std::shared_ptr<Allocator>, FRAME_COUNT> _cbAllocator;
 
+		// ImGui
+		std::shared_ptr<GraphicsCommandList> _imguiCommandList;
+		std::shared_ptr<Allocator> _imguiAllocator;
 
 		// Uploading
 		std::shared_ptr<GraphicsCommandList> _uploadCommandList;

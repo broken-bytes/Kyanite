@@ -120,7 +120,10 @@ void StartRender() {
 	ImGui::Begin("DirectX12 Texture Test");
 	// Note that we pass the GPU SRV handle here, *not* the CPU handle. We're passing the internal pointer value, cast to an ImTextureID
 	auto handle = GetOutputTexture();
-	ImGui::Image((ImTextureID)handle, ImVec2((float)256, (float)256));
+	ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+	ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+	ImGui::Image((ImTextureID)handle, ImVec2((float)vMax.x - vMin.x, (float)vMax.y - vMin.y));
+	Instance.Renderer->SetMainViewport(vMin.x, vMin.y, vMax.x, vMax.y);
 	ImGui::End();
 
 }
