@@ -3,7 +3,7 @@
 ecs_world_t *ECS;
 ecs_entity_t Scene;
 
-void SetupBuiltinTypesMeta() {
+void SetupBuiltinTypes() {
   ECS_COMPONENT(ECS, TransformComponent);
   ECS_COMPONENT(ECS, Vector3Component);
   ECS_COMPONENT(ECS, MeshComponent);
@@ -27,15 +27,6 @@ void SetupBuiltinTypesMeta() {
                    .members = {
                        {.name = "internalRefId", .type = ecs_id(ecs_u64_t)},
                    }});
-}
-
-void SetupBuiltinTypesComponents() {
-
-}
-
-void SetupBuiltinTypes() {
-  SetupBuiltinTypesComponents();
-  SetupBuiltinTypesMeta();
 }
 
 void ECS_Init(uint8_t numThreads) {

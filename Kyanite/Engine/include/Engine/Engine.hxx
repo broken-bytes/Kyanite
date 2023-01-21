@@ -151,6 +151,10 @@ DLL_EXPORT void SetCamera(float xPos, float yPos, float zPos, float xRotation,
                           float yRotation, float zRotation);
 #pragma endregion
 
+#pragma region RENDER_API
+DLL_EXPORT void DrawLine(float* from, float* to, float* color);
+#pragma endregion
+
 #pragma region SHADER_API
 DLL_EXPORT void SetMaterialTexture(uint64_t material, const char* name, uint64_t texture);
 DLL_EXPORT void SetMaterialPropertyInt(uint64_t material, const char* name, int value);
@@ -192,30 +196,32 @@ DLL_EXPORT void SetFogColor(float r, float g, float b, float a);
 DLL_EXPORT void SetFogIntensity(float intensity);
 DLL_EXPORT void SetFogMinDistance(float distance);
 
-#ifdef __cplusplus
-}
-#endif
 
-#pragma region INTERNAL_API
+#pragma region LOADER_API
 // --- Load Functions ---
 // Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if
 // not supported)
-uint64_t LoadMeshGPU(MeshInfo &info);
+uint64_t LoadMeshGPU(MeshInfo& info);
 // Loads a mesh into CPU memory (RAM)
-ModelInfo LoadModelCPU(const char *path);
+ModelInfo LoadModelCPU(const char* path);
 
-void FreeModelCPU(ModelInfo &info);
+void FreeModelCPU(ModelInfo& info);
 // Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU
 // if not supported)
-uint64_t  LoadTextureGPU(TextureInfo &info);
+uint64_t LoadTextureGPU(TextureInfo& info);
 // Loads a texture into CPU memory (RAM)
-TextureInfo LoadTextureCPU(const char *path);
-void FreeTextureCPU(TextureInfo &info);
-ShaderInfo LoadShaderCPU(const char *path);
+TextureInfo LoadTextureCPU(const char* path);
+void FreeTextureCPU(TextureInfo& info);
+ShaderInfo LoadShaderCPU(const char* path);
 // Loads a shader and compiles it
-uint64_t LoadShaderGPU(ShaderInfo &info);
+uint64_t LoadShaderGPU(ShaderInfo& info);
 // Creates a new material in the renderpipeline and returns its ref
 uint64_t LoadMaterialGPU(const char* name, uint64_t shader);
 void DrawMesh(uint64_t entityId, uint64_t mesh, uint64_t material, MeshDrawInfo info, Transform transform);
 
 #pragma endregion
+
+
+#ifdef __cplusplus
+}
+#endif

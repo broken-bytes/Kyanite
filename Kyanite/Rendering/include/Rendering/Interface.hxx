@@ -40,6 +40,13 @@ namespace Renderer {
 		DirectX12 = 0,
 		OpenGL = 1
 	};
+
+	struct DebugLine {
+		glm::vec3 Start;
+		glm::vec3 End;
+		glm::vec4 Color;
+	};
+
     class Interface {
         public: 
         Interface(std::uint32_t width, std::uint32_t height, void* window, RenderBackendAPI type);
@@ -65,6 +72,7 @@ namespace Renderer {
 		auto UploadShaderData(GraphicsShader shader)->std::uint64_t;
 		auto DrawMesh(uint64_t entityId, uint64_t meshId, uint64_t materialId, MeshDrawInfo info,
                          glm::vec3 position, glm::quat rotation, glm::vec3 scale) -> void;
+		auto DrawLine(glm::vec3 from, glm::vec3 to, glm::vec4 color) -> void;
 		auto SetMeshProperties() -> void;
 		auto MeshDataFor(const char* uuid) -> std::vector<std::uint64_t>;
 		auto SetCamera(glm::vec3 position, glm::vec3 rotation) -> void;
@@ -139,6 +147,7 @@ namespace Renderer {
 		// Rendering
 		std::vector<std::shared_ptr<VertexArrayObject>> _meshes = {};
 		std::vector<DrawCall> _meshesToDraw = {};
+		std::vector<DebugLine> _linesToDraw = {};
 		std::vector < std::shared_ptr<TextureBuffer>> _textures;
 		std::vector<std::shared_ptr<GraphicsShaderBinding>> _shaders;
 		std::vector<std::shared_ptr<Material>> _materials;
@@ -164,7 +173,6 @@ namespace Renderer {
 		uint64_t _mouseOverRowPitchActual;
   		uint64_t _mouseOverRowPitchRequired; 
   		uint64_t _mouseOverPadding;
-
 
 		// --- DEFAULT SHADERS & MATERIALS --- 
 		// Color Only shader. -> Used for outlining and mouse over detection

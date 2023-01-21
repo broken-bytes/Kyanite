@@ -759,6 +759,10 @@ auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId,
   _meshesToDraw.push_back({entityId, meshId, materialId, transform});
 }
 
+auto Interface::DrawLine(glm::vec3 from, glm::vec3 to, glm::vec4 color) -> void {
+
+}
+
 auto Interface::SetCursorPosition(std::array<uint32_t, 2> position) -> void {
   _cursorPosition = position;
 }

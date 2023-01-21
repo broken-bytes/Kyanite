@@ -39,6 +39,42 @@ struct EngineInstance {
 
 EngineInstance Instance = {};
 
+void RendererSystem(ecs_iter_t* iterator) {
+	size_t numItems = 0;
+	auto transforms = reinterpret_cast<TransformComponent*>(ECS_GetComponentData(iterator, sizeof(TransformComponent), 1, &numItems));
+	auto meshes = reinterpret_cast<MeshComponent*>(ECS_GetComponentData(iterator, sizeof(MeshComponent), 2, &numItems));
+	auto material = reinterpret_cast<MaterialComponent*>(ECS_GetComponentData(iterator, sizeof(MaterialComponent), 3, &numItems));
+
+	for (int x = 0; x < numItems; x++) {
+		DrawMesh(
+			0, 
+			meshes[x].internalId, 
+			material[x].internalId, 
+			MeshDrawInfo{}, 
+			{ 
+				{ transforms[x].Position.x, transforms[x].Position.y, transforms[x].Position.z }, 
+				{ transforms[x].Rotation.x, transforms[x].Rotation.y, transforms[x].Rotation.z },
+				{ transforms[x].Scale.x, transforms[x].Scale.y, transforms[x].Scale.z }
+			});
+	}
+}
+
+void SetupEntityRenderer() {
+	std::vector<uint64_t> componentIds = {};
+	ECS_COMPONENT(ECS_GetWorld(), TransformComponent);
+	ECS_COMPONENT(ECS_GetWorld(), MeshComponent);
+	ECS_COMPONENT(ECS_GetWorld(), MaterialComponent);
+	componentIds.push_back(ecs_id(TransformComponent));
+	componentIds.push_back(ecs_id(MeshComponent));
+	componentIds.push_back(ecs_id(MaterialComponent));
+	RegisterSystem("Renderer", RendererSystem, componentIds.data(), componentIds.size());
+}
+
+
+void SetupBuiltinSystems() {
+	SetupEntityRenderer();
+}
+
 void SetupImGui() {
 	Instance.CTX = ImGui::CreateContext();
 	ImGui::SetCurrentContext(Instance.CTX);
@@ -67,6 +103,8 @@ void Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
 		resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
 
 	ECS_Init(std::thread::hardware_concurrency());
+
+	SetupBuiltinSystems();
 }
 
 void Shutdown() {
@@ -159,6 +197,12 @@ void SetCamera(float xPos, float yPos, float zPos, float xRotation,
 	float yRotation, float zRotation) {
 	Instance.Renderer->SetCamera({ xPos, yPos, zPos },
 		{ xRotation, yRotation, zRotation });
+}
+#pragma endregion
+
+#pragma region RENDER_API
+void DrawLine(float* from, float* to, float* color) {
+	Instance.Renderer->DrawLine(*(reinterpret_cast<glm::vec3*>(from)), *(reinterpret_cast<glm::vec3*>(to)), *(reinterpret_cast<glm::vec4*>(color)));
 }
 #pragma endregion
 
