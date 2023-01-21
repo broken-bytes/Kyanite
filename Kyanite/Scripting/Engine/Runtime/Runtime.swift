@@ -54,10 +54,3 @@ let engine = Engine()
 }
 #endif
 
-
-#if _EDITOR_RUNTIME
-@_cdecl("start") public func start(nativeCore: UnsafeMutableRawPointer) {
-    let core = nativeCore.load(as: NativeCore.self)
-    NativeCore.shared = core
-}
-#endif

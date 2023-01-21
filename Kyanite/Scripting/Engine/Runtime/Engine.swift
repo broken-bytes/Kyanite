@@ -25,11 +25,11 @@ internal class Engine {
     ) {
         args[1].withCString {
             NativeCore.shared.start(width: width, height: height, window: window, rootDir: $0)
-        }
 
         #if _EDITOR
-        editor.start()
+            editor.start(rootDir: args[1])
         #endif
+        }
     }
     
     internal func update() {

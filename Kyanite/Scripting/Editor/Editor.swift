@@ -5,7 +5,9 @@ public class Editor {
 
     }
 
-    public func start() {
+    public func start(rootDir: String) {
+        print(rootDir)
+        AssetDatabase.shared.setRootDir(rootDir: rootDir)
         windows.append(Outliner())
         windows.append(Profiler())
         windows.append(Universe())
