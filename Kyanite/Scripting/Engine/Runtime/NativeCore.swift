@@ -14,7 +14,7 @@ internal typealias DeleteEntity = @convention(c) (UInt64) -> Void
 internal typealias RegisterComponent = @convention(c) (UInt64, UInt8, UnsafePointer<Int8>) -> UInt64
 internal typealias AddComponent = @convention(c) (UInt64, UInt64, UInt64, UnsafeMutableRawPointer) -> UInt64
 internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
-internal typealias RegisterSystem = @convention(c) (UnsafePointer<Int8>, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64, UnsafeMutablePointer<UnsafeMutableRawPointer>) -> UInt64
+internal typealias RegisterSystem = @convention(c) (UnsafePointer<Int8>, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> UInt64
 internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8, UnsafeMutablePointer<UInt64>) -> UnsafeMutableRawPointer
 internal typealias GetSystemDeltaTme = @convention(c) (UnsafeMutableRawPointer, UnsafeMutablePointer<Float>) -> Void
 internal typealias SetMouseButtonDown = @convention(c) (UInt8) -> Void
@@ -143,7 +143,7 @@ internal class NativeCore {
         return self.entityFuncs.getComponent(entity, component)
     }
 
-    internal func registerSystem(name: String, callback: @convention(c) (UnsafeMutableRawPointer) -> Void, _ archetype: Component.Type..., ctx: UnsafeMutablePointer<UnsafeMutableRawPointer>) -> UInt64 {
+    internal func registerSystem(name: String, callback: @convention(c) (UnsafeMutableRawPointer) -> Void, _ archetype: Component.Type...) -> UInt64 {
         let arch: [UInt64] = archetype.map { 
             return try! ComponentRegistry.shared.resolveType(type: $0)
         }
@@ -153,7 +153,7 @@ internal class NativeCore {
         return name.withCString { cStr in       
             return arch.withUnsafeBufferPointer { 
                 let rawPtr = UnsafeMutableRawPointer(mutating: $0.baseAddress)!
-                return self.entityFuncs.registerSystem(cStr, addRawPointer, rawPtr, UInt64(arch.count), ctx)
+                return self.entityFuncs.registerSystem(cStr, addRawPointer, rawPtr, UInt64(arch.count))
             }
         }
     }

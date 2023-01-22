@@ -50,12 +50,7 @@ internal class Engine {
         try! ComponentRegistry.shared.register(component: MoveComponent.self)
         try! ComponentRegistry.shared.register(component: MeshComponent.self)
         try! ComponentRegistry.shared.register(component: MaterialComponent.self)
-        //NativeCore.shared.registerSystem(name: "MovementSystem", callback: testSystem, TransformComponent.self, MoveComponent.self)
-
-        System("MoveSystem") {
-            let transform: UnsafeMutablePointer<TransformComponent> = $1
-            let movement: UnsafeMutablePointer<MoveComponent> = $2
-        }
+        NativeCore.shared.registerSystem(name: "MovementSystem", callback: testSystem, TransformComponent.self, MoveComponent.self)
 
         World("Test")
 

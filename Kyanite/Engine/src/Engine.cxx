@@ -79,7 +79,7 @@ void SetupImGui() {
 	ImGui::SetCurrentContext(Instance.CTX);
 	auto io = ImGui::GetIO();
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	Instance.BaseText = io.Fonts->AddFontFromFileTTF("H:\\Projects\\Kyanite\\Resources\\fonts\\Metrophobic-Regular.ttf", 24.0f);
+	//Instance.BaseText = io.Fonts->AddFontFromFileTTF("H:\\Projects\\Kyanite\\Resources\\fonts\\Metrophobic-Regular.ttf", 24.0f);
 
 	// Enable Gamepad Controls
 	ImGui::StyleColorsDark();
