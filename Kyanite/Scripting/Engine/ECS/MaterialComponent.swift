@@ -1,8 +1,8 @@
 public struct MaterialComponent: Component {
     private let internalRefId: UInt64
 
-    public init(mesh: Material) {
-        internalRefId = mesh.internalRefId
+    public init(material: Material) {
+        internalRefId = material.internalRefId
     }
 
     internal init(with shaderId: UInt64) {

@@ -9,7 +9,8 @@ internal typealias SetRootDir = @convention(c) (UnsafePointer<Int8>) -> Void
 internal typealias SetResized = @convention(c) (UInt32, UInt32) -> Void
 
 // Entity Funcs
-internal typealias CreateEntity = @convention(c) (UnsafeMutableRawPointer) -> UInt64
+internal typealias CreateEntity = @convention(c) (UnsafePointer<Int8>) -> UInt64
+internal typealias DeleteEntity = @convention(c) (UInt64) -> Void
 internal typealias RegisterComponent = @convention(c) (UInt64, UInt8, UnsafePointer<Int8>) -> UInt64
 internal typealias AddComponent = @convention(c) (UInt64, UInt64, UInt64, UnsafeMutableRawPointer) -> UInt64
 internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
@@ -36,6 +37,7 @@ internal struct CoreFuncs {
 
 internal struct EntityFuncs {
     internal let createEntity: CreateEntity
+    internal let deleteEntity: DeleteEntity
     internal let registerComponent: RegisterComponent
     internal let addComponent: AddComponent
     internal let getComponent: GetComponent
@@ -84,6 +86,7 @@ internal class NativeCore {
 
         entityFuncs = EntityFuncs(
             createEntity: self.lib.loadFunc(named: "ECS_CreateEntity"), 
+            deleteEntity: self.lib.loadFunc(named: "ECS_DeleteEntity"),
             registerComponent: self.lib.loadFunc(named: "ECS_RegisterComponent"), 
             addComponent: self.lib.loadFunc(named: "ECS_AddComponent"), 
             getComponent: self.lib.loadFunc(named: "ECS_GetComponent"),
@@ -117,10 +120,13 @@ internal class NativeCore {
     }
 
     internal func createNewEntity(name: String) -> UInt64 {
-        return withUnsafePointer(to: name.data(using: .utf8)) { ptr in 
-            let rawPtr = UnsafeMutableRawPointer(mutating: ptr)
-            return self.entityFuncs.createEntity(rawPtr)
+        return name.withCString {
+            return self.entityFuncs.createEntity($0)
         }
+    }
+
+    internal func deleteEntity(id: UInt64) -> Void {
+        self.entityFuncs.deleteEntity(id) 
     }
 
     internal func registerNewComponent<T>(type: T.Type) throws -> UInt64 {

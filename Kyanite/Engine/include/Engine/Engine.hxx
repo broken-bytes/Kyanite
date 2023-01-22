@@ -182,6 +182,7 @@ DLL_EXPORT void Shader_SetMaterialPropertyVector4(uint64_t material, const char*
 
 #pragma region ENTITY_API
 DLL_EXPORT uint64_t ECS_CreateEntity(const char* name);
+DLL_EXPORT void ECS_DeleteEntity(uint64_t id);
 DLL_EXPORT uint64_t ECS_RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid);
 DLL_EXPORT uint64_t ECS_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data);
 DLL_EXPORT const void* ECS_GetComponent(uint64_t entity, uint64_t id);

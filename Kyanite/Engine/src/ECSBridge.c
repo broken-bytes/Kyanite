@@ -61,6 +61,10 @@ uint64_t Flecs_CreateEntity(const char *name) {
     return e;
 }
 
+void Flecs_DeleteEntity(uint64_t id) {
+    ecs_delete(ECS, id);
+}
+
 uint64_t Flecs_RegisterComponent(uint64_t size, uint8_t alignment, const char *uuid) {
   return ecs_component_init(ECS, &(ecs_component_desc_t){
         .type.size = size,

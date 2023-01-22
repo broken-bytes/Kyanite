@@ -49,10 +49,12 @@ internal class Engine {
         try! ComponentRegistry.shared.register(component: TransformComponent.self)
         try! ComponentRegistry.shared.register(component: MoveComponent.self)
         try! ComponentRegistry.shared.register(component: MeshComponent.self)
+        try! ComponentRegistry.shared.register(component: MaterialComponent.self)
         NativeCore.shared.registerSystem(name: "MovementSystem", callback: testSystem, TransformComponent.self, MoveComponent.self)
 
-        World("Test") {
-            WithEntity("Main") {
+        World("Test")
+
+        Entity("Main") {
                 TransformComponent(
                     position: Vector3(x: Float.random(in: -100..<101), y: Float.random(in: -100..<101), z: Float.random(in: -100..<101)),
                     scale: Vector3(x: Float.random(in: 0.05..<1.5), y: Float.random(in: 0.05..<1.5), z: Float.random(in: 0.05..<1.5)),
@@ -67,7 +69,23 @@ internal class Engine {
                 )
                 MeshComponent(mesh: Mesh())
             }
-        }
+        Entity("Another") {
+            TransformComponent(
+                position: Vector3(x: Float.random(in: -100..<101), y: Float.random(in: -100..<101), z: Float.random(in: -100..<101)),
+                scale: Vector3(x: Float.random(in: 0.05..<1.5), y: Float.random(in: 0.05..<1.5), z: Float.random(in: 0.05..<1.5)),
+                rotation: Vector3(x: Float.random(in: -100..<101), y: Float.random(in: -100..<101), z: Float.random(in: -100..<101))
+            )
+            MoveComponent(
+                movement: Vector3(
+                    x: Float.random(in: -1.5..<1.5), 
+                    y: 0, 
+                    z: Float.random(in: -1.5..<1.5)
+                )
+            )
+            MeshComponent(mesh: Mesh())
+        }.add { 
+            MaterialComponent(material: Material())
+        } 
     }
     
     internal func update() {

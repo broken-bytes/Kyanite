@@ -42,6 +42,7 @@ void Flecs_Update(float frametime);
 ecs_world_t* Flecs_GetWorld(void);
 ecs_entity_t Flecs_GetScene(void);
 uint64_t Flecs_CreateEntity(const char* name);
+void Flecs_DeleteEntity(uint64_t id);
 uint64_t Flecs_RegisterComponent(uint64_t size, uint8_t alignment, const char *uuid);
 uint64_t Flecs_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *data);
 const void* Flecs_GetComponent(uint64_t entity, uint64_t id);

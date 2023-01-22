@@ -19,6 +19,14 @@ public final class Entity {
         EntityBuilder.processEntity(entity: self, components: components)
     }
 
+    deinit {
+        NativeCore.shared.deleteEntity(id: internalId)
+    }
+
+    public func add(@EntityBuilder components: () -> ComponentContent) {
+        EntityBuilder.processEntity(entity: self, components: components)
+    }
+
     public func addComponent<T: Component>(component: T) {
         print("Adding \(T.self) to \(self)")
         let typeId = try! ComponentRegistry.shared.resolve(component: T.self)

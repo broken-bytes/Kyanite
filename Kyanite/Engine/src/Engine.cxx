@@ -241,6 +241,10 @@ uint64_t ECS_CreateEntity(const char* name) {
 	return Flecs_CreateEntity(name);
 }
 
+void ECS_DeleteEntity(uint64_t id) {
+	Flecs_DeleteEntity(id);
+}
+
 uint64_t ECS_RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid) {
 	return Flecs_RegisterComponent(size, alignment, uuid);
 }
