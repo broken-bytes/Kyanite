@@ -1,0 +1,11 @@
+Model Information:
+* title:	Stylized Orc Warrior
+* source:	https://sketchfab.com/3d-models/stylized-orc-warrior-0fbe7f481fd2416cbdad416599c4e3b6
+* author:	eugeen (https://sketchfab.com/eugeen)
+
+Model License:
+* license type:	CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+* requirements:	Author must be credited. No commercial use.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Stylized Orc Warrior" (https://sketchfab.com/3d-models/stylized-orc-warrior-0fbe7f481fd2416cbdad416599c4e3b6) by eugeen (https://sketchfab.com/eugeen) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)

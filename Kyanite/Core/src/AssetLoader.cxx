@@ -30,39 +30,43 @@
 using namespace std::filesystem;
 namespace fs = std::filesystem;
 
+constexpr const char* CONTENT = "Content/";
+constexpr const char* SCRIPTS = "Scripts/";
+constexpr const char* CACHE = "Cache/";
+
 namespace AssetLoader {
 
-// Helper functions & types
-std::map<std::string, ShaderAssetDescriptionPropType> TypeMappings = {
-	{"Texture", ShaderAssetDescriptionPropType::TEXTURE},
-	{"Int", ShaderAssetDescriptionPropType::INT},
-	{"Float", ShaderAssetDescriptionPropType::FLOAT},
-	{"Vector2", ShaderAssetDescriptionPropType::VECTOR2},
-	{"Vector3", ShaderAssetDescriptionPropType::VECTOR3},
-	{"Vector4", ShaderAssetDescriptionPropType::VECTOR4},
-	{"Bool", ShaderAssetDescriptionPropType::BOOL},
-};
+	// Helper functions & types
+	std::map<std::string, ShaderAssetDescriptionPropType> TypeMappings = {
+		{"Texture", ShaderAssetDescriptionPropType::TEXTURE},
+		{"Int", ShaderAssetDescriptionPropType::INT},
+		{"Float", ShaderAssetDescriptionPropType::FLOAT},
+		{"Vector2", ShaderAssetDescriptionPropType::VECTOR2},
+		{"Vector3", ShaderAssetDescriptionPropType::VECTOR3},
+		{"Vector4", ShaderAssetDescriptionPropType::VECTOR4},
+		{"Bool", ShaderAssetDescriptionPropType::BOOL},
+	};
 
-auto ShaderPropTypeNameToType(const std::string& type) -> ShaderAssetDescriptionPropType {
-	return TypeMappings.at(type);
-}
+	auto ShaderPropTypeNameToType(const std::string& type) -> ShaderAssetDescriptionPropType {
+		return TypeMappings.at(type);
+	}
 
-auto ShaderPropTypeToName(ShaderAssetDescriptionPropType type) -> std::string {
-	auto item = std::find_if(TypeMappings.begin(), TypeMappings.end(), [type](auto& item) {
-		return item.second == type;
-	});
-	
-	return item->first;
-}
+	auto ShaderPropTypeToName(ShaderAssetDescriptionPropType type) -> std::string {
+		auto item = std::find_if(TypeMappings.begin(), TypeMappings.end(), [type](auto& item) {
+			return item.second == type;
+			});
+
+		return item->first;
+	}
 
 
-std::string RootDir = "";
+	std::string RootDir = "";
 
 	auto SetRootDir(std::string path) -> void {
 		RootDir = path;
 	}
 
-	auto LoadModel(std::string path)->ModelAsset {
+	auto LoadModel(std::string path) -> ModelAsset {
 		std::vector<ModelSubMesh> meshes = {};
 
 		tinygltf::Model model;
@@ -72,7 +76,7 @@ std::string RootDir = "";
 
 		std::vector<uint8_t> bytes = {};
 
-		auto fullPath = RootDir + path;
+		auto fullPath = RootDir + CONTENT + path;
 
 		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, fullPath);
 		std::stringstream outStream;
@@ -149,86 +153,86 @@ std::string RootDir = "";
 					verts.push_back(1);
 				}
 
-				ModelSubMesh subMesh = {mesh.name, verts, inds};
+				ModelSubMesh subMesh = { mesh.name, verts, inds };
 				meshes.push_back(subMesh);
 			}
 		}
 		return { path, meshes };
 	}
 
-        auto LoadShader(std::string path) -> ShaderAsset {
-                auto fullPath = RootDir + path;
-                ShaderAsset asset = {};
+	auto LoadShader(std::string path) -> ShaderAsset {
+		auto fullPath = RootDir + CONTENT + path;
+		ShaderAsset asset = {};
 
-                // Gather shader description
-                YAML::Node shaderDescription = YAML::LoadFile(fullPath);
-                const std::string name =
-                    shaderDescription["name"].as<std::string>();
-                const std::string hlslPath =
-                    RootDir + shaderDescription["path"].as<std::string>();
-				std::string lighting = shaderDescription["lighting"].as<std::string>();
-				asset.Description.IsLit = lighting == "default" ? true : false;
+		// Gather shader description
+		YAML::Node shaderDescription = YAML::LoadFile(fullPath);
+		const std::string name =
+			shaderDescription["name"].as<std::string>();
+		const std::string hlslPath =
+			RootDir + shaderDescription["path"].as<std::string>();
+		std::string lighting = shaderDescription["lighting"].as<std::string>();
+		asset.Description.IsLit = lighting == "default" ? true : false;
 
-				std::string instancing = shaderDescription["instancing"].as<std::string>();
-				asset.Description.InstancingEnabled = lighting == "enabled" ? true : false;
-				
-				std::string format = shaderDescription["format"].as<std::string>();
+		std::string instancing = shaderDescription["instancing"].as<std::string>();
+		asset.Description.InstancingEnabled = lighting == "enabled" ? true : false;
 
-				if(format == "rgba_float") {
-					asset.Description.Format = ShaderAssetOutputFormat::RGBA_FLOAT;
-				}
+		std::string format = shaderDescription["format"].as<std::string>();
 
-				if(format == "rgba_uint") {
-					asset.Description.Format = ShaderAssetOutputFormat::RGBA_UINT;
-				}
+		if (format == "rgba_float") {
+			asset.Description.Format = ShaderAssetOutputFormat::RGBA_FLOAT;
+		}
+
+		if (format == "rgba_uint") {
+			asset.Description.Format = ShaderAssetOutputFormat::RGBA_UINT;
+		}
 
 
-                const auto constants = shaderDescription["constants"];
+		const auto constants = shaderDescription["constants"];
 
-                for (YAML::const_iterator it = constants.begin();
-                     it != constants.end(); ++it) {
-                        const YAML::Node &inputElem = *it;
-                        std::string name = inputElem["name"].as<std::string>();
-                        std::string type = inputElem["type"].as<std::string>();
-                        uint8_t slot = inputElem["slot"].as<int>();
-                        ShaderAssetDescriptionProp prop = {};
-                        prop.Type = ShaderPropTypeNameToType(type);
-                        prop.Slot = slot;
-                        prop.Name = name;
-                        asset.Description.Constants.push_back(prop);
-                }
+		for (YAML::const_iterator it = constants.begin();
+			it != constants.end(); ++it) {
+			const YAML::Node& inputElem = *it;
+			std::string name = inputElem["name"].as<std::string>();
+			std::string type = inputElem["type"].as<std::string>();
+			uint8_t slot = inputElem["slot"].as<int>();
+			ShaderAssetDescriptionProp prop = {};
+			prop.Type = ShaderPropTypeNameToType(type);
+			prop.Slot = slot;
+			prop.Name = name;
+			asset.Description.Constants.push_back(prop);
+		}
 
-				const auto buffer = shaderDescription["buffer"];
+		const auto buffer = shaderDescription["buffer"];
 
-                for (YAML::const_iterator it = buffer.begin();
-                     it != buffer.end(); ++it) {
-                        const YAML::Node &inputElem = *it;
-                        std::string name = inputElem["name"].as<std::string>();
-                        std::string type = inputElem["type"].as<std::string>();
-                        uint8_t slot = inputElem["slot"].as<int>();
-                        ShaderAssetDescriptionProp prop = {};
-                        prop.Type = ShaderPropTypeNameToType(type);
-                        prop.Slot = slot;
-                        prop.Name = name;
-                        asset.Description.ConstantBufferLayout.push_back(prop);
-                }
+		for (YAML::const_iterator it = buffer.begin();
+			it != buffer.end(); ++it) {
+			const YAML::Node& inputElem = *it;
+			std::string name = inputElem["name"].as<std::string>();
+			std::string type = inputElem["type"].as<std::string>();
+			uint8_t slot = inputElem["slot"].as<int>();
+			ShaderAssetDescriptionProp prop = {};
+			prop.Type = ShaderPropTypeNameToType(type);
+			prop.Slot = slot;
+			prop.Name = name;
+			asset.Description.ConstantBufferLayout.push_back(prop);
+		}
 
-				asset.Name = name;
-                const auto shaderCodeFileSize = fs::file_size(hlslPath);
+		asset.Name = name;
+		const auto shaderCodeFileSize = fs::file_size(hlslPath);
 
-                // Create a buffer.
-                std::string shaderCode(shaderCodeFileSize, '\0');
-                std::ifstream file(hlslPath, std::ios::in);
+		// Create a buffer.
+		std::string shaderCode(shaderCodeFileSize, '\0');
+		std::ifstream file(hlslPath, std::ios::in);
 
-                // Read the whole file into the buffer.
-                file.read(shaderCode.data(), shaderCodeFileSize);
-                asset.Code = shaderCode;
+		// Read the whole file into the buffer.
+		file.read(shaderCode.data(), shaderCodeFileSize);
+		asset.Code = shaderCode;
 
-                return asset;
-        }
+		return asset;
+	}
 
-        auto CalcMipLevels(uint16_t width, uint16_t height) -> uint8_t {
-			
+	auto CalcMipLevels(uint16_t width, uint16_t height) -> uint8_t {
+
 		auto size = std::max(width, height);
 
 		// FIXME: WRONG
@@ -250,7 +254,7 @@ std::string RootDir = "";
 	}
 
 	auto LoadTexture(std::string path) -> TextureAsset {
-		auto fullPath = RootDir + path;
+		auto fullPath = RootDir + CONTENT + path;
 
 		auto type = FreeImage_GetFileType(fullPath.c_str());
 		auto result = FreeImage_Load(type, fullPath.c_str(), type == FIF_PNG ? PNG_IGNOREGAMMA : 0);
@@ -264,7 +268,7 @@ std::string RootDir = "";
 
 		int channels = bbp / 8;
 
-		if(channels != 4) {
+		if (channels != 4) {
 			result = FreeImage_ConvertTo32Bits(result);
 		}
 

@@ -50,7 +50,12 @@ internal class Engine {
         try! ComponentRegistry.shared.register(component: MoveComponent.self)
         try! ComponentRegistry.shared.register(component: MeshComponent.self)
         try! ComponentRegistry.shared.register(component: MaterialComponent.self)
-        NativeCore.shared.registerSystem(name: "MovementSystem", callback: testSystem, TransformComponent.self, MoveComponent.self)
+        //NativeCore.shared.registerSystem(name: "MovementSystem", callback: testSystem, TransformComponent.self, MoveComponent.self)
+
+        System("MoveSystem") {
+            let transform: UnsafeMutablePointer<TransformComponent> = $1
+            let movement: UnsafeMutablePointer<MoveComponent> = $2
+        }
 
         World("Test")
 
@@ -83,9 +88,7 @@ internal class Engine {
                 )
             )
             MeshComponent(mesh: Mesh())
-        }.add { 
-            MaterialComponent(material: Material())
-        } 
+        }
     }
     
     internal func update() {
@@ -120,5 +123,9 @@ internal class Engine {
 
     internal func onViewportResized(width: UInt32, height: UInt32) {
         NativeCore.shared.setResized(width: width, height: height)
+    }
+
+    deinit {
+        print("GGOODBYE FROM ENGINE")
     }
 }
