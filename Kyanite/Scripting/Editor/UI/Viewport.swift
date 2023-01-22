@@ -11,13 +11,6 @@ public struct Viewport: EditorWindow {
     private var renderUpdate: ((Float) -> Void)!
 
     public init(hwnd: UnsafeMutableRawPointer) {
-        print(hwnd)
-        let lib = Library.loadLibrary(at: "./Kyanite.dll")
-        print(lib)
-        var startFunc: RenderStart = lib.loadFunc(named: "start")
-        print(startFunc)
-        startFunc(hwnd)
-        
     }
 
     public func draw() {

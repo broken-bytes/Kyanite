@@ -147,6 +147,7 @@ auto D3D12Device::CreateSamplerHeap(size_t count) -> std::shared_ptr<Heap> {
   return std::make_shared<D3D12Heap>(*this, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
                                      count);
 }
+
 auto D3D12Device::CreateVertexBuffer(std::vector<Vertex> vertices, std::string name)
     -> std::shared_ptr<Renderer::Buffer> {
   auto len = sizeof(Vertex);
@@ -156,7 +157,6 @@ auto D3D12Device::CreateVertexBuffer(std::vector<Vertex> vertices, std::string n
       CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize, D3D12_RESOURCE_FLAG_NONE);
 
   Microsoft::WRL::ComPtr<ID3D12Resource> buffer;
-  Microsoft::WRL::ComPtr<ID3D12Resource> uploadBuffer;
   _device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
                                    &resourceDesc, D3D12_RESOURCE_STATE_COMMON,
                                    nullptr, IID_PPV_ARGS(&buffer));
@@ -170,6 +170,28 @@ auto D3D12Device::CreateVertexBuffer(std::vector<Vertex> vertices, std::string n
       buffer, view, vertices.size(), name);
 }
 
+auto D3D12Device::CreateInstanceBuffer(std::vector<InstanceVertex> vertices, std::string name)
+-> std::shared_ptr<Renderer::Buffer> {
+    auto len = sizeof(InstanceVertex);
+    const uint32_t vertexBufferSize = vertices.size() * sizeof(InstanceVertex);
+    auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    auto resourceDesc =
+        CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize, D3D12_RESOURCE_FLAG_NONE);
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> buffer;
+    _device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
+        &resourceDesc, D3D12_RESOURCE_STATE_COMMON,
+        nullptr, IID_PPV_ARGS(&buffer));
+
+    D3D12_VERTEX_BUFFER_VIEW view = {};
+    view.BufferLocation = buffer->GetGPUVirtualAddress();
+    view.StrideInBytes = sizeof(InstanceVertex);
+    view.SizeInBytes = vertexBufferSize;
+
+    return std::make_shared<D3D12Buffer<D3D12_VERTEX_BUFFER_VIEW>>(
+        buffer, view, vertices.size(), name);
+}
+
 auto D3D12Device::CreateIndexBuffer(std::vector<uint32_t> indices, std::string name)
     -> std::shared_ptr<Renderer::Buffer> {
   const uint32_t indexBufferSize = indices.size() * sizeof(uint32_t);
@@ -178,7 +200,6 @@ auto D3D12Device::CreateIndexBuffer(std::vector<uint32_t> indices, std::string n
       CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize, D3D12_RESOURCE_FLAG_NONE);
 
   Microsoft::WRL::ComPtr<ID3D12Resource> buffer;
-  Microsoft::WRL::ComPtr<ID3D12Resource> uploadBuffer;
   _device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
                                    &resourceDesc, D3D12_RESOURCE_STATE_COMMON,
                                    nullptr, IID_PPV_ARGS(&buffer));

@@ -17,6 +17,7 @@ let package = Package(
             name: "Audio",
             path: "./Audio"
         ),
+
         .target(
             name: "Core",
             path: "./Core"    

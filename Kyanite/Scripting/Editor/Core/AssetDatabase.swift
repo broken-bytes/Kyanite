@@ -11,6 +11,10 @@ public class AssetDatabase {
         
     }
 
+    deinit {
+        sqlite3_close(database.pointee)
+    }
+
     public func setRootDir(rootDir: String) {
         self.rootDir = rootDir
         self.database = UnsafeMutablePointer<OpaquePointer?>.allocate(capacity: 1)
@@ -38,8 +42,10 @@ public class AssetDatabase {
     }
 
     private func setupDatabase() {
+        print("Start Database init")
         setupAssetsTable()
         setupLinksTable()
+        print("Database init done")
     }
 
     private func setupAssetsTable() {
@@ -59,7 +65,7 @@ CREATE TABLE IF NOT EXISTS asset (
             error
         )
         if error.pointee != nil {
-            print(String(cString: error.pointee!))
+            print("Error creating Assets Table")
         }
     }
 
@@ -79,8 +85,8 @@ CREATE TABLE IF NOT EXISTS asset_link (
             nil,
             error
         )
-        if error.pointee != nil {
-            print(String(cString: error.pointee!))
+    if error.pointee != nil {
+            print("Error creating Links Table")
         }
     }
 }

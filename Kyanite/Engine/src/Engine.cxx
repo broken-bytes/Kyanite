@@ -30,7 +30,6 @@
 
 struct EngineInstance {
 	std::unique_ptr<Renderer::Interface> Renderer;
-	ecs_world_t* ECS;
 	ecs_entity_t Scene;
 	ImGuiIO IO;
 	ImGuiContext* CTX;
@@ -39,6 +38,7 @@ struct EngineInstance {
 
 EngineInstance Instance = {};
 
+
 void RendererSystem(ecs_iter_t* iterator) {
 	size_t numItems = 0;
 	auto transforms = reinterpret_cast<TransformComponent*>(ECS_GetComponentData(iterator, sizeof(TransformComponent), 1, &numItems));
@@ -46,8 +46,8 @@ void RendererSystem(ecs_iter_t* iterator) {
 	auto material = reinterpret_cast<MaterialComponent*>(ECS_GetComponentData(iterator, sizeof(MaterialComponent), 3, &numItems));
 
 	for (int x = 0; x < numItems; x++) {
-		DrawMesh(
-			0, 
+		Renderer_DrawMesh(
+			x, 
 			meshes[x].internalId, 
 			material[x].internalId, 
 			MeshDrawInfo{}, 
@@ -61,15 +61,14 @@ void RendererSystem(ecs_iter_t* iterator) {
 
 void SetupEntityRenderer() {
 	std::vector<uint64_t> componentIds = {};
-	ECS_COMPONENT(ECS_GetWorld(), TransformComponent);
-	ECS_COMPONENT(ECS_GetWorld(), MeshComponent);
-	ECS_COMPONENT(ECS_GetWorld(), MaterialComponent);
+	ECS_COMPONENT(Flecs_GetWorld(), TransformComponent);
+	ECS_COMPONENT(Flecs_GetWorld(), MeshComponent);
+	ECS_COMPONENT(Flecs_GetWorld(), MaterialComponent);
 	componentIds.push_back(ecs_id(TransformComponent));
 	componentIds.push_back(ecs_id(MeshComponent));
 	componentIds.push_back(ecs_id(MaterialComponent));
-	RegisterSystem("Renderer", RendererSystem, componentIds.data(), componentIds.size());
+	ECS_RegisterSystem("Renderer", RendererSystem, componentIds.data(), componentIds.size());
 }
-
 
 void SetupBuiltinSystems() {
 	SetupEntityRenderer();
@@ -86,7 +85,6 @@ void SetupImGui() {
 	ImGui::StyleColorsDark();
 }
 
-#pragma region EXPORTED_API
 // NOTE - We are using void* Pointers instead of
 // std::shared_ptr<TrackedResource> for the C-style exported API.
 //  Reasons:
@@ -96,25 +94,25 @@ void SetupImGui() {
 //  The void* pointer is still std::shared_ptr<TrackedResource> but cast to
 //  void* so Swift can keep a ref to it.
 
-#pragma region RUNTIME_API
-void Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
+#pragma region ENGINE_API
+void Engine_Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
 	SetupImGui();
 	Instance.Renderer = std::make_unique<Renderer::Interface>(
 		resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);
 
-	ECS_Init(std::thread::hardware_concurrency());
+	Flecs_Init(std::thread::hardware_concurrency());
 
 	SetupBuiltinSystems();
 }
 
-void Shutdown() {
+void Engine_Shutdown() {
 }
 
-void Update(float frameTime) {
-	ECS_Update(frameTime);
+void Engine_Update(float frameTime) {
+	Flecs_Update(frameTime);
 }
 
-void StartRender() {
+void Engine_StartRender() {
 	Instance.Renderer->StartFrame();
 	ImGui::PushFont(Instance.BaseText);
 	ImGuiWindowFlags maindockWindowFlags = 0;
@@ -142,8 +140,8 @@ void StartRender() {
 	ImGui::DockSpace(dockId, { 0,0 }, dockFlags);
 
 	ImGui::Begin("Entities");
-	auto termIt = ecs_term_t{ ecs_pair(EcsChildOf, ECS_GetScene()) };
-	ecs_iter_t it = ecs_term_iter(ECS_GetWorld(), &termIt);
+	auto termIt = ecs_term_t{ ecs_pair(EcsChildOf, Flecs_GetScene()) };
+	ecs_iter_t it = ecs_term_iter(Flecs_GetWorld(), &termIt);
 	// ecs_iter_poly(ECS, ECS, &it, NULL);
 	while (ecs_iter_next(&it)) {
 		for (int i = 0; i < it.count; i++) {
@@ -157,7 +155,7 @@ void StartRender() {
 
 	ImGui::Begin("DirectX12 Texture Test");
 	// Note that we pass the GPU SRV handle here, *not* the CPU handle. We're passing the internal pointer value, cast to an ImTextureID
-	auto handle = GetOutputTexture();
+	auto handle = Engine_GetOutputTexture();
 	ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 	ImVec2 vMax = ImGui::GetWindowContentRegionMax();
 	ImGui::Image((ImTextureID)handle, ImVec2((float)vMax.x - vMin.x, (float)vMax.y - vMin.y));
@@ -166,7 +164,7 @@ void StartRender() {
 
 }
 
-void EndRender() {
+void Engine_EndRender() {
 	ImGui::End();
 	ImGui::PopFont();
 	Instance.Renderer->MidFrame();
@@ -174,26 +172,25 @@ void EndRender() {
 }
 
 
-void Resize(uint32_t width, uint32_t height) {
+void Engine_Resize(uint32_t width, uint32_t height) {
 	Instance.Renderer->Resize(width, height);
 }
 
-uint64_t GetOutputTexture() {
+uint64_t Engine_GetOutputTexture() {
 	return Instance.Renderer->GetOutputTexture();
 }
 
-#pragma endregion
+void Engine_SetMaxFrameRate(uint16_t maxFramerate) {}
 
-#pragma region CONFIG_API
-void SetMaxFrameRate(uint16_t maxFramerate) {}
+void Engine_SetVSync(bool enabled) {}
 
-void SetVSync(bool enabled) {}
+void Engine_SetRootDir(const char* path) {
+	AssetLoader::SetRootDir(path);
+}
 
-void SetRootDir(const char* path) { AssetLoader::SetRootDir(path); }
+void Engine_SetCursorPosition(uint32_t x, uint32_t y) {}
 
-void SetCursorPosition(uint32_t x, uint32_t y) {}
-
-void SetCamera(float xPos, float yPos, float zPos, float xRotation,
+void Engine_SetCamera(float xPos, float yPos, float zPos, float xRotation,
 	float yRotation, float zRotation) {
 	Instance.Renderer->SetCamera({ xPos, yPos, zPos },
 		{ xRotation, yRotation, zRotation });
@@ -201,64 +198,76 @@ void SetCamera(float xPos, float yPos, float zPos, float xRotation,
 #pragma endregion
 
 #pragma region RENDER_API
-void DrawLine(float* from, float* to, float* color) {
+void Renderer_DrawMesh(uint64_t entityId, uint64_t mesh, uint64_t material,
+	MeshDrawInfo info, Transform transform) {
+	glm::vec3 position = glm::vec3(transform.Position.X, transform.Position.Y,
+		transform.Position.Z);
+	glm::vec3 scale =
+		glm::vec3(transform.Scale.X, transform.Scale.Y, transform.Scale.Z);
+	glm::quat qRotation = glm::quat(transform.Rotation.Q, transform.Rotation.X,
+		transform.Rotation.Y, transform.Rotation.Z);
+	Instance.Renderer->DrawMesh(entityId, mesh, material, info, position,
+		qRotation, scale);
+}
+
+void Renderer_DrawLine(float* from, float* to, float* color) {
 	Instance.Renderer->DrawLine(*(reinterpret_cast<glm::vec3*>(from)), *(reinterpret_cast<glm::vec3*>(to)), *(reinterpret_cast<glm::vec4*>(color)));
 }
 #pragma endregion
 
 #pragma region SHADER_API
-void SetMaterialTexture(uint64_t material, const char* name, uint64_t texture) {
+void Shader_SetMaterialTexture(uint64_t material, const char* name, uint64_t texture) {
 	Instance.Renderer->SetMaterialTexture(material, name, texture);
 }
 
-void SetMaterialPropertyInt(uint64_t material, const char* name, int value) {}
+void Shader_SetMaterialPropertyInt(uint64_t material, const char* name, int value) {}
 
-void SetMaterialPropertyFloat(uint64_t material, const char* name,
+void Shader_SetMaterialPropertyFloat(uint64_t material, const char* name,
 	float value) {}
 
-void SetMaterialPropertyVector2(uint64_t material, const char* name,
+void Shader_SetMaterialPropertyVector2(uint64_t material, const char* name,
 	float* value) {}
 
-void SetMaterialPropertyVector3(uint64_t material, const char* name,
+void Shader_SetMaterialPropertyVector3(uint64_t material, const char* name,
 	float* value) {}
 
-void SetMaterialPropertyVector4(uint64_t material, const char* name,
+void Shader_SetMaterialPropertyVector4(uint64_t material, const char* name,
 	float* value) {}
 
 #pragma endregion
 
 #pragma region ENTITY_API
-uint64_t CreateEntity(const char* name) {
-	return ECS_CreateEntity(name);
+uint64_t ECS_CreateEntity(const char* name) {
+	return Flecs_CreateEntity(name);
 }
 
-uint64_t RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid) {
-	return ECS_RegisterComponent(size, alignment, uuid);
+uint64_t ECS_RegisterComponent(uint64_t size, uint8_t alignment, const char* uuid) {
+	return Flecs_RegisterComponent(size, alignment, uuid);
 }
 
-uint64_t AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data) {
-	return ECS_AddComponent(entity, id, size, data);
+uint64_t ECS_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data) {
+	return Flecs_AddComponent(entity, id, size, data);
 }
 
-const void* GetComponent(uint64_t entity, uint64_t id) {
-	return ECS_GetComponent(entity, id);
+const void* ECS_GetComponent(uint64_t entity, uint64_t id) {
+	return Flecs_GetComponent(entity, id);
 }
 
-uint32_t GetMouseOverEntityId(uint32_t x, uint32_t y) {
+uint32_t ECS_GetMouseOverEntityId(uint32_t x, uint32_t y) {
 	return Instance.Renderer->ReadMouseOverData(x, y);
 }
 
-uint64_t RegisterSystem(const char* name, void* system, uint64_t* componentIds,
+uint64_t ECS_RegisterSystem(const char* name, void* system, uint64_t* componentIds,
 	size_t numComponents) {
-	return ECS_RegisterSystem(name, system, componentIds, numComponents);
+	return Flecs_RegisterSystem(name, system, componentIds, numComponents);
 }
 
-void* GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count) {
-	return ECS_GetComponentData(iterator, size, index, count);
+void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count) {
+	return Flecs_GetComponentData(iterator, size, index, count);
 }
 
-void GetSystemDelta(void* iterator, float* delta) {
-	ECS_GetSystemDeltaTime(iterator, delta);
+void ECS_GetSystemDelta(void* iterator, float* delta) {
+	Flecs_GetSystemDeltaTime(iterator, delta);
 }
 
 #pragma endregion
@@ -317,32 +326,22 @@ void IMGUI_DrawColorPicker(const char* title, float* color) {
 
 #pragma endregion
 
-#pragma region RENDERING_API
-#pragma endregion
-
-#pragma endregion
-
-void SetClearColor(float r, float g, float b, float a) {}
-
-void SetFogColor(float r, float g, float b, float a) {}
-
-void SetFogIntensity(float intensity) {}
-
-void SetFogMinDistance(float distance) {}
-
 #pragma region INTERNAL_API
 // --- Load Functions ---
 // Loads a mesh directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU if
 // not supported)
-uint64_t LoadMeshGPU(MeshInfo& info) {
+uint64_t Engine_LoadMeshGPU(MeshInfo& info) {
 	auto index = Instance.Renderer->UploadMeshData(
-		(Vertex*)info.Vertices, info.VerticesCount / 9, info.Indices,
-		info.IndicesCount);
+		(Vertex*)info.Vertices, 
+		info.VerticesCount / 13, // 13 Because 13 Float values. Vec4 Pos, Vec3 Normal, Vec2 UV, Vec4 COl 
+		info.Indices,
+		info.IndicesCount
+	);
 	return index;
 }
 
 // Loads a mesh into CPU memory (RAM)
-ModelInfo LoadModelCPU(const char* path) {
+ModelInfo Engine_LoadModelCPU(const char* path) {
 	auto model = AssetLoader::LoadModel(path);
 
 	ModelInfo info;
@@ -369,17 +368,17 @@ ModelInfo LoadModelCPU(const char* path) {
 	return info;
 }
 
-void FreeModelCPU(ModelInfo& info) { delete[] info.Meshes; }
+void Engine_FreeModelCPU(ModelInfo& info) { delete[] info.Meshes; }
 
 // Loads a texture directly into the GPU (DxStorage, MetalIO, or via CPU -> GPU
 // if not supported)
-uint64_t LoadTextureGPU(TextureInfo& info) {
+uint64_t Engine_LoadTextureGPU(TextureInfo& info) {
 	return Instance.Renderer->UploadTextureData(info.Levels[0].Data, info.Levels[0].Width,
 		info.Levels[0].Height, 4);
 }
 
 // Loads a texture into CPU memory (RAM)
-TextureInfo LoadTextureCPU(const char* path) {
+TextureInfo Engine_LoadTextureCPU(const char* path) {
 	auto texture = AssetLoader::LoadTexture(path);
 
 	TextureInfo info;
@@ -397,7 +396,7 @@ TextureInfo LoadTextureCPU(const char* path) {
 	return info;
 }
 
-void FreeTextureCPU(TextureInfo& info) {
+void Engine_FreeTextureCPU(TextureInfo& info) {
 	for (int x = 0; x < info.LevelCount; x++) {
 		delete[] info.Levels[x].Data;
 	}
@@ -405,7 +404,7 @@ void FreeTextureCPU(TextureInfo& info) {
 	delete[] info.Levels;
 }
 
-ShaderInfo LoadShaderCPU(const char* path) {
+ShaderInfo Engine_LoadShaderCPU(const char* path) {
 	const char* Name;
 	ShaderJSONDataLightingModel Lighting;
 	ShaderJSONDataInputProp* Input;
@@ -421,6 +420,7 @@ ShaderInfo LoadShaderCPU(const char* path) {
 	shader.Code.copy(code, codeLen);
 	code[codeLen] = '\0';
 	info.Data.Code = code;
+	info.Data.InstancingEnabled = shader.Description.InstancingEnabled;
 
 	// Only default lighting for now
 	info.Data.Lighting = shader.Description.IsLit
@@ -526,7 +526,7 @@ ShaderInfo LoadShaderCPU(const char* path) {
 }
 
 // Loads a shader and compiles it
-uint64_t LoadShaderGPU(ShaderInfo& info) {
+uint64_t Engine_LoadShaderGPU(ShaderInfo& info) {
 	Renderer::GraphicsShader shader = {};
 	shader.Code = info.Data.Code;
 	shader.Name = std::string(info.Data.Name);
@@ -609,20 +609,8 @@ uint64_t LoadShaderGPU(ShaderInfo& info) {
 }
 
 // Creates a new material in the renderpipeline and returns its ref
-uint64_t LoadMaterialGPU(const char* name, uint64_t shader) {
+uint64_t Engine_LoadMaterialGPU(const char* name, uint64_t shader) {
 	return Instance.Renderer->CreateMaterial(name, shader);
-}
-
-void DrawMesh(uint64_t entityId, uint64_t mesh, uint64_t material,
-	MeshDrawInfo info, Transform transform) {
-	glm::vec3 position = glm::vec3(transform.Position.X, transform.Position.Y,
-		transform.Position.Z);
-	glm::vec3 scale =
-		glm::vec3(transform.Scale.X, transform.Scale.Y, transform.Scale.Z);
-	glm::quat qRotation = glm::quat(transform.Rotation.Q, transform.Rotation.X,
-		transform.Rotation.Y, transform.Rotation.Z);
-	Instance.Renderer->DrawMesh(entityId, mesh, material, info, position,
-		qRotation, scale);
 }
 
 #pragma endregion

@@ -278,14 +278,13 @@ auto Interface::MidFrame() -> void {
   // --- Display Render Pass ---
   {
     clearColor = {0, 0.2, 0.2, 1};
-
       _commandList->SetGraphicsRootConstantBuffer(
       _lightDataBuffer[_frameIndex], &light, sizeof(light),
       _lightDataGPUAddress[_frameIndex]);
 
-  _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
-                           ResourceState::PRESENT,
-                           ResourceState::RENDER_TARGET);
+      _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
+                               ResourceState::PRESENT,
+                               ResourceState::RENDER_TARGET);
 
     auto dsvHandle = _dsvHeap->CpuHandleFor(0);
     auto rtvHandle = _rtvHeap->CpuHandleFor(_frameIndex);
@@ -324,13 +323,15 @@ auto Interface::MidFrame() -> void {
         _commandList->SetGraphicsRootDescriptorTable(
             1,
             _srvHeap->GpuHandleFor(
-                _frameIndex)); // b1     -> The Constant Buffer
+                2)); // b1     -> The Constant Buffer
                                // for this Mesh/Material Light data
       }
       // FIXME: The Texture offsets might start earlier if there is no light CBV
       // andor no User-defined CBV
       // FIXME: Currently, the user-defined CBV is skipped. Need to implement
       // that later on
+
+
       for (auto [it, end, x] = std::tuple{material->Textures.cbegin(),
                                           material->Textures.cend(), 0};
            it != end; it++, x++) {
@@ -340,7 +341,7 @@ auto Interface::MidFrame() -> void {
             [texture](auto &item) { return item.Name == texture.first; });
 
         if (slotBinding != material->Shader->Constants.end()) {
-          auto index = 1 + (shader->ConstantBufferLayout.empty() ? 0 : 1)  + slotBinding->Index + (shader->IsLit ? 1 : 0);
+          auto index = 2 + (shader->ConstantBufferLayout.empty() ? 0 : 1)  + slotBinding->Index + (shader->IsLit ? 1 : 0);
           _commandList->SetGraphicsRootDescriptorTable(index,it->second->GPUHandle);
         }
       }
@@ -356,9 +357,6 @@ auto Interface::MidFrame() -> void {
       _commandList->SetIndexBuffer(vao->IndexBuffer);
       _commandList->DrawInstanced(vao->IndexBuffer->Size(), 1, 0, 0, 0);
 
-      _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
-          ResourceState::RENDER_TARGET,
-          ResourceState::PRESENT);
     }
   }
 
@@ -411,7 +409,6 @@ auto Interface::MidFrame() -> void {
   
   _commandList->Copy(0, 0, _windowDimension.x, _windowDimension.y, _frames[_frameIndex]->RenderTarget(), _textures[_nextFrameIndex]);
 
-
   _commandList->Transition(_frames[_frameIndex]->RenderTarget(),
       ResourceState::COPY_SOURCE,
       ResourceState::PRESENT);
@@ -421,6 +418,7 @@ auto Interface::MidFrame() -> void {
   _imguiCommandList->Close();
   _cbCommandList->Close();
 
+  //_mainQueue->ExecuteCommandLists({_mouseOverCommandList, _commandList, _imguiCommandList });
   _mainQueue->ExecuteCommandLists({_mouseOverCommandList, _commandList, _imguiCommandList });
 
   // Present the frame.
@@ -448,6 +446,8 @@ auto Interface::Resize(uint32_t width, uint32_t height) -> void {
         _frames[x]->ResetRenderTarget();
     }
     _swapChain->Resize(FRAME_COUNT, width, height);
+    _scissorRect = { 0u, 0u, static_cast<uint32_t>(_windowDimension.x),
+                static_cast<uint32_t>(_windowDimension.y) };
 
     for (uint32_t x = 0; x < FRAME_COUNT; x++) {
         auto rt = _swapChain->GetBuffer(x);
@@ -728,7 +728,8 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
       {"POSITION", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 0, GraphicsPipelineClassification::VERTEX, 0},
       {"NORMAL", 0, GraphicsPipelineFormat::RGB32_FLOAT, 0, 16,GraphicsPipelineClassification::VERTEX, 0},
       {"TEXCOORD", 0, GraphicsPipelineFormat::RG32_FLOAT, 0, 28,GraphicsPipelineClassification::VERTEX, 0},
-      {"COLOR", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 36, GraphicsPipelineClassification::VERTEX, 0}
+      {"COLOR", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 36, GraphicsPipelineClassification::VERTEX, 0},
+      {"SV_InstanceID", 0, GraphicsPipelineFormat::R32_UINT, 0, 52, GraphicsPipelineClassification::VERTEX, 0}
       };
 
   auto pipeline =

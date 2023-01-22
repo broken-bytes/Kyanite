@@ -151,14 +151,14 @@ public class InputSystem: EventSystem<InputEvent> {
     private var mouseMovement: MouseMovement = MouseMovement(x: 0, y: 0)
 
     private override init() {
-        mouseButtonStates[.left] = .none
-        mouseButtonStates[.middle] = .none
-        mouseButtonStates[.right] = .none
-        mouseButtonStates[.thumb1] = .none
-        mouseButtonStates[.thumb2] = .none
+        mouseButtonStates[.left] = ButtonState.none
+        mouseButtonStates[.middle] = ButtonState.none
+        mouseButtonStates[.right] = ButtonState.none
+        mouseButtonStates[.thumb1] = ButtonState.none
+        mouseButtonStates[.thumb2] = ButtonState.none
 
         for key in KeyboardButton.allCases {
-            keyboardButtonStates[key] = .none
+            keyboardButtonStates[key] = ButtonState.none
         }
     }
 
@@ -189,7 +189,7 @@ public class InputSystem: EventSystem<InputEvent> {
                 mouseButtonStates[mbState.key] = .held
             }
             if mbState.value == .released {
-                mouseButtonStates[mbState.key] = .none
+                mouseButtonStates[mbState.key] = ButtonState.none
             }
         }
 
@@ -198,7 +198,7 @@ public class InputSystem: EventSystem<InputEvent> {
                 keyboardButtonStates[kbState.key] = .held
             }
             if kbState.value == .released {
-                keyboardButtonStates[kbState.key] = .none
+                keyboardButtonStates[kbState.key] = ButtonState.none
             }
         }
 

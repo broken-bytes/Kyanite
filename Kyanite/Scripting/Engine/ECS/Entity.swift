@@ -14,6 +14,7 @@ public final class Entity {
     }
 
     public func addComponent<T: Component>(component: T) {
+        print("Adding \(T.self) to \(self)")
         let typeId = try! ComponentRegistry.shared.resolve(component: T.self)
         let ptr = UnsafeMutablePointer<T>.allocate(capacity: 1)
         ptr.initialize(to: component)

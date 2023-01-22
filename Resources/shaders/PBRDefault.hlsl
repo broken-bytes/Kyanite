@@ -58,6 +58,7 @@ struct VS_INPUT
     float3 Normal : NORMAL;
     float2 UV: TEXCOORD;
     float4 Color: COLOR;
+    uint Instance: SV_InstanceID;
 };
 
 struct PS_INPUT {

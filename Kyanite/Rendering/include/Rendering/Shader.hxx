@@ -28,6 +28,7 @@ namespace Renderer {
         std::vector<GraphicsShaderSlot> Constants;
         std::vector<GraphicsShaderSlot> ConstantBufferLayout;
         bool IsLit;
+        bool InstancingEnabled;
         // Name, Code
         std::string Code;
     };

@@ -59,6 +59,7 @@ namespace Renderer {
 		[[nodiscard]] virtual auto CreateDepthStencilHeap(size_t count) -> std::shared_ptr<Heap>;
 		[[nodiscard]] virtual auto CreateSamplerHeap(size_t count) -> std::shared_ptr<Heap>;
         [[nodiscard]] virtual auto CreateVertexBuffer(std::vector<Vertex> vertices, std::string name) -> std::shared_ptr<Renderer::Buffer>;
+		[[nodiscard]] virtual auto CreateInstanceBuffer(std::vector<InstanceVertex> vertices, std::string name) -> std::shared_ptr<Renderer::Buffer>;
 		[[nodiscard]] virtual auto CreateIndexBuffer(std::vector<uint32_t> indices, std::string name)->std::shared_ptr<Renderer::Buffer>;
 		[[nodiscard]] virtual auto CreateUploadBuffer(size_t sizeInBytes, std::string name)->std::shared_ptr<Renderer::UploadBuffer>;
         [[nodiscard]] virtual auto CreateVertexArrayObject(Renderer::VertexBuffer* vertexBuffer, Renderer::IndexBuffer* indexBuffer) -> std::shared_ptr<VertexArrayObject>;

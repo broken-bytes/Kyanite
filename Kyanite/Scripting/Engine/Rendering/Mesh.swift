@@ -1,9 +1,9 @@
-public class Mesh {
+import Foundation
 
-    internal let internalRefId: UInt64
+public class Mesh: Resource {
 
     public init() {
-        internalRefId = 0
+        super.init(uuid: UUID().uuidString, refId: 0)
     }
 
     internal convenience init(internalRefId: UInt64) {

@@ -6,6 +6,21 @@ import Math
 import Editor
 #endif
 
+
+struct MoveComponent: Component {
+    public var movement: Vector3
+}
+
+public func testSystem(iterator: UnsafeMutableRawPointer) {
+    let delta = NativeCore.shared.getSystemDeltaTime(iterator: iterator)
+    var transforms = NativeCore.shared.getComponentSet(iterator: iterator, type: TransformComponent.self, index: 1)
+    var movement = NativeCore.shared.getComponentSet(iterator: iterator, type: MoveComponent.self, index: 2)
+
+    for x in 0..<transforms.count {
+        transforms[x].position = add(left: transforms[x].position, right: mul(vector: movement[x].movement, value: delta))
+    }
+}
+
 internal class Engine {
     #if _EDITOR
     private let editor = Editor()
@@ -29,6 +44,29 @@ internal class Engine {
         #if _EDITOR
             editor.start(rootDir: args[1])
         #endif
+        }
+
+        try! ComponentRegistry.shared.register(component: TransformComponent.self)
+        try! ComponentRegistry.shared.register(component: MoveComponent.self)
+        try! ComponentRegistry.shared.register(component: MeshComponent.self)
+        NativeCore.shared.registerSystem(name: "MovementSystem", callback: testSystem, TransformComponent.self, MoveComponent.self)
+
+        World("Test") {
+            WithEntity("Main") {
+                TransformComponent(
+                    position: Vector3(x: Float.random(in: -100..<101), y: Float.random(in: -100..<101), z: Float.random(in: -100..<101)),
+                    scale: Vector3(x: Float.random(in: 0.05..<1.5), y: Float.random(in: 0.05..<1.5), z: Float.random(in: 0.05..<1.5)),
+                    rotation: Vector3(x: Float.random(in: -100..<101), y: Float.random(in: -100..<101), z: Float.random(in: -100..<101))
+                )
+                MoveComponent(
+                    movement: Vector3(
+                        x: Float.random(in: -1.5..<1.5), 
+                        y: 0, 
+                        z: Float.random(in: -1.5..<1.5)
+                    )
+                )
+                MeshComponent(mesh: Mesh())
+            }
         }
     }
     

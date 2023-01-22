@@ -47,6 +47,14 @@ namespace Renderer {
 		glm::vec4 Color;
 	};
 
+	struct BatchedDrawCall {
+		uint64_t MeshId;
+		uint64_t MaterialId;
+		glm::mat4x4 Matrix;
+		uint64_t Items;
+		std::shared_ptr<UploadBuffer> ConstantBuffer;
+	};
+
     class Interface {
         public: 
         Interface(std::uint32_t width, std::uint32_t height, void* window, RenderBackendAPI type);

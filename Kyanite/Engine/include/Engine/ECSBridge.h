@@ -37,18 +37,17 @@ struct MaterialComponent {
   uint64_t internalId;
 } typedef MaterialComponent;
 
-void ECS_Init(uint8_t);
-void ECS_Update(float frametime);
-ecs_world_t* ECS_GetWorld(void);
-ecs_entity_t ECS_GetScene(void);
-
-uint64_t ECS_CreateEntity(const char* name);
-uint64_t ECS_RegisterComponent(uint64_t size, uint8_t alignment, const char *uuid);
-uint64_t ECS_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *data);
-const void* ECS_GetComponent(uint64_t entity, uint64_t id);
-uint64_t ECS_RegisterSystem(const char* name, void *system, uint64_t *componentIds, size_t numComponents);
-void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count);
-void ECS_GetSystemDeltaTime(void* iterator, float* deltaTime);
+void Flecs_Init(uint8_t);
+void Flecs_Update(float frametime);
+ecs_world_t* Flecs_GetWorld(void);
+ecs_entity_t Flecs_GetScene(void);
+uint64_t Flecs_CreateEntity(const char* name);
+uint64_t Flecs_RegisterComponent(uint64_t size, uint8_t alignment, const char *uuid);
+uint64_t Flecs_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *data);
+const void* Flecs_GetComponent(uint64_t entity, uint64_t id);
+uint64_t Flecs_RegisterSystem(const char* name, void *system, uint64_t *componentIds, size_t numComponents);
+void* Flecs_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count);
+void Flecs_GetSystemDeltaTime(void* iterator, float* deltaTime);
 #ifdef __cplusplus
 }
 #endif

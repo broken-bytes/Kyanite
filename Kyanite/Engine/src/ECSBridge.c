@@ -29,7 +29,7 @@ void SetupBuiltinTypes() {
                    }});
 }
 
-void ECS_Init(uint8_t numThreads) {
+void Flecs_Init(uint8_t numThreads) {
   ECS = ecs_init();
   ECS_IMPORT(ECS, FlecsMonitor);
   ecs_set_threads(ECS, numThreads);
@@ -43,25 +43,25 @@ void ECS_Init(uint8_t numThreads) {
   ecs_log_set_level(1);
 }
 
-void ECS_Update(float frametime) {
+void Flecs_Update(float frametime) {
     ecs_progress(ECS, frametime);
 }
 
-ecs_world_t* ECS_GetWorld(void) {
+ecs_world_t* Flecs_GetWorld(void) {
     return ECS;
 }
 
-ecs_entity_t ECS_GetScene(void) {
+ecs_entity_t Flecs_GetScene(void) {
     return Scene;
 }
 
-uint64_t ECS_CreateEntity(const char *name) {
+uint64_t Flecs_CreateEntity(const char *name) {
     ecs_entity_t e = ecs_new_w_pair(ECS, EcsChildOf, Scene);
     ecs_set_name(ECS, e, name);
     return e;
 }
 
-uint64_t ECS_RegisterComponent(uint64_t size, uint8_t alignment, const char *uuid) {
+uint64_t Flecs_RegisterComponent(uint64_t size, uint8_t alignment, const char *uuid) {
   return ecs_component_init(ECS, &(ecs_component_desc_t){
         .type.size = size,
         .type.alignment = alignment,
@@ -70,16 +70,16 @@ uint64_t ECS_RegisterComponent(uint64_t size, uint8_t alignment, const char *uui
     });
 }
 
-uint64_t ECS_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *data) {
+uint64_t Flecs_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *data) {
      ecs_set_id(ECS, entity, id, size, data);
   return 0;
 }
 
-const void* ECS_GetComponent(uint64_t entity, uint64_t id) {
+const void* Flecs_GetComponent(uint64_t entity, uint64_t id) {
     return ecs_get_id(ECS, entity, id);
 }
 
-uint64_t ECS_RegisterSystem(const char* name, void *system, uint64_t *componentIds, size_t numComponents) {
+uint64_t Flecs_RegisterSystem(const char* name, void *system, uint64_t *componentIds, size_t numComponents) {
   ecs_system_desc_t desc = {0};
   desc.entity = ecs_entity(ECS, { 
     .name = name,
@@ -95,12 +95,12 @@ uint64_t ECS_RegisterSystem(const char* name, void *system, uint64_t *componentI
   return ecs_system_init(ECS, &desc);
 }
 
-void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count) {
+void* Flecs_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count) {
     ecs_iter_t* it = (ecs_iter_t*)iterator;
     *count =  it->count;
     return ecs_field_w_size((ecs_iter_t*)iterator, size, index);
 }
 
-void ECS_GetSystemDeltaTime(void* iterator, float* deltaTime) {
+void Flecs_GetSystemDeltaTime(void* iterator, float* deltaTime) {
   *deltaTime = ((ecs_iter_t*)iterator)->delta_time;
 }

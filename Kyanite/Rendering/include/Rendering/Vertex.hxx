@@ -12,6 +12,10 @@ struct Vertex {
     float Color[4];
 } typedef Vertex;
 
+struct InstanceVertex {
+    float Matrix[16];
+} typedef InstanceVertex;
+
 #ifdef __cplusplus 
 }
 #endif

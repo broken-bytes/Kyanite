@@ -23,6 +23,7 @@ namespace Renderer {
         RG32_FLOAT          = 16,
         RG32_UINT           = 17,
         RG32_SINT           = 18,
+        R32_UINT            = 42
     };
 
     enum class GraphicsPipelineClassification {

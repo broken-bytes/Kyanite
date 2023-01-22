@@ -46,6 +46,7 @@ namespace AssetLoader {
 
 	struct ShaderAssetDescription {
 		bool IsLit;
+		bool InstancingEnabled;
 		ShaderAssetOutputFormat Format;
 		std::vector<ShaderAssetDescriptionProp> Constants;
 		std::vector<ShaderAssetDescriptionProp> ConstantBufferLayout;

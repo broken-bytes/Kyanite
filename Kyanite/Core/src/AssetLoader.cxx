@@ -168,6 +168,9 @@ std::string RootDir = "";
                     RootDir + shaderDescription["path"].as<std::string>();
 				std::string lighting = shaderDescription["lighting"].as<std::string>();
 				asset.Description.IsLit = lighting == "default" ? true : false;
+
+				std::string instancing = shaderDescription["instancing"].as<std::string>();
+				asset.Description.InstancingEnabled = lighting == "enabled" ? true : false;
 				
 				std::string format = shaderDescription["format"].as<std::string>();
 

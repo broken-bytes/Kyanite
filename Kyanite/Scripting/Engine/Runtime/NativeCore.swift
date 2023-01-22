@@ -10,10 +10,10 @@ internal typealias SetResized = @convention(c) (UInt32, UInt32) -> Void
 
 // Entity Funcs
 internal typealias CreateEntity = @convention(c) (UnsafeMutableRawPointer) -> UInt64
-internal typealias RegisterComponent = @convention(c) (UInt64, UInt8, UnsafeMutableRawPointer) -> UInt64
+internal typealias RegisterComponent = @convention(c) (UInt64, UInt8, UnsafePointer<Int8>) -> UInt64
 internal typealias AddComponent = @convention(c) (UInt64, UInt64, UInt64, UnsafeMutableRawPointer) -> UInt64
 internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
-internal typealias RegisterSystem = @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> Void
+internal typealias RegisterSystem = @convention(c) (UnsafePointer<Int8>, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> Void
 internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8, UnsafeMutablePointer<UInt64>) -> UnsafeMutableRawPointer
 internal typealias GetSystemDeltaTme = @convention(c) (UnsafeMutableRawPointer, UnsafeMutablePointer<Float>) -> Void
 internal typealias SetMouseButtonDown = @convention(c) (UInt8) -> Void
@@ -71,25 +71,25 @@ internal class NativeCore {
         lib = Library.loadLibrary(at: "Kyanite-Runtime.dll")
 
         coreFuncs = CoreFuncs(
-            start: self.lib.loadFunc(named: "Init"), 
-            update: self.lib.loadFunc(named: "Update"),
-            startRender: self.lib.loadFunc(named: "StartRender"),
-            endRender: self.lib.loadFunc(named: "EndRender"),
-            setRootDir: self.lib.loadFunc(named: "SetRootDir"),
+            start: self.lib.loadFunc(named: "Engine_Init"), 
+            update: self.lib.loadFunc(named: "Engine_Update"),
+            startRender: self.lib.loadFunc(named: "Engine_StartRender"),
+            endRender: self.lib.loadFunc(named: "Engine_EndRender"),
+            setRootDir: self.lib.loadFunc(named: "Engine_SetRootDir"),
             setMouseUp: self.lib.loadFunc(named: "IMGUI_NotifyMouseUp"),
             setMouseDown: self.lib.loadFunc(named: "IMGUI_NotifyMouseDown"),
             setMouseMoved: self.lib.loadFunc(named: "IMGUI_NotifyMouseMove"),
-            setResized: self.lib.loadFunc(named: "Resize")
+            setResized: self.lib.loadFunc(named: "Engine_Resize")
         )
 
         entityFuncs = EntityFuncs(
-            createEntity: self.lib.loadFunc(named: "CreateEntity"), 
-            registerComponent: self.lib.loadFunc(named: "RegisterComponent"), 
-            addComponent: self.lib.loadFunc(named: "AddComponent"), 
-            getComponent: self.lib.loadFunc(named: "GetComponent"),
-            registerSystem: self.lib.loadFunc(named: "RegisterSystem"),
-            getComponentSetFromIterator: self.lib.loadFunc(named: "GetComponentData"),
-            getSystemDeltaTime: self.lib.loadFunc(named: "GetSystemDelta")
+            createEntity: self.lib.loadFunc(named: "ECS_CreateEntity"), 
+            registerComponent: self.lib.loadFunc(named: "ECS_RegisterComponent"), 
+            addComponent: self.lib.loadFunc(named: "ECS_AddComponent"), 
+            getComponent: self.lib.loadFunc(named: "ECS_GetComponent"),
+            registerSystem: self.lib.loadFunc(named: "ECS_RegisterSystem"),
+            getComponentSetFromIterator: self.lib.loadFunc(named: "ECS_GetComponentData"),
+            getSystemDeltaTime: self.lib.loadFunc(named: "ECS_GetSystemDelta")
         )
 
         imguiFuncs = IMGUIFuncs(
@@ -125,8 +125,7 @@ internal class NativeCore {
 
     internal func registerNewComponent<T>(type: T.Type) throws -> UInt64 {
         return "\(type)".withCString { 
-            let rawPtr = UnsafeMutableRawPointer(mutating: $0)!
-            return self.entityFuncs.registerComponent(UInt64(MemoryLayout<T>.size), UInt8(MemoryLayout<T>.alignment), rawPtr)   
+            return self.entityFuncs.registerComponent(UInt64(MemoryLayout<T>.size), UInt8(MemoryLayout<T>.alignment), $0)   
         }
     }
 
@@ -144,13 +143,11 @@ internal class NativeCore {
         }
 
         let addRawPointer = unsafeBitCast(callback, to: UnsafeMutableRawPointer.self)
-        guard let rawStr = name.data(using: .utf8) else { fatalError("Failed to create data from system name") }
 
         return name.withCString { cStr in       
             return arch.withUnsafeBufferPointer { 
                 let rawPtr = UnsafeMutableRawPointer(mutating: $0.baseAddress)!
-                let rawPtrStrName = UnsafeMutableRawPointer(mutating: cStr)!
-                self.entityFuncs.registerSystem(rawPtrStrName, addRawPointer, rawPtr, UInt64(arch.count))
+                self.entityFuncs.registerSystem(cStr, addRawPointer, rawPtr, UInt64(arch.count))
             }
         }
     }
