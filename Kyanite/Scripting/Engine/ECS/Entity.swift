@@ -11,6 +11,12 @@ public final class Entity {
         self.internalId = NativeCore.shared.createNewEntity(name: name)
         self.name = name
         self.uuid = UUID().uuidString
+        World.activeWorld.addEntity(entity: self)
+    }
+
+    public convenience init(_ name: String, @EntityBuilder components: () -> ComponentContent) {
+        self.init(name: name)
+        EntityBuilder.processEntity(entity: self, components: components)
     }
 
     public func addComponent<T: Component>(component: T) {

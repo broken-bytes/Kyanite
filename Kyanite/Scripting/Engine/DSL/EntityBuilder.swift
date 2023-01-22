@@ -137,4 +137,35 @@ static internal func handleEightComps(entity: Entity, tuple: any ContentTupleBas
     entity.addComponent(component: item.6)
     entity.addComponent(component: item.7)
 }
+
+static internal func processEntity(entity: Entity, @EntityBuilder components: () -> ComponentContent) {
+   let componentsData = components()
+
+    if let compSingle = componentsData as? ComponentEntry {
+        entity.addComponent(component: compSingle.component)
+    }
+
+    if let tuple = componentsData as? any ContentTupleBase {
+        let mirror = Mirror(reflecting: tuple.item)
+        
+        switch mirror.children.count {
+            case 2:
+                EntityBuilder.handleTwoComps(entity: entity, tuple: tuple)   
+            case 3:
+                EntityBuilder.handleThreeComps(entity: entity, tuple: tuple)   
+            case 4:
+                EntityBuilder.handleFourComps(entity: entity, tuple: tuple)   
+            case 5:
+                EntityBuilder.handleFiveComps(entity: entity, tuple: tuple)   
+            case 6:
+                EntityBuilder.handleSixComps(entity: entity, tuple: tuple)   
+            case 7:
+                EntityBuilder.handleSevenComps(entity: entity, tuple: tuple)   
+            case 8:
+                EntityBuilder.handleEightComps(entity: entity, tuple: tuple)                                                                          
+            default:
+                fatalError("Too large") 
+        }
+    }
+}
 }
