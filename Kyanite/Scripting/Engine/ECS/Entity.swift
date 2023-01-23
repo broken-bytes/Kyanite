@@ -1,14 +1,27 @@
 import Foundation
 import Core
 
+internal typealias CreateEntityFunc = @convention(c) (UnsafePointer<Int8>) -> UInt64
+internal typealias DeleteEntityFunc = @convention(c) (UInt64) -> Void
+internal typealias AddComponentFunc = @convention(c) (UInt64, UInt64, UInt64, UnsafeMutableRawPointer) -> Void
+internal typealias GetComponentFunc = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
+
 public final class Entity {
     public var name: String
     public let uuid: String
 
     private let internalId: UInt64
 
+    private static let lib = Library.loadLibrary(at: "Kyanite-Runtime.dll")
+    private static let createEntity: CreateEntityFunc = lib.loadFunc(named: "ECS_CreateEntity")
+    private static let deleteEntity: DeleteEntityFunc = lib.loadFunc(named: "ECS_DeleteEntity")
+    private static let addComponent: AddComponentFunc = lib.loadFunc(named: "ECS_AddComponent")
+    private static let getComponent: GetComponentFunc = lib.loadFunc(named: "ECS_GetComponent")
+
     public init(name: String) {
-        self.internalId = NativeCore.shared.createNewEntity(name: name)
+        self.internalId = name.withCString {
+            return Entity.createEntity($0)
+        }
         self.name = name
         self.uuid = UUID().uuidString
         World.activeWorld.addEntity(entity: self)
@@ -20,7 +33,15 @@ public final class Entity {
     }
 
     deinit {
-        NativeCore.shared.deleteEntity(id: internalId)
+        Entity.deleteEntity(self.internalId)
+    }
+
+    public func delete() {
+        Entity.deleteEntity(self.internalId)
+    }
+
+    public static func delete(entity: Entity) {
+        Entity.deleteEntity(entity.internalId)
     }
 
     public func add(@EntityBuilder components: () -> ComponentContent) {
@@ -32,12 +53,12 @@ public final class Entity {
         let ptr = UnsafeMutablePointer<T>.allocate(capacity: 1)
         ptr.initialize(to: component)
         let rawPtr = UnsafeMutableRawPointer(mutating: ptr)
-        _ = NativeCore.shared.addComponentToEntity(entity: self.internalId, component: typeId, data: rawPtr, type: T.self)
+        Entity.addComponent(self.internalId, typeId, UInt64(MemoryLayout<T>.size), rawPtr)
     }
 
     public func component<T>(of type: T.Type) -> UnsafeMutablePointer<T>? {
         let typeId = try! ComponentRegistry.shared.resolve(component: T.self)
-        let rawPtr = NativeCore.shared.getComponentFromEntity(entity: self.internalId, component: typeId)
+        let rawPtr = Entity.getComponent(self.internalId, typeId)
         
         return rawPtr.bindMemory(to: T.self, capacity: 1)
     }

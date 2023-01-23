@@ -11,6 +11,7 @@
 #include <stduuid/uuid.h>
 #include <string.h>
 #include <thread>
+#include <vector>
 
 #include "glm/common.hpp"
 #include "glm/ext/quaternion_transform.hpp"
@@ -27,6 +28,9 @@
 #include <imgui.h>
 
 #include "ECSBridge.h"
+#include <iostream>
+#include <InputHandler.hxx>
+#include <SDL2/SDL_syswm.h>
 
 struct EngineInstance {
 	std::unique_ptr<Renderer::Interface> Renderer;
@@ -34,10 +38,58 @@ struct EngineInstance {
 	ImGuiIO IO;
 	ImGuiContext* CTX;
 	ImFont* BaseText;
+	std::vector<uint32_t> WindowSize = { 0, 0 };
 };
 
 EngineInstance Instance = {};
 
+
+void HandleEvents() {
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		switch (event.type) {
+		case SDL_WINDOWEVENT:
+			if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+				int width = event.window.data1;
+				int height = event.window.data2;
+
+				if (width != Instance.WindowSize[0] || height != Instance.WindowSize[1]) {
+					Instance.WindowSize[0] = width;
+					Instance.WindowSize[1] = height;
+
+					Instance.Renderer->Resize(width, height);
+				}
+			}
+			break;
+		case SDL_USEREVENT:
+			break;
+		case SDL_KEYUP:
+			InputHandler::AddKeyboardEvent(event.key.keysym.scancode, InputHandler::ButtonState::Up);
+			break;
+		case SDL_KEYDOWN:
+			InputHandler::AddKeyboardEvent(event.key.keysym.scancode, InputHandler::ButtonState::Down);
+			break;
+		case SDL_MOUSEBUTTONUP:
+			//GlobalInstance.MouseUp(event.button.button);
+			InputHandler::AddMouseClickEvent(InputHandler::MouseButton(event.button.button), InputHandler::ButtonState::Up);
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			InputHandler::AddMouseClickEvent(InputHandler::MouseButton(event.button.button), InputHandler::ButtonState::Down);
+			break;
+
+		case SDL_MOUSEMOTION:
+			InputHandler::AddMouseMoveEvent(event.motion.x, event.motion.y);
+			break;
+
+		case SDL_QUIT:
+			exit(0);
+			break;
+		default:
+			break;
+		} // End switch
+	} // End while
+
+}
 
 void RendererSystem(ecs_iter_t* iterator) {
 	size_t numItems = 0;
@@ -47,12 +99,12 @@ void RendererSystem(ecs_iter_t* iterator) {
 
 	for (int x = 0; x < numItems; x++) {
 		Renderer_DrawMesh(
-			x, 
-			meshes[x].internalId, 
-			material[x].internalId, 
-			MeshDrawInfo{}, 
-			{ 
-				{ transforms[x].Position.x, transforms[x].Position.y, transforms[x].Position.z }, 
+			x,
+			meshes[x].internalId,
+			material[x].internalId,
+			MeshDrawInfo{},
+			{
+				{ transforms[x].Position.x, transforms[x].Position.y, transforms[x].Position.z },
 				{ transforms[x].Rotation.x, transforms[x].Rotation.y, transforms[x].Rotation.z },
 				{ transforms[x].Scale.x, transforms[x].Scale.y, transforms[x].Scale.z }
 			});
@@ -103,13 +155,18 @@ void Engine_Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
 	Flecs_Init(std::thread::hardware_concurrency());
 
 	SetupBuiltinSystems();
+
+	InputHandler::Init();
 }
 
 void Engine_Shutdown() {
 }
 
 void Engine_Update(float frameTime) {
+	HandleEvents();
 	Flecs_Update(frameTime);
+	Engine_StartRender();
+	Engine_EndRender();
 }
 
 void Engine_StartRender() {
@@ -144,6 +201,29 @@ void Engine_SetCamera(float xPos, float yPos, float zPos, float xRotation,
 	float yRotation, float zRotation) {
 	Instance.Renderer->SetCamera({ xPos, yPos, zPos },
 		{ xRotation, yRotation, zRotation });
+}
+#pragma endregion
+
+
+#pragma region INPUT_API
+uint8_t Input_GetKeyboardButton(uint16_t code) {
+	return (uint8_t)InputHandler::GetKeyboardButtonState(SDL_Scancode(code));
+}
+
+uint8_t Input_GetMouseButton(uint8_t button) {
+	return (uint8_t)InputHandler::GetMouseButtonState(InputHandler::MouseButton(button));
+}
+
+DLL_EXPORT void Input_GetMouseMovement(float* x, float_t* y) {
+	auto movement = InputHandler::GetMouseMovement();
+	*x = (float)movement[0] / Instance.WindowSize[0];
+	*y = (float)movement[1] / Instance.WindowSize[1];
+}
+
+DLL_EXPORT void Input_GetMousePosition(uint32_t* x, uint32_t* y) {
+	auto pos = InputHandler::GetMouseAbs();
+	*x = pos[0];
+	*y = pos[1];
 }
 #pragma endregion
 
@@ -290,7 +370,7 @@ void IMGUI_DrawColorPicker(const char* title, float* color) {
 // not supported)
 uint64_t Engine_LoadMeshGPU(MeshInfo& info) {
 	auto index = Instance.Renderer->UploadMeshData(
-		(Vertex*)info.Vertices, 
+		(Vertex*)info.Vertices,
 		info.VerticesCount / 13, // 13 Because 13 Float values. Vec4 Pos, Vec3 Normal, Vec2 UV, Vec4 COl 
 		info.Indices,
 		info.IndicesCount

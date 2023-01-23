@@ -1,9 +1,24 @@
+import Core
+
+internal typealias GetMouseInputNativeFunc = @convention(c) (UInt8) -> UInt8
+internal typealias GetMouseMouseMovementNativeFunc = @convention(c) (UnsafeMutablePointer<Float>, UnsafeMutablePointer<Float>) -> Void
+internal typealias GetMouseMousePositionNativeFunc = @convention(c) (UnsafeMutablePointer<UInt32>, UnsafeMutablePointer<UInt32>) -> Void
+internal typealias GetKeyboardButtonStateNativeFunc = @convention(c) (UInt16) -> UInt8
+
 public class InputSystem: EventSystem<InputEvent> {
-    public enum ButtonState {
-        case none // When button is not held 
-        case pressed // When button was pressed this frame
-        case released // When button was released this frame
-        case held // When Button is held
+    // MARK: Native DLL wrappers
+
+    private let nativeLib: Library
+    private let getMouseInput: GetMouseInputNativeFunc
+    private let getMouseMovement: GetMouseMouseMovementNativeFunc
+    private let getMousePosition: GetMouseMousePositionNativeFunc
+    private let getKeyboardInput: GetKeyboardButtonStateNativeFunc
+
+    public enum ButtonState: UInt8 {
+        case up = 0
+        case down = 1
+        case held = 2
+        case released = 3
     }
 
     public enum MouseButton: UInt8 {
@@ -14,7 +29,12 @@ public class InputSystem: EventSystem<InputEvent> {
         case thumb2
     }
 
-    public enum KeyboardButton : UInt8, CaseIterable {
+    public enum Axis: UInt8 {
+        case mouseX
+        case mouseY
+    }
+
+    public enum KeyboardButton : UInt16, CaseIterable {
         case a = 4
         case b = 5
         case c = 6
@@ -143,91 +163,39 @@ public class InputSystem: EventSystem<InputEvent> {
     
     public static let shared = InputSystem()
 
-    // MARK: Private state management props
-
-    private var mouseButtonStates: [MouseButton : ButtonState] = [:]
-    private var keyboardButtonStates: [KeyboardButton : ButtonState] = [:]
-    private var lastMousePos: MouseMovement = MouseMovement(x: 0, y: 0)
-    private var mouseMovement: MouseMovement = MouseMovement(x: 0, y: 0)
-
     private override init() {
-        mouseButtonStates[.left] = ButtonState.none
-        mouseButtonStates[.middle] = ButtonState.none
-        mouseButtonStates[.right] = ButtonState.none
-        mouseButtonStates[.thumb1] = ButtonState.none
-        mouseButtonStates[.thumb2] = ButtonState.none
-
-        for key in KeyboardButton.allCases {
-            keyboardButtonStates[key] = ButtonState.none
-        }
-    }
-
-    public override func flush() {
-        super.flush()
-        // Reset the Input each frame. 
-        // - All events are cleared
-        // - Pressed and released messages removed and state is changed
-
-        // Pass the inputs to IMGUI before clearing
-        #if _ENGINE
-        NativeCore.shared.setMouseMoved(x: lastMousePos.x, y: lastMousePos.y)
-        #endif
-
-        for mbState in mouseButtonStates {
-            if mbState.value == .pressed {
-                NativeCore.shared.setMouseDown(button: mbState.key.rawValue - 1)
-            }
-            if mbState.value == .released {
-                NativeCore.shared.setMouseUp(button: mbState.key.rawValue - 1)
-            }
-        }
-
-        // Check what state the mouse buttons are in 
-        // - If the state is pressed that means we dit not get any release message, thus the button must still be held
-        // - If the state is released that means we dit not get any pressed message, thus the button must still be released, thus none
-        for mbState in mouseButtonStates {
-            if mbState.value == .pressed {
-                mouseButtonStates[mbState.key] = .held
-            }
-            if mbState.value == .released {
-                mouseButtonStates[mbState.key] = ButtonState.none
-            }
-        }
-
-        for kbState in keyboardButtonStates {
-            if kbState.value == .pressed {
-                keyboardButtonStates[kbState.key] = .held
-            }
-            if kbState.value == .released {
-                keyboardButtonStates[kbState.key] = ButtonState.none
-            }
-        }
-
-        mouseMovement = MouseMovement(x: 0, y: 0)
+        self.nativeLib = Library.loadLibrary(at: "Kyanite-Runtime.dll")
+        self.getKeyboardInput = nativeLib.loadFunc(named: "Input_GetKeyboardButton")
+        self.getMouseInput = nativeLib.loadFunc(named: "Input_GetMouseButton")
+        self.getMouseMovement = nativeLib.loadFunc(named: "Input_GetMouseMovement")
+        self.getMousePosition = nativeLib.loadFunc(named: "Input_GetMousePosition")
     }
 
     public func mouseButtonState(for button: MouseButton) -> ButtonState {
-        guard let btn = mouseButtonStates[button] else { return .none }
-        return btn
+        return ButtonState(rawValue: self.getMouseInput(button.rawValue))!
     }
 
     public func buttonState(for button: KeyboardButton) -> ButtonState {
-        guard let btn = keyboardButtonStates[button] else { return .none }
-        return btn
+        return ButtonState(rawValue: self.getKeyboardInput(button.rawValue))!
     }
 
-    internal func setMouseButton(button: MouseButton, isPressed: Bool) {
-        mouseButtonStates[button] = isPressed ? .pressed : .released
-        self.push(event: MouseInputEvent(button: button, isPressed: isPressed))
+    public func motion(for axis: Axis) -> Float {
+        switch axis {
+            case .mouseX:
+                return handleMouseAxis(axis: axis)
+            case .mouseY:
+                return handleMouseAxis(axis: axis)
+        }
     }
 
-    internal func setKeyboardButton(button: KeyboardButton, isPressed: Bool, name: String) {
-        keyboardButtonStates[button] = isPressed ? .pressed : .released
-        self.push(event: KeyboardInputEvent(button: button, isPressed: isPressed, name: name))
-    }
+    private func handleMouseAxis(axis: Axis) -> Float {
+        let mouse = UnsafeMutablePointer<Float>.allocate(capacity: 2)
+        self.getMouseMovement(mouse, mouse.advanced(by: 1))
 
-    internal func setMouseMoved(x: Int32, y: Int32) {
-        mouseMovement = MouseMovement(x: x - mouseMovement.x, y: y - mouseMovement.y)
-        lastMousePos = MouseMovement(x: x, y: y)
+        if axis == .mouseX {
+            return mouse.pointee
+        }
+
+        return mouse.advanced(by: 1).pointee
     }
 }

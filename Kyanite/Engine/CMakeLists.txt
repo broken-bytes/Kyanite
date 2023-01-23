@@ -22,9 +22,11 @@ add_library(
     src/Engine.cxx
     src/ResourceTracker.cxx
     src/ECSBridge.c
+    src/InputHandler.cxx
     include/Engine/Engine.hxx
     include/Engine/ResourceTracker.hxx
     include/Engine/ECSBridge.h
+    include/Engine/InputHandler.hxx
 )
 target_include_directories(
     Kyanite-Runtime

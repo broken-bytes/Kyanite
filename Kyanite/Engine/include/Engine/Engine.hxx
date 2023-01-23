@@ -123,20 +123,6 @@ struct ShaderInfo {
   ShaderJSONData Data;
 } typedef ShaderInfo;
 
-
-
-#pragma region EXPORTED_TYPES
-
-#pragma endregion
-
-
-//NOTE - We are using void* Pointers instead of std::shared_ptr<TrackedResource> for the C-style exported API. 
-// Reasons: 
-// - Swift can only handle C-style types(for now)
-// - We cannot export C++ types from within a C API
-// - C++ name mangling is a mess
-// The void* pointer is still std::shared_ptr<TrackedResource> but cast to void* so Swift can keep a ref to it.
-
 #pragma region ENGINE_API
 DLL_EXPORT void Engine_Init(uint32_t resolutionX, uint32_t resolutionY, void *window);
 DLL_EXPORT void Engine_Shutdown();
@@ -160,6 +146,13 @@ DLL_EXPORT void Engine_SetRootDir(const char* path);
 DLL_EXPORT void Engine_SetCursorPosition(uint32_t x, uint32_t y);
 DLL_EXPORT void Engine_SetCamera(float xPos, float yPos, float zPos, float xRotation,
                           float yRotation, float zRotation);
+#pragma endregion
+
+#pragma region INPUT_API
+DLL_EXPORT uint8_t Input_GetKeyboardButton(uint16_t code);
+DLL_EXPORT uint8_t Input_GetMouseButton(uint8_t button);
+DLL_EXPORT void Input_GetMouseMovement(float* x, float* y);
+DLL_EXPORT void Input_GetMousePosition(uint32_t* x, uint32_t* y);
 #pragma endregion
 
 #pragma region RENDER_API

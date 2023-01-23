@@ -33,14 +33,8 @@ RENDERDOC_API_1_5_0* rdoc_api = NULL;
 #endif
 
 // ArgsCount, ArgsVec, Width, Height, SDL Window, Root Dir
-typedef void RuntimeStart(int argc, char* argv[], uint32_t, uint32_t, void*, const char*);
+typedef void RuntimeStart(int argc, char* argv[], uint32_t, uint32_t, void*);
 typedef void RuntimeTick();
-typedef void RuntimeKeyUp(uint8_t, const char*);
-typedef void RuntimeKeyDown(uint8_t, const char*);
-typedef void RuntimeMouseUp(uint8_t);
-typedef void RuntimeMouseDown(uint8_t);
-typedef void RuntimeMouseMoved(int32_t, int32_t);
-typedef void RuntimeViewportResized(uint32_t, uint32_t);
 
 struct Instance {
 	SDL_Window* Window;
@@ -48,12 +42,6 @@ struct Instance {
 	const char* Name;
 	const char* Version;
 	RuntimeTick* Tick;
-	RuntimeKeyUp* KeyUp;
-	RuntimeKeyDown* KeyDown;
-	RuntimeMouseUp* MouseUp;
-	RuntimeMouseDown* MouseDown;
-	RuntimeMouseMoved* MouseMoved;
-	RuntimeViewportResized* ViewportResized;
 	uint32_t Width;
 	uint32_t Height;
 };
@@ -112,19 +100,13 @@ int main(int argc, char* argv[]) {
 
 #if _WIN32
 	bAttachToConsole();
-	auto lib = LoadLibraryA("Kyanite.dll");
+	auto lib = LoadLibraryA("Kyanite-Assembly.dll");
 	if (!lib) {
 		throw std::runtime_error("Could not load engine library... Exiting");
 	}
 	else {
-		((RuntimeStart*)GetProcAddress(lib, "start"))(argc, argv, W, H, GlobalInstance.Window, argv[1]);
+		((RuntimeStart*)GetProcAddress(lib, "start"))(argc, argv, W, H, GlobalInstance.Window);
 		GlobalInstance.Tick = (RuntimeTick*)GetProcAddress(lib, "update");
-		GlobalInstance.KeyUp = (RuntimeKeyUp*)GetProcAddress(lib, "onKeyUp");
-		GlobalInstance.KeyDown = (RuntimeKeyDown*)GetProcAddress(lib, "onKeyDown");
-		GlobalInstance.MouseUp = (RuntimeMouseUp*)GetProcAddress(lib, "onMouseButtonUp");
-		GlobalInstance.MouseDown = (RuntimeMouseDown*)GetProcAddress(lib, "onMouseButtonDown");
-		GlobalInstance.MouseMoved = (RuntimeMouseMoved*)GetProcAddress(lib, "onMouseMoved");
-		GlobalInstance.ViewportResized = (RuntimeViewportResized*)GetProcAddress(lib, "onViewportResized");
 	}
 #endif
 	// Setup Dear ImGui style
@@ -133,47 +115,6 @@ int main(int argc, char* argv[]) {
 
 	while (GlobalInstance.Running) {
 		Tick();
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-			case SDL_WINDOWEVENT:
-				if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-					int width = event.window.data1;
-					int height = event.window.data2;
-
-					if (width != GlobalInstance.Width || height != GlobalInstance.Height) {
-						GlobalInstance.Width = width;
-						GlobalInstance.Height = height;
-
-						GlobalInstance.ViewportResized(width, height);
-					}
-				}
-				break;
-			case SDL_USEREVENT:
-				break;
-			case SDL_KEYUP:
-				GlobalInstance.KeyUp(event.key.keysym.scancode, SDL_GetKeyName(event.key.keysym.sym));
-				break;
-			case SDL_KEYDOWN:
-				GlobalInstance.KeyDown(event.key.keysym.scancode, SDL_GetKeyName(event.key.keysym.sym));
-				break;
-			case SDL_MOUSEBUTTONUP:
-				GlobalInstance.MouseUp(event.button.button);
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				GlobalInstance.MouseDown(event.button.button);
-				break;
-
-			case SDL_QUIT:
-				GlobalInstance.Running = false;
-				break;
-
-			case SDL_MOUSEMOTION:
-				GlobalInstance.MouseMoved(event.motion.x, event.motion.y);
-
-			default:
-				break;
-			} // End switch
-		} // End while
 	}
 	SDL_DestroyWindow(GlobalInstance.Window);
 	SDL_Quit();

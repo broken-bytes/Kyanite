@@ -1,5 +1,7 @@
 import Core
 
+internal typealias RegisterComponentFunc = @convention(c) (UInt64, UInt8, UnsafePointer<Int8>) -> UInt64
+
 public enum ComponentError: Error {
     case notRegistered(message: String)
 }
@@ -21,6 +23,8 @@ public class ComponentRegistry {
     }
 
     public static let shared = ComponentRegistry()
+    private static let lib = Library.loadLibrary(at: "Kyanite-Runtime.dll")
+    private static let registerComponent: RegisterComponentFunc = lib.loadFunc(named: "ECS_RegisterComponent")
 
     fileprivate var mappings: Set<ComponentEntry> = []
 
@@ -31,8 +35,12 @@ public class ComponentRegistry {
     public func register<T>(component: T.Type) throws -> UInt64 {
         let tempName = "\(component)"
         Logger.shared.println(str: "Registering: \(component) from register")
-        let id = try NativeCore.shared.registerNewComponent(type: component)
-        mappings.insert(ComponentEntry(name: tempName, id: id))
+        let id = tempName.withCString {
+            return ComponentRegistry.registerComponent(UInt64(MemoryLayout<T>.size), UInt8(MemoryLayout<T>.alignment), $0)
+        }
+
+        self.mappings.insert(ComponentEntry(name: tempName, id: id))
+
 
         return id
     }
