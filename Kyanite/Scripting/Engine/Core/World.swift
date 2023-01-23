@@ -2,6 +2,7 @@ public struct World {
     public static var activeWorld: World!
 
     var entities: [Entity] = []
+    var systems: [System] = []
 
     public init(_ name: String, _ funcs: (() -> Entity)...) {
         World.activeWorld = self
@@ -20,6 +21,11 @@ public struct World {
         let entity = Entity(name, components: components)
         entities.append(entity)
 
+        return self
+    }
+
+    internal mutating func addSystem(system: System) -> World {
+        systems.append(system)
         return self
     }
 }

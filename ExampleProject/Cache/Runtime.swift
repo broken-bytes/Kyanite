@@ -51,6 +51,16 @@ var updateNative: Update!
     System("MoveSystem") { 
         let delta: Float = $0
         let trans: UnsafeMutablePointer<TransformComponent> = $1
+        let move: UnsafeMutablePointer<MoveComponent> = $2
+
+        trans.pointee.position = add(left: trans.pointee.position, right: mul(vector: move.pointee.movement, value: delta))
+    }
+
+    System("TransSystem") { 
+        let delta: Float = $0
+        let trans: UnsafeMutablePointer<TransformComponent> = $1
+
+        print(trans)
     }
 }
 

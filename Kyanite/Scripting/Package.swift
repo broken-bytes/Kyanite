@@ -8,7 +8,7 @@ let package = Package(
     products: [
         .library(
             name: "Kyanite",
-            type: .dynamic,
+            type: .static,
             targets: ["Core", "Audio", "Engine"]
         )
     ],
