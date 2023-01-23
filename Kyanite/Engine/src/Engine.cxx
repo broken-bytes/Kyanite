@@ -67,7 +67,7 @@ void SetupEntityRenderer() {
 	componentIds.push_back(ecs_id(TransformComponent));
 	componentIds.push_back(ecs_id(MeshComponent));
 	componentIds.push_back(ecs_id(MaterialComponent));
-	ECS_RegisterSystem("Renderer", RendererSystem, componentIds.data(), componentIds.size());
+	ECS_RegisterSystem("Renderer", RendererSystem, true, componentIds.data(), componentIds.size());
 }
 
 void SetupBuiltinSystems() {
@@ -114,59 +114,9 @@ void Engine_Update(float frameTime) {
 
 void Engine_StartRender() {
 	Instance.Renderer->StartFrame();
-	ImGui::PushFont(Instance.BaseText);
-	ImGuiWindowFlags maindockWindowFlags = 0;
-
-	// etc.
-	bool showMainDockWindow = true;
-	bool fullscreen = true;
-	ImGuiDockNodeFlags dockFlags = ImGuiDockNodeFlags_None;
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-	ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->Pos);
-	ImGui::SetNextWindowSize(viewport->Size);
-	ImGui::SetNextWindowViewport(viewport->ID);
-
-	windowFlags |= ImGuiWindowFlags_NoTitleBar
-		| ImGuiWindowFlags_NoCollapse
-		| ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoMove
-		| ImGuiWindowFlags_NoBringToFrontOnFocus
-		| ImGuiWindowFlags_NoNavFocus;
-
-	ImGui::Begin("Main Dock", &showMainDockWindow, windowFlags);
-
-	ImGuiID dockId = ImGui::GetID("Dockspace");
-	ImGui::DockSpace(dockId, { 0,0 }, dockFlags);
-
-	ImGui::Begin("Entities");
-	auto termIt = ecs_term_t{ ecs_pair(EcsChildOf, Flecs_GetScene()) };
-	ecs_iter_t it = ecs_term_iter(Flecs_GetWorld(), &termIt);
-	// ecs_iter_poly(ECS, ECS, &it, NULL);
-	while (ecs_iter_next(&it)) {
-		for (int i = 0; i < it.count; i++) {
-			auto text = ecs_get_name(it.world, it.entities[i]);
-			if (text != nullptr) {
-				ImGui::Text(text); // Need the Name here
-			}
-		}
-	}
-	ImGui::End();
-
-	ImGui::Begin("DirectX12 Texture Test");
-	// Note that we pass the GPU SRV handle here, *not* the CPU handle. We're passing the internal pointer value, cast to an ImTextureID
-	auto handle = Engine_GetOutputTexture();
-	ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-	ImVec2 vMax = ImGui::GetWindowContentRegionMax();
-	ImGui::Image((ImTextureID)handle, ImVec2((float)vMax.x - vMin.x, (float)vMax.y - vMin.y));
-	Instance.Renderer->SetMainViewport(vMin.x, vMin.y, vMax.x, vMax.y);
-	ImGui::End();
-
 }
 
 void Engine_EndRender() {
-	ImGui::End();
-	ImGui::PopFont();
 	Instance.Renderer->MidFrame();
 	Instance.Renderer->EndFrame();
 }
@@ -261,9 +211,9 @@ uint32_t ECS_GetMouseOverEntityId(uint32_t x, uint32_t y) {
 	return Instance.Renderer->ReadMouseOverData(x, y);
 }
 
-uint64_t ECS_RegisterSystem(const char* name, void* system, uint64_t* componentIds,
+uint64_t ECS_RegisterSystem(const char* name, void* system, bool multiThreaded, uint64_t* componentIds,
 	size_t numComponents) {
-	return Flecs_RegisterSystem(name, system, componentIds, numComponents);
+	return Flecs_RegisterSystem(name, system, multiThreaded, componentIds, numComponents);
 }
 
 void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count) {
@@ -308,8 +258,12 @@ void IMGUI_EndChild() {
 
 }
 
-void IMGUI_DrawFloatField(const char* title, float* value) {
+void IMGUI_DrawText(const char* text) {
+	ImGui::Text(text);
+}
 
+void IMGUI_DrawFloatField(const char* title, float* value) {
+	ImGui::InputFloat(title, value);
 }
 
 void IMGUI_DrawFloat2Field(const char* title, float* value) {
@@ -321,7 +275,7 @@ void IMGUI_DrawFloat3Field(const char* title, float* value) {
 }
 
 void IMGUI_DrawIntField(const char* title, int* value) {
-
+	ImGui::InputInt(title, value);
 }
 
 void IMGUI_DrawColorPicker(const char* title, float* color) {

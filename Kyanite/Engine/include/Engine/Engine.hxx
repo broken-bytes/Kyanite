@@ -187,7 +187,7 @@ DLL_EXPORT uint64_t ECS_RegisterComponent(uint64_t size, uint8_t alignment, cons
 DLL_EXPORT uint64_t ECS_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void* data);
 DLL_EXPORT const void* ECS_GetComponent(uint64_t entity, uint64_t id);
 DLL_EXPORT uint32_t ECS_GetMouseOverEntityId(uint32_t x, uint32_t y);
-DLL_EXPORT uint64_t ECS_RegisterSystem(const char* name, void* system, uint64_t* componentIds, size_t numComponents);
+DLL_EXPORT uint64_t ECS_RegisterSystem(const char* name, void* system, bool multiThreaded, uint64_t* componentIds, size_t numComponents);
 DLL_EXPORT void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count);
 DLL_EXPORT void ECS_GetSystemDelta(void* iterator, float* delta);
 #pragma endregion
@@ -200,6 +200,7 @@ DLL_EXPORT void IMGUI_StartWindow(const char* name);
 DLL_EXPORT void IMGUI_EndWindow();
 DLL_EXPORT void IMGUI_StartChild();
 DLL_EXPORT void IMGUI_EndChild();
+DLL_EXPORT void IMGUI_DrawText(const char* text);
 DLL_EXPORT void IMGUI_DrawFloatField(const char* title, float* value);
 DLL_EXPORT void IMGUI_DrawFloat2Field(const char* title, float* value);
 DLL_EXPORT void IMGUI_DrawFloat3Field(const char* title, float* value);

@@ -62,7 +62,7 @@ public struct ComponentTuple<Tuple>: ComponentContent, ContentTupleBase {
 
 extension EntityBuilder {
   static internal func handleTwoComps(entity: Entity, tuple: any ContentTupleBase) {
-    guard let item = tuple.item as? (any Component, any Component, any Component) else { 
+    guard let item = tuple.item as? (any Component, any Component) else { 
         fatalError("Types unexpectedly don't match") 
     }
     entity.addComponent(component: item.0)

@@ -14,7 +14,7 @@ internal typealias DeleteEntity = @convention(c) (UInt64) -> Void
 internal typealias RegisterComponent = @convention(c) (UInt64, UInt8, UnsafePointer<Int8>) -> UInt64
 internal typealias AddComponent = @convention(c) (UInt64, UInt64, UInt64, UnsafeMutableRawPointer) -> UInt64
 internal typealias GetComponent = @convention(c) (UInt64, UInt64) -> UnsafeMutableRawPointer
-internal typealias RegisterSystem = @convention(c) (UnsafePointer<Int8>, UnsafeMutableRawPointer, UnsafeMutableRawPointer, UInt64) -> UInt64
+internal typealias RegisterSystem = @convention(c) (UnsafePointer<Int8>, UnsafeMutableRawPointer, Bool, UnsafeMutableRawPointer, UInt64) -> UInt64
 internal typealias GetComponentSetFromIterator = @convention(c) (UnsafeMutableRawPointer, UInt64, UInt8, UnsafeMutablePointer<UInt64>) -> UnsafeMutableRawPointer
 internal typealias GetSystemDeltaTme = @convention(c) (UnsafeMutableRawPointer, UnsafeMutablePointer<Float>) -> Void
 internal typealias SetMouseButtonDown = @convention(c) (UInt8) -> Void
@@ -22,6 +22,9 @@ internal typealias SetMouseButtonUp = @convention(c) (UInt8) -> Void
 internal typealias SetMouseMoved = @convention(c) (Int32, Int32) -> Void
 internal typealias StartIMGUIWindow = @convention(c) (UnsafePointer<Int8>) -> Void
 internal typealias EndIMGUIWindow = @convention(c) () -> Void
+internal typealias IMGUIDrawFloat = @convention(c) (UnsafePointer<Int8>, UnsafeMutablePointer<Float>) -> Void
+internal typealias IMGUIDrawInt = @convention(c) (UnsafePointer<Int8>, Int) -> Void
+internal typealias IMGUIDrawText = @convention(c) (UnsafePointer<Int8>) -> Void
 
 internal struct CoreFuncs {
     internal let start: Start
@@ -49,6 +52,9 @@ internal struct EntityFuncs {
 internal struct IMGUIFuncs {
     internal let startWindow: StartIMGUIWindow
     internal let endWindow: EndIMGUIWindow
+    internal let drawFloatField: IMGUIDrawFloat
+    internal let drawIntField: IMGUIDrawInt
+    internal let drawText: IMGUIDrawText
 }
 
 enum EntityError: Error {
@@ -97,7 +103,10 @@ internal class NativeCore {
 
         imguiFuncs = IMGUIFuncs(
             startWindow: self.lib.loadFunc(named: "IMGUI_StartWindow"), 
-            endWindow: self.lib.loadFunc(named: "IMGUI_EndWindow")
+            endWindow: self.lib.loadFunc(named: "IMGUI_EndWindow"),
+            drawFloatField: self.lib.loadFunc(named: "IMGUI_DrawFloatField"),
+            drawIntField: self.lib.loadFunc(named: "IMGUI_DrawIntField"),
+            drawText: self.lib.loadFunc(named: "IMGUI_DrawText")
         )
     }
 
@@ -143,7 +152,7 @@ internal class NativeCore {
         return self.entityFuncs.getComponent(entity, component)
     }
 
-    internal func registerSystem(name: String, callback: @convention(c) (UnsafeMutableRawPointer) -> Void, _ archetype: Component.Type...) -> UInt64 {
+    internal func registerSystem(name: String, multiThreaded: Bool, callback: @convention(c) (UnsafeMutableRawPointer) -> Void, _ archetype: Component.Type...) -> UInt64 {
         let arch: [UInt64] = archetype.map { 
             return try! ComponentRegistry.shared.resolveType(type: $0)
         }
@@ -153,7 +162,7 @@ internal class NativeCore {
         return name.withCString { cStr in       
             return arch.withUnsafeBufferPointer { 
                 let rawPtr = UnsafeMutableRawPointer(mutating: $0.baseAddress)!
-                return self.entityFuncs.registerSystem(cStr, addRawPointer, rawPtr, UInt64(arch.count))
+                return self.entityFuncs.registerSystem(cStr, addRawPointer, multiThreaded, rawPtr, UInt64(arch.count))
             }
         }
     }
@@ -188,5 +197,31 @@ internal class NativeCore {
 
     internal func setResized(width: UInt32, height: UInt32) {
         self.coreFuncs.setResized(width, height)
+    }
+
+    internal func beginWindow(title: String) {
+        self.imguiFuncs.startWindow(title)
+    }
+
+    internal func endWindow() {
+        self.imguiFuncs.endWindow()
+    }
+
+    internal func floatField(title: String, value: UnsafeMutablePointer<Float>) {
+        title.withCString {
+            self.imguiFuncs.drawFloatField($0, value)
+        }
+    }
+
+    internal func intField(title: String, value: inout Int) {
+        title.withCString {
+            self.imguiFuncs.drawIntField($0, value)
+        }
+    }
+
+    internal func text(value: String) {
+        value.withCString {
+            self.imguiFuncs.drawText($0)
+        }
     }
 }

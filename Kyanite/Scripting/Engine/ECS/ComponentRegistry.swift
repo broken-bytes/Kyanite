@@ -4,7 +4,7 @@ public enum ComponentError: Error {
     case notRegistered(message: String)
 }
 
-internal class ComponentRegistry {
+public class ComponentRegistry {
 
     fileprivate struct ComponentEntry: Equatable, Hashable {
         let name: String
@@ -20,7 +20,7 @@ internal class ComponentRegistry {
         }
     }
 
-    internal static let shared = ComponentRegistry()
+    public static let shared = ComponentRegistry()
 
     fileprivate var mappings: Set<ComponentEntry> = []
 
@@ -28,7 +28,7 @@ internal class ComponentRegistry {
 
     }
     
-    internal func register<T>(component: T.Type) throws -> UInt64 {
+    public func register<T>(component: T.Type) throws -> UInt64 {
         let tempName = "\(component)"
         Logger.shared.println(str: "Registering: \(component) from register")
         let id = try NativeCore.shared.registerNewComponent(type: component)
@@ -37,7 +37,7 @@ internal class ComponentRegistry {
         return id
     }
 
-    internal func resolve<T>(component: T.Type) throws -> UInt64 {
+    public func resolve<T>(component: T.Type) throws -> UInt64 {
         if let entry = mappings.first(where: { $0.name == "\(component)"}) {
             return entry.id
         } 

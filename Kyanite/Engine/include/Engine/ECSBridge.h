@@ -46,7 +46,7 @@ void Flecs_DeleteEntity(uint64_t id);
 uint64_t Flecs_RegisterComponent(uint64_t size, uint8_t alignment, const char *uuid);
 uint64_t Flecs_AddComponent(uint64_t entity, uint64_t id, uint64_t size, void *data);
 const void* Flecs_GetComponent(uint64_t entity, uint64_t id);
-uint64_t Flecs_RegisterSystem(const char* name, void *system, uint64_t *componentIds, size_t numComponents);
+uint64_t Flecs_RegisterSystem(const char* name, void *system, bool multiThreaded, uint64_t *componentIds, size_t numComponents);
 void* Flecs_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count);
 void Flecs_GetSystemDeltaTime(void* iterator, float* deltaTime);
 #ifdef __cplusplus

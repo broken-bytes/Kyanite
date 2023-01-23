@@ -150,7 +150,6 @@ int main(int argc, char* argv[]) {
 				break;
 			case SDL_USEREVENT:
 				break;
-
 			case SDL_KEYUP:
 				GlobalInstance.KeyUp(event.key.keysym.scancode, SDL_GetKeyName(event.key.keysym.sym));
 				break;

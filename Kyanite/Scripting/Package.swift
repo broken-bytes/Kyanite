@@ -9,7 +9,7 @@ let package = Package(
         .library(
             name: "Kyanite",
             type: .dynamic,
-            targets: ["Core", "Audio", "Editor", "Engine"]
+            targets: ["Core", "Audio", "Engine"]
         )
     ],
     targets: [
@@ -21,12 +21,6 @@ let package = Package(
         .target(
             name: "Core",
             path: "./Core"    
-        ),
-
-        .target(
-            name: "Editor",
-            dependencies: ["Core", "SQLite"],
-            path: "./Editor"
         ),
 
         .target(
@@ -47,7 +41,7 @@ let package = Package(
 
         .target(
             name: "Engine",
-            dependencies: ["Core", "Audio", "Math", "Physics", "Editor"],
+            dependencies: ["Core", "Audio", "Math", "Physics"],
             path: "./Engine"
         ),
     ]

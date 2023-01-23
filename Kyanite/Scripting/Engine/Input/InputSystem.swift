@@ -169,7 +169,9 @@ public class InputSystem: EventSystem<InputEvent> {
         // - Pressed and released messages removed and state is changed
 
         // Pass the inputs to IMGUI before clearing
+        #if _ENGINE
         NativeCore.shared.setMouseMoved(x: lastMousePos.x, y: lastMousePos.y)
+        #endif
 
         for mbState in mouseButtonStates {
             if mbState.value == .pressed {
@@ -179,7 +181,6 @@ public class InputSystem: EventSystem<InputEvent> {
                 NativeCore.shared.setMouseUp(button: mbState.key.rawValue - 1)
             }
         }
-
 
         // Check what state the mouse buttons are in 
         // - If the state is pressed that means we dit not get any release message, thus the button must still be held

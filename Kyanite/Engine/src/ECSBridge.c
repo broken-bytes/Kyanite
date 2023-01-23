@@ -40,7 +40,7 @@ void Flecs_Init(uint8_t numThreads) {
   ecs_add_id(ECS, Scene, sceneTag);
   ecs_set_name(ECS, Scene, "Scene");
   SetupBuiltinTypes();
-  ecs_log_set_level(1);
+  ecs_log_set_level(2);
 }
 
 void Flecs_Update(float frametime) {
@@ -83,8 +83,9 @@ const void* Flecs_GetComponent(uint64_t entity, uint64_t id) {
     return ecs_get_id(ECS, entity, id);
 }
 
-uint64_t Flecs_RegisterSystem(const char* name, void *system, uint64_t *componentIds, size_t numComponents) {
+uint64_t Flecs_RegisterSystem(const char* name, void *system, bool multiThreaded, uint64_t *componentIds, size_t numComponents) {
   ecs_system_desc_t desc = {0};
+  desc.multi_threaded = multiThreaded;
   desc.entity = ecs_entity(ECS, { 
     .name = name,
     .add = { ecs_dependson(EcsOnUpdate)}
