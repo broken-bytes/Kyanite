@@ -109,3 +109,7 @@ void* Flecs_GetComponentData(void* iterator, size_t size, uint8_t index, size_t*
 void Flecs_GetSystemDeltaTime(void* iterator, float* deltaTime) {
   *deltaTime = ((ecs_iter_t*)iterator)->delta_time;
 }
+
+uint64_t Flecs_GetSystemFromIter(void* iterator) {
+    return ((ecs_iter_t*)iterator)->system;
+}

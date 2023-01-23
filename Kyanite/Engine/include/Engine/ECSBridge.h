@@ -49,6 +49,7 @@ const void* Flecs_GetComponent(uint64_t entity, uint64_t id);
 uint64_t Flecs_RegisterSystem(const char* name, void *system, bool multiThreaded, uint64_t *componentIds, size_t numComponents);
 void* Flecs_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count);
 void Flecs_GetSystemDeltaTime(void* iterator, float* deltaTime);
+uint64_t Flecs_GetSystemFromIter(void* iterator);
 #ifdef __cplusplus
 }
 #endif

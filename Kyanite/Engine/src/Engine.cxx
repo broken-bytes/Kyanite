@@ -304,6 +304,10 @@ void ECS_GetSystemDelta(void* iterator, float* delta) {
 	Flecs_GetSystemDeltaTime(iterator, delta);
 }
 
+uint64_t ECS_GetSystemFromIter(void* iterator) {
+	return Flecs_GetSystemFromIter(iterator);
+}
+
 #pragma endregion
 
 #pragma region IMGUI_API

@@ -51,7 +51,6 @@ var updateNative: Update!
     System("MoveSystem") { 
         let delta: Float = $0
         let trans: UnsafeMutablePointer<TransformComponent> = $1
-        let move: UnsafeMutablePointer<MoveComponent> = $2
     }
 }
 

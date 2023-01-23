@@ -23,7 +23,7 @@ public class ComponentRegistry {
     }
 
     public static let shared = ComponentRegistry()
-    private static let lib = Library.loadLibrary(at: "Kyanite-Runtime.dll")
+    private static let lib = Library.loadLibrary(at: "./Kyanite-Runtime.dll")
     private static let registerComponent: RegisterComponentFunc = lib.loadFunc(named: "ECS_RegisterComponent")
 
     fileprivate var mappings: Set<ComponentEntry> = []

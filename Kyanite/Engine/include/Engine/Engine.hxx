@@ -183,6 +183,7 @@ DLL_EXPORT uint32_t ECS_GetMouseOverEntityId(uint32_t x, uint32_t y);
 DLL_EXPORT uint64_t ECS_RegisterSystem(const char* name, void* system, bool multiThreaded, uint64_t* componentIds, size_t numComponents);
 DLL_EXPORT void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count);
 DLL_EXPORT void ECS_GetSystemDelta(void* iterator, float* delta);
+DLL_EXPORT uint64_t ECS_GetSystemFromIter(void* iterator);
 #pragma endregion
 
 #pragma region IMGUI_API
