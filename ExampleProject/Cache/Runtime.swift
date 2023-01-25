@@ -37,15 +37,17 @@ var updateNative: Update!
 
     World("Test")
 
-    Entity("Test") { 
-        TransformComponent(
-            position: Vector3(x: 0, y: 0, z: 0),
-            scale: Vector3(x: 0, y: 0, z: 0),
-            rotation: Vector3(x: 0, y: 0, z: 0)
-        )
-        MoveComponent(
-            movement: Vector3(x: 0, y: 0, z: 0)
-        )
+    for x in 0..<10000 {
+        Entity("Test\(x)") { 
+            TransformComponent(
+                position: Vector3(x: 0, y: 0, z: 0),
+                scale: Vector3(x: 0, y: 0, z: 0),
+                rotation: Vector3(x: 0, y: 0, z: 0)
+            )
+            MoveComponent(
+                movement: Vector3(x: Float.random(in: -1..<1), y: Float.random(in: -1..<1), z: Float.random(in: -1..<1))
+            )
+        }
     }
 
     System("MoveSystem") { 
@@ -54,13 +56,6 @@ var updateNative: Update!
         let move: UnsafeMutablePointer<MoveComponent> = $2
 
         trans.pointee.position = add(left: trans.pointee.position, right: mul(vector: move.pointee.movement, value: delta))
-    }
-
-    System("TransSystem") { 
-        let delta: Float = $0
-        let trans: UnsafeMutablePointer<TransformComponent> = $1
-
-        print(trans)
     }
 }
 

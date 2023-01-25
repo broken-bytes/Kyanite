@@ -110,7 +110,6 @@ static internal func processSystem(@EntityBuilder components: () -> SystemConten
    let componentsData = components()
 
     if let compSingle = componentsData as? SystemEntry {
-        entity.addComponent(component: compSingle.component)
     }
 
     if let tuple = componentsData as? any SystemTupleBase {
