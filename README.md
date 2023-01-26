@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://i.imgur.com/mF8krya.png" />
+</p>
+
 # Kyanite
 
 The modern game engine written in C++ and Swift where coding is fun 🎉
