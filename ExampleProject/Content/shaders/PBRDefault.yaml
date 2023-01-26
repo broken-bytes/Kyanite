@@ -1,7 +1,7 @@
 name: PBRDefault
 path: shaders/PBRDefault.hlsl
 lighting: default
-instancing: enabled
+instancing: disabled
 format: rgba_float
 buffer:
 constants:

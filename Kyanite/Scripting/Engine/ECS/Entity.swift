@@ -12,7 +12,7 @@ public final class Entity {
 
     private let internalId: UInt64
 
-    private static let lib = Library.loadLibrary(at: "Kyanite-Runtime.dll")
+    private static let lib = Core.Runtime.library
     private static let createEntity: CreateEntityFunc = lib.loadFunc(named: "ECS_CreateEntity")
     private static let deleteEntity: DeleteEntityFunc = lib.loadFunc(named: "ECS_DeleteEntity")
     private static let addComponent: AddComponentFunc = lib.loadFunc(named: "ECS_AddComponent")

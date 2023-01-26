@@ -62,6 +62,11 @@ struct ModelInfo {
   int MeshCount;
 } typedef ModelInfo;
 
+struct ModelIdInfo {
+    uint64_t* Ids;
+    size_t NumIds;
+} typedef ModelIdInfo;
+
 struct TextureLevelInfo {
   uint8_t *Data;
   uint16_t Width;
@@ -131,6 +136,9 @@ DLL_EXPORT void Engine_StartRender();
 DLL_EXPORT void Engine_EndRender();
 DLL_EXPORT void Engine_Resize(uint32_t width, uint32_t height);
 DLL_EXPORT uint64_t Engine_GetOutputTexture();
+DLL_EXPORT void Engine_LoadMeshes(const char* path, ModelIdInfo* info);
+DLL_EXPORT uint64_t Engine_LoadShader(const char* path);
+DLL_EXPORT uint64_t Engine_LoadTexture(const char* path);
 DLL_EXPORT uint64_t Engine_LoadMeshGPU(MeshInfo& info);
 DLL_EXPORT ModelInfo Engine_LoadModelCPU(const char* path);
 DLL_EXPORT void Engine_FreeModelCPU(ModelInfo& info);

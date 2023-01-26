@@ -1,0 +1,11 @@
+Model Information:
+* title:	54509-YORP asteroid, potential Earth impactor
+* source:	https://sketchfab.com/3d-models/54509-yorp-asteroid-potential-earth-impactor-52dbac4348404822bf386baa415f4773
+* author:	SebastianSosnowski (https://sketchfab.com/SebastianSosnowski)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "54509-YORP asteroid, potential Earth impactor" (https://sketchfab.com/3d-models/54509-yorp-asteroid-potential-earth-impactor-52dbac4348404822bf386baa415f4773) by SebastianSosnowski (https://sketchfab.com/SebastianSosnowski) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

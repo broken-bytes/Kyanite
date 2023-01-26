@@ -198,7 +198,7 @@ auto Interface::MidFrame() -> void {
   //_viewMatrix = glm::inverse(_viewMatrix);
   _projectionMatrix =
       glm::perspectiveFovLH(glm::radians(55.0f), (float)_windowDimension.x,
-                            (float)_windowDimension.y, 0.01f, 1000.0f);
+                            (float)_windowDimension.y, 0.001f, 2000.0f);
 
   // Record commands.
   glm::vec4 clearColor = {255, 255, 255, 255};
@@ -278,6 +278,7 @@ auto Interface::MidFrame() -> void {
   // --- Display Render Pass ---
   {
     clearColor = {0, 0.2, 0.2, 1};
+
       _commandList->SetGraphicsRootConstantBuffer(
       _lightDataBuffer[_frameIndex], &light, sizeof(light),
       _lightDataGPUAddress[_frameIndex]);
@@ -341,7 +342,7 @@ auto Interface::MidFrame() -> void {
             [texture](auto &item) { return item.Name == texture.first; });
 
         if (slotBinding != material->Shader->Constants.end()) {
-          auto index = 2 + (shader->ConstantBufferLayout.empty() ? 0 : 1)  + slotBinding->Index + (shader->IsLit ? 1 : 0);
+          auto index = 1 + (shader->ConstantBufferLayout.empty() ? 0 : 1)  + slotBinding->Index + (shader->IsLit ? 1 : 0);
           _commandList->SetGraphicsRootDescriptorTable(index,it->second->GPUHandle);
         }
       }
@@ -419,7 +420,7 @@ auto Interface::MidFrame() -> void {
   _cbCommandList->Close();
 
   //_mainQueue->ExecuteCommandLists({_mouseOverCommandList, _commandList, _imguiCommandList });
-  _mainQueue->ExecuteCommandLists({_mouseOverCommandList, _commandList, _imguiCommandList });
+  _mainQueue->ExecuteCommandLists({_mouseOverCommandList, _imguiCommandList, _commandList });
 
   // Present the frame.
   _swapChain->Swap();
@@ -448,6 +449,8 @@ auto Interface::Resize(uint32_t width, uint32_t height) -> void {
     _swapChain->Resize(FRAME_COUNT, width, height);
     _scissorRect = { 0u, 0u, static_cast<uint32_t>(_windowDimension.x),
                 static_cast<uint32_t>(_windowDimension.y) };
+    _viewport = { 0u, 0u,_windowDimension.x,
+                _windowDimension.y, 0, 1.0f };
 
     for (uint32_t x = 0; x < FRAME_COUNT; x++) {
         auto rt = _swapChain->GetBuffer(x);
@@ -728,8 +731,7 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
       {"POSITION", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 0, GraphicsPipelineClassification::VERTEX, 0},
       {"NORMAL", 0, GraphicsPipelineFormat::RGB32_FLOAT, 0, 16,GraphicsPipelineClassification::VERTEX, 0},
       {"TEXCOORD", 0, GraphicsPipelineFormat::RG32_FLOAT, 0, 28,GraphicsPipelineClassification::VERTEX, 0},
-      {"COLOR", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 36, GraphicsPipelineClassification::VERTEX, 0},
-      {"SV_InstanceID", 0, GraphicsPipelineFormat::R32_UINT, 0, 52, GraphicsPipelineClassification::VERTEX, 0}
+      {"COLOR", 0, GraphicsPipelineFormat::RGBA32_FLOAT, 0, 36, GraphicsPipelineClassification::VERTEX, 0}
       };
 
   auto pipeline =
@@ -743,11 +745,15 @@ auto Interface::UploadShaderData(GraphicsShader shader) -> uint64_t {
   return _shaders.size() - 1;
 }
 
-auto Interface::DrawMesh(uint64_t entityId, uint64_t meshId,
-                         uint64_t materialId, MeshDrawInfo info,
-                         glm::vec3 position, glm::quat rotation,
-                         glm::vec3 scale) -> void {
-
+auto Interface::DrawMesh(
+    uint64_t entityId, 
+    uint64_t meshId,
+    uint64_t materialId, 
+    MeshDrawInfo info,
+    glm::vec3 position, 
+    glm::quat rotation,
+    glm::vec3 scale
+) -> void {
   glm::mat4 transform = glm::mat4(1.0f);
   transform = glm::translate(transform, position);
   transform = glm::scale(transform, scale);

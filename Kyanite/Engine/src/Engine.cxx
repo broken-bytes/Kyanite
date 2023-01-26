@@ -119,7 +119,7 @@ void SetupEntityRenderer() {
 	componentIds.push_back(ecs_id(TransformComponent));
 	componentIds.push_back(ecs_id(MeshComponent));
 	componentIds.push_back(ecs_id(MaterialComponent));
-	ECS_RegisterSystem("Renderer", RendererSystem, true, componentIds.data(), componentIds.size());
+	ECS_RegisterSystem("Renderer", RendererSystem, false , componentIds.data(), componentIds.size());
 }
 
 void SetupBuiltinSystems() {
@@ -167,6 +167,7 @@ void Engine_Update(float frameTime) {
 	Flecs_Update(frameTime);
 	Engine_StartRender();
 	Engine_EndRender();
+	InputHandler::Flush();
 }
 
 void Engine_StartRender() {
@@ -185,6 +186,29 @@ void Engine_Resize(uint32_t width, uint32_t height) {
 
 uint64_t Engine_GetOutputTexture() {
 	return Instance.Renderer->GetOutputTexture();
+}
+
+void Engine_LoadMeshes(const char* path, ModelIdInfo* info) {
+	auto model = Engine_LoadModelCPU(path);
+
+	auto data = new uint64_t[model.MeshCount];
+
+	for (int x = 0; x < model.MeshCount; x++) {
+		data[x] = Engine_LoadMeshGPU(model.Meshes[x]);
+	}
+
+	info->Ids = data;
+	info->NumIds = model.MeshCount;
+}
+
+uint64_t Engine_LoadShader(const char* path) {
+	auto info = Engine_LoadShaderCPU(path);
+	return Engine_LoadShaderGPU(info);
+}
+
+uint64_t Engine_LoadTexture(const char* path) {
+	auto info = Engine_LoadTextureCPU(path);
+	return Engine_LoadTextureGPU(info);
 }
 
 void Engine_SetMaxFrameRate(uint16_t maxFramerate) {}

@@ -8,7 +8,7 @@ internal typealias GetKeyboardButtonStateNativeFunc = @convention(c) (UInt16) ->
 public class InputSystem: EventSystem<InputEvent> {
     // MARK: Native DLL wrappers
 
-    private let nativeLib: Library
+    private let nativeLib: Library = Core.Runtime.library
     private let getMouseInput: GetMouseInputNativeFunc
     private let getMouseMovement: GetMouseMouseMovementNativeFunc
     private let getMousePosition: GetMouseMousePositionNativeFunc
@@ -164,7 +164,6 @@ public class InputSystem: EventSystem<InputEvent> {
     public static let shared = InputSystem()
 
     private override init() {
-        self.nativeLib = Library.loadLibrary(at: "Kyanite-Runtime.dll")
         self.getKeyboardInput = nativeLib.loadFunc(named: "Input_GetKeyboardButton")
         self.getMouseInput = nativeLib.loadFunc(named: "Input_GetMouseButton")
         self.getMouseMovement = nativeLib.loadFunc(named: "Input_GetMouseMovement")

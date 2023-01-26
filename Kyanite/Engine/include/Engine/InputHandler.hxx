@@ -35,5 +35,7 @@ namespace InputHandler {
     auto GetMouseButtonState(MouseButton button) -> ButtonState;
     auto GetMouseMovement() -> std::vector<uint32_t>;
     auto GetMouseAbs() -> std::vector<uint32_t>;
+
+    auto Flush() -> void;
 }
 

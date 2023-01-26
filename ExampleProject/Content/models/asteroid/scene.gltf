@@ -1,0 +1,276 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 5299,
+      "max": [
+        0.0715111717581749,
+        0.05422880873084068,
+        0.06390268355607986
+      ],
+      "min": [
+        -0.07334653288125992,
+        -0.039457280188798904,
+        -0.06058927997946739
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 63588,
+      "componentType": 5126,
+      "count": 5299,
+      "max": [
+        0.9980908036231995,
+        0.9999979734420776,
+        0.9976270198822021
+      ],
+      "min": [
+        -0.9979920983314514,
+        -0.9998843669891357,
+        -0.9993225932121277
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 5299,
+      "max": [
+        0.9999104142189026,
+        0.9998729825019836,
+        0.8723187446594238,
+        1.0
+      ],
+      "min": [
+        -0.9999833106994629,
+        -0.9003231525421143,
+        -0.954064667224884,
+        1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 5299,
+      "max": [
+        0.9976963400840759,
+        0.9898730516433716
+      ],
+      "min": [
+        0.008522468619048595,
+        0.002272672951221466
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 29802,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "SebastianSosnowski (https://sketchfab.com/SebastianSosnowski)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/54509-yorp-asteroid-potential-earth-impactor-52dbac4348404822bf386baa415f4773",
+      "title": "54509-YORP asteroid, potential Earth impactor"
+    },
+    "generator": "Sketchfab-13.75.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 119208,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 42392,
+      "byteOffset": 119208,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 127176,
+      "byteOffset": 161600,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 84784,
+      "byteOffset": 288776,
+      "byteStride": 16,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 373560,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/Standard_baseColor.jpeg"
+    },
+    {
+      "uri": "textures/Standard_normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "Standard",
+      "normalTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9980982799185673
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Group24690_Standard_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 4,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        29.010774612426758,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        6.441685987385428e-15,
+        -29.010774612426758,
+        0.0,
+        0.0,
+        29.010774612426758,
+        6.441685987385428e-15,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "a9e4196a11a0482a900cb8219ad0af1d.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Group24690"
+    },
+    {
+      "mesh": 0,
+      "name": "Group24690_Standard_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    }
+  ]
+}

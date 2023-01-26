@@ -37,16 +37,58 @@ var updateNative: Update!
 
     World("Test")
 
-    for x in 0..<10000 {
+
+    let shaderId = AssetDatabase.shared.loadShader(at: "shaders/PBRDefault.yaml")
+
+    var raw = UnsafeMutableRawPointer.allocate(byteCount: 1, alignment: 1)
+    var count = UnsafeMutablePointer<UInt64>.allocate(capacity: 1)
+
+
+    let playerMeshIds = AssetDatabase.shared.loadModel(at: "models/spaceship/scene.gltf")
+
+    print(playerMeshIds)
+    let playerMatId = AssetDatabase.shared.createNewMaterial(named: "Player", shaderId: shaderId)
+    let playerMat = Material(internalRefId: playerMatId)
+    let playerTex = AssetDatabase.shared.loadTexture(at: "models/spaceship/textures/Material.001_baseColor.png")
+    let playerNor = AssetDatabase.shared.loadTexture(at: "models/spaceship/textures/Material.001_baseColor.png")
+    playerMat.setTexture(named: "Diffuse", texture: playerTex)
+    playerMat.setTexture(named: "Normal", texture: playerNor)
+
+    Entity("PlayerEntity") { 
+        TransformComponent(
+            position: Vector3(x: 0, y:0, z: 10),
+            rotation: Vector3(x: 0, y: 0, z: 0),
+            scale: Vector3(x: 0.5, y: 0.5, z: 0.5)
+        )
+        MoveComponent(
+            movement: Vector3(x: 0, y: 0, z: 0)
+        )
+        MaterialComponent(material: playerMat)
+        MeshComponent(mesh: Mesh(internalRefId: playerMeshIds.first!))
+        PlayerComponent(id: 0)
+    }
+
+    let asteroidMeshIds = AssetDatabase.shared.loadModel(at: "models/asteroid/scene.gltf")
+    let asteroidMatId = AssetDatabase.shared.createNewMaterial(named: "Test", shaderId: shaderId)
+    let asteroidMat = Material(internalRefId: asteroidMatId)
+    let asteroidTex = AssetDatabase.shared.loadTexture(at: "models/asteroid/textures/Standard_baseColor.jpeg")
+    let asteroidNor = AssetDatabase.shared.loadTexture(at: "models/asteroid/textures/Standard_normal.png")
+    asteroidMat.setTexture(named: "Diffuse", texture: asteroidTex)
+    asteroidMat.setTexture(named: "Normal", texture: asteroidNor)
+
+
+    for x in 0..<1000 {
         Entity("Test\(x)") { 
             TransformComponent(
-                position: Vector3(x: 0, y: 0, z: 0),
-                scale: Vector3(x: 0, y: 0, z: 0),
-                rotation: Vector3(x: 0, y: 0, z: 0)
+                position: Vector3(x: Float.random(in: -1..<1), y: Float.random(in: -1..<1), z:10),
+                rotation: Vector3(x: 0, y: 0, z: 0),
+                scale: Vector3(x: 1, y: 1, z: 1)
             )
             MoveComponent(
                 movement: Vector3(x: Float.random(in: -1..<1), y: Float.random(in: -1..<1), z: Float.random(in: -1..<1))
             )
+            MeshComponent(mesh: Mesh(internalRefId: asteroidMeshIds.first!))
+            MaterialComponent(material: asteroidMat)
         }
     }
 
@@ -56,6 +98,33 @@ var updateNative: Update!
         let move: UnsafeMutablePointer<MoveComponent> = $2
 
         trans.pointee.position = add(left: trans.pointee.position, right: mul(vector: move.pointee.movement, value: delta))
+    }
+
+    System("PlayerSystem") { 
+        let delta: Float = $0
+        let player: UnsafeMutablePointer<PlayerComponent> = $1
+        let move: UnsafeMutablePointer<MoveComponent> = $2
+
+        var movementX: Float = 0
+        var movementZ: Float = 0
+
+        if(InputSystem.shared.buttonState(for: .a) == .held) {
+            movementX = -5
+        }
+
+        if(InputSystem.shared.buttonState(for: .d) == .held) {
+            movementX = 5
+        }
+
+        if(InputSystem.shared.buttonState(for: .w) == .held) {
+            movementZ = 5
+        }
+
+        if(InputSystem.shared.buttonState(for: .s) == .held) {
+            movementZ = -5
+        }
+
+        move.pointee.movement = Vector3(x: movementX, y: 0, z: movementZ)
     }
 }
 

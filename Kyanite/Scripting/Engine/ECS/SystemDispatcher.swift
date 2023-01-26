@@ -15,7 +15,7 @@ func dispatch(iterator: UnsafeMutableRawPointer) {
 }
 
 internal struct SystemDispatcher {
-    static let lib: Library = Library.loadLibrary(at: "./Kyanite-Runtime.dll")
+    static let lib: Library = Core.Runtime.library
     static let register: RegisterSystem = lib.loadFunc(named: "ECS_RegisterSystem")
     static let getSystemDelta: GetSystemDelta = lib.loadFunc(named: "ECS_GetSystemDelta")
     static let getSystemComponentData: GetSystemComponentData = lib.loadFunc(named: "ECS_GetComponentData")

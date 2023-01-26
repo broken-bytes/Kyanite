@@ -169,7 +169,7 @@ namespace AssetLoader {
 		const std::string name =
 			shaderDescription["name"].as<std::string>();
 		const std::string hlslPath =
-			RootDir + shaderDescription["path"].as<std::string>();
+			RootDir + CONTENT + shaderDescription["path"].as<std::string>();
 		std::string lighting = shaderDescription["lighting"].as<std::string>();
 		asset.Description.IsLit = lighting == "default" ? true : false;
 
