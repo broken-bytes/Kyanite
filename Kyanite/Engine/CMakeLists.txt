@@ -46,6 +46,10 @@ target_include_directories(Kyanite-Runtime PRIVATE
 )
 
 target_include_directories(Kyanite-Runtime PRIVATE
+  ${CMAKE_SOURCE_DIR}/Kyanite/Physics/include
+)
+
+target_include_directories(Kyanite-Runtime PRIVATE
   ${CMAKE_SOURCE_DIR}/Kyanite/Core/include
 )
 

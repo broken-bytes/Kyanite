@@ -39,7 +39,7 @@ public func vec2ToVec3(vector: Vector2) -> Vector3 {
 }
 
 public func vec2ToVec4(vector: Vector2) -> Vector4 {
-    return Vector4(x: vector.x, y: vector.y, z: 1, w: 1)
+    return Vector4(w: 1, x: vector.x, y: vector.y, z: 1)
 }
 
 public extension Vector2 {

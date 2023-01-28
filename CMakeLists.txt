@@ -25,8 +25,10 @@ add_subdirectory(Kyanite/Rendering)
 add_subdirectory(Kyanite/Runtime)
 # Game Engine library
 add_subdirectory(Kyanite/Engine) 
+# Physics
+add_subdirectory(Kyanite/Physics)
 
 # Editor code
 
 target_link_libraries(Rendering PUBLIC Core)
-target_link_libraries(Kyanite-Runtime PUBLIC Core Rendering)
+target_link_libraries(Kyanite-Runtime PUBLIC Core Rendering Physics)

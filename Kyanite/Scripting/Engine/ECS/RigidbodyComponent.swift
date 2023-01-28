@@ -1,5 +1,9 @@
-import Physics
+public struct RigidBodyComponent: Component {
+    public let isStatic: Bool
+    public let mass: Float
 
-public struct RigidbodyComponent: Component {
-    public let rigibody: Rigidbody
+    public init(mass: Float, isStatic: Bool) {
+        self.mass = mass
+        self.isStatic = isStatic
+    } 
 }

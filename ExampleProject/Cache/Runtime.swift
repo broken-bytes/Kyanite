@@ -5,7 +5,7 @@ import Math
 import Core
 
 internal typealias Start = @convention(c) (UInt32, UInt32, UnsafeMutableRawPointer) -> Void
-internal typealias Update = @convention(c) (Float) -> Void
+internal typealias Update = @convention(c) () -> Void
 internal typealias SetRootDir = @convention(c) (UnsafePointer<Int8>) -> Void
 
 // Pointer to the engine, Ptr to component register func
@@ -34,6 +34,10 @@ var updateNative: Update!
     try! ComponentRegistry.shared.register(component: MaterialComponent.self)
     try! ComponentRegistry.shared.register(component: MoveComponent.self)
     try! ComponentRegistry.shared.register(component: PlayerComponent.self)
+    try! ComponentRegistry.shared.register(component: RigidBodyComponent.self)
+    try! ComponentRegistry.shared.register(component: SphereColliderComponent.self)
+    try! ComponentRegistry.shared.register(component: BoxColliderComponent.self)
+    try! ComponentRegistry.shared.register(component: CapsuleColliderComponent.self)
 
     World("Test")
 
@@ -46,7 +50,6 @@ var updateNative: Update!
 
     let playerMeshIds = AssetDatabase.shared.loadModel(at: "models/spaceship/scene.gltf")
 
-    print(playerMeshIds)
     let playerMatId = AssetDatabase.shared.createNewMaterial(named: "Player", shaderId: shaderId)
     let playerMat = Material(internalRefId: playerMatId)
     let playerTex = AssetDatabase.shared.loadTexture(at: "models/spaceship/textures/Material.001_baseColor.png")
@@ -57,7 +60,7 @@ var updateNative: Update!
     Entity("PlayerEntity") { 
         TransformComponent(
             position: Vector3(x: 0, y:0, z: 10),
-            rotation: Vector3(x: 0, y: 0, z: 0),
+            rotation: Vector4(w: 0, x: 0, y: 0, z: 0),
             scale: Vector3(x: 0.5, y: 0.5, z: 0.5)
         )
         MoveComponent(
@@ -77,15 +80,19 @@ var updateNative: Update!
     asteroidMat.setTexture(named: "Normal", texture: asteroidNor)
 
 
-    for x in 0..<1000 {
+    for x in 0..<2000 {
         Entity("Test\(x)") { 
             TransformComponent(
-                position: Vector3(x: Float.random(in: -1..<1), y: Float.random(in: -1..<1), z:10),
-                rotation: Vector3(x: 0, y: 0, z: 0),
-                scale: Vector3(x: 1, y: 1, z: 1)
+                position: Vector3(x: Float.random(in: -50..<50), y: Float.random(in: -50..<50), z:10),
+                rotation: Vector4(w: 0, x: 0, y: 0, z: 0),
+                scale: Vector3(x: Float.random(in: -1..<5), y: Float.random(in: -1..<5), z: Float.random(in: -1..<5))
             )
-            MoveComponent(
-                movement: Vector3(x: Float.random(in: -1..<1), y: Float.random(in: -1..<1), z: Float.random(in: -1..<1))
+            RigidBodyComponent(
+                mass: Float.random(in: 1..<50),
+                isStatic: false
+            )
+            SphereColliderComponent(
+                radius: Float.random(in: 0.1..<2)
             )
             MeshComponent(mesh: Mesh(internalRefId: asteroidMeshIds.first!))
             MaterialComponent(material: asteroidMat)
@@ -126,8 +133,17 @@ var updateNative: Update!
 
         move.pointee.movement = Vector3(x: movementX, y: 0, z: movementZ)
     }
+
+    System("MovementChanger") {
+        let delta = $0
+        let movement: UnsafeMutablePointer<MoveComponent> = $1
+
+        if InputSystem.shared.buttonState(for: .e) == .down {
+            movement.pointee.movement = Vector3(x: Float.random(in: -1..<1), y: Float.random(in: -1..<1), z: Float.random(in: -1..<1)) 
+        }
+    }
 }
 
 @_cdecl("update") public func update(frameTime: Float) {
-    updateNative(frameTime)
+    updateNative()
 }

@@ -41,7 +41,7 @@ public func vec3ToVec2(vector: Vector3) -> Vector2 {
 }
 
 public func vec3ToVec4(vector: Vector3) -> Vector4 {
-    return Vector4(x: vector.x, y: vector.y, z: vector.z, w: 1)
+    return Vector4(w: 1, x: vector.x, y: vector.y, z: vector.z)
 }
 
 public func vec3ToQuaternion(vector: Vector3) -> Quaternion {

@@ -131,7 +131,7 @@ struct ShaderInfo {
 #pragma region ENGINE_API
 DLL_EXPORT void Engine_Init(uint32_t resolutionX, uint32_t resolutionY, void *window);
 DLL_EXPORT void Engine_Shutdown();
-DLL_EXPORT void Engine_Update(float frameTime);
+DLL_EXPORT void Engine_Update();
 DLL_EXPORT void Engine_StartRender();
 DLL_EXPORT void Engine_EndRender();
 DLL_EXPORT void Engine_Resize(uint32_t width, uint32_t height);
@@ -192,6 +192,13 @@ DLL_EXPORT uint64_t ECS_RegisterSystem(const char* name, void* system, bool mult
 DLL_EXPORT void* ECS_GetComponentData(void* iterator, size_t size, uint8_t index, size_t* count);
 DLL_EXPORT void ECS_GetSystemDelta(void* iterator, float* delta);
 DLL_EXPORT uint64_t ECS_GetSystemFromIter(void* iterator);
+#pragma endregion
+
+#pragma region PHYSICS_API
+DLL_EXPORT void Physics_AddRigidBody(uint64_t entityId, float mass, bool isStatic);
+DLL_EXPORT void Physics_AddBoxCollider(uint64_t entityId, float boundsX, float boundsY, float boundsZ);
+DLL_EXPORT void Physics_AddSphereCollider(uint64_t entityId, float radius);
+DLL_EXPORT void Physics_AddCapsuleCollider(uint64_t entityId, float radius, float halfHeight);
 #pragma endregion
 
 #pragma region IMGUI_API

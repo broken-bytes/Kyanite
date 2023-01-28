@@ -43,7 +43,6 @@ public struct ComponentEntry: ComponentContent {
     }
 }
 
-
 public protocol ContentTupleBase {
     associatedtype Item
 

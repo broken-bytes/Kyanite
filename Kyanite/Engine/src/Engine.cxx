@@ -24,13 +24,16 @@
 #include "glm/matrix.hpp"
 #include "glm/trigonometric.hpp"
 #include "glm/vec4.hpp"
-
+#include <numeric>
+#include <chrono>
 #include <imgui.h>
 
 #include "ECSBridge.h"
 #include <iostream>
 #include <InputHandler.hxx>
 #include <SDL2/SDL_syswm.h>
+
+#include "Physics/PhysicsHandler.hxx"
 
 struct EngineInstance {
 	std::unique_ptr<Renderer::Interface> Renderer;
@@ -39,6 +42,7 @@ struct EngineInstance {
 	ImGuiContext* CTX;
 	ImFont* BaseText;
 	std::vector<uint32_t> WindowSize = { 0, 0 };
+	float DeltaTime = 0.1;
 };
 
 EngineInstance Instance = {};
@@ -157,17 +161,27 @@ void Engine_Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
 	SetupBuiltinSystems();
 
 	InputHandler::Init();
+	PhysicsHandler::Init([](uint64_t entityId) {
+		ECS_COMPONENT(Flecs_GetWorld(), TransformComponent);
+		return Flecs_GetComponent(entityId, ecs_id(TransformComponent));
+	});
 }
 
 void Engine_Shutdown() {
 }
 
-void Engine_Update(float frameTime) {
+void Engine_Update() {
+	auto start = std::chrono::system_clock::now();
 	HandleEvents();
-	Flecs_Update(frameTime);
+	Flecs_Update(Instance.DeltaTime);
 	Engine_StartRender();
 	Engine_EndRender();
 	InputHandler::Flush();
+	PhysicsHandler::Update(Instance.DeltaTime);
+	auto end = std::chrono::system_clock::now();
+	std::chrono::duration<double> diff = end - start;	
+	Instance.DeltaTime = diff.count();
+
 }
 
 void Engine_StartRender() {
@@ -274,10 +288,19 @@ void Shader_SetMaterialTexture(uint64_t material, const char* name, uint64_t tex
 	Instance.Renderer->SetMaterialTexture(material, name, texture);
 }
 
-void Shader_SetMaterialPropertyInt(uint64_t material, const char* name, int value) {}
+void Shader_SetMaterialPropertyInt(
+	uint64_t material, 
+	const char* name, 
+	int value
+) {
+}
 
-void Shader_SetMaterialPropertyFloat(uint64_t material, const char* name,
-	float value) {}
+void Shader_SetMaterialPropertyFloat(
+	uint64_t material, 
+	const char* name,
+	float value
+) {
+}
 
 void Shader_SetMaterialPropertyVector2(uint64_t material, const char* name,
 	float* value) {}
@@ -331,7 +354,26 @@ void ECS_GetSystemDelta(void* iterator, float* delta) {
 uint64_t ECS_GetSystemFromIter(void* iterator) {
 	return Flecs_GetSystemFromIter(iterator);
 }
+#pragma endregion
 
+#pragma region PHYSICS_API
+void Physics_AddRigidBody(uint64_t entityId, float mass, bool isStatic) {
+	ECS_COMPONENT(Flecs_GetWorld(), TransformComponent);
+	auto transform = Flecs_GetComponent(entityId, ecs_id(TransformComponent));
+	PhysicsHandler::AddRigidbody(entityId, transform, mass, isStatic);
+}
+
+void Physics_AddBoxCollider(uint64_t entityId, float boundsX, float boundsY, float boundsZ) {
+	PhysicsHandler::AddBoxCollider(entityId, { boundsX, boundsY, boundsZ });
+}
+
+void Physics_AddSphereCollider(uint64_t entityId, float radius) {
+	PhysicsHandler::AddSphereCollider(entityId, radius);
+}
+
+void Physics_AddCapsuleCollider(uint64_t entityId, float radius, float halfHeight) {
+	PhysicsHandler::AddCapsuleCollider(entityId, radius, halfHeight);
+}
 #pragma endregion
 
 #pragma region IMGUI_API
