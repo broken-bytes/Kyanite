@@ -155,7 +155,7 @@ namespace PhysicsHandler {
 	auto Init(std::function<void* (uint64_t)> transformQuery) -> void {
 		AllocatorCallback = new Allocator();
 		ErrorCallback = new Error();
-		Dispatcher = new CpuDispatcher(4);
+		Dispatcher = new CpuDispatcher(8);
 		Foundation = PxCreateFoundation(
 			PX_PHYSICS_VERSION,
 			*AllocatorCallback,

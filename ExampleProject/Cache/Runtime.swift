@@ -80,7 +80,7 @@ var updateNative: Update!
     asteroidMat.setTexture(named: "Normal", texture: asteroidNor)
 
 
-    for x in 0..<2000 {
+    for x in 0..<50 {
         Entity("Test\(x)") { 
             TransformComponent(
                 position: Vector3(x: Float.random(in: -50..<50), y: Float.random(in: -50..<50), z:10),
@@ -96,50 +96,6 @@ var updateNative: Update!
             )
             MeshComponent(mesh: Mesh(internalRefId: asteroidMeshIds.first!))
             MaterialComponent(material: asteroidMat)
-        }
-    }
-
-    System("MoveSystem") { 
-        let delta: Float = $0
-        let trans: UnsafeMutablePointer<TransformComponent> = $1
-        let move: UnsafeMutablePointer<MoveComponent> = $2
-
-        trans.pointee.position = add(left: trans.pointee.position, right: mul(vector: move.pointee.movement, value: delta))
-    }
-
-    System("PlayerSystem") { 
-        let delta: Float = $0
-        let player: UnsafeMutablePointer<PlayerComponent> = $1
-        let move: UnsafeMutablePointer<MoveComponent> = $2
-
-        var movementX: Float = 0
-        var movementZ: Float = 0
-
-        if(InputSystem.shared.buttonState(for: .a) == .held) {
-            movementX = -5
-        }
-
-        if(InputSystem.shared.buttonState(for: .d) == .held) {
-            movementX = 5
-        }
-
-        if(InputSystem.shared.buttonState(for: .w) == .held) {
-            movementZ = 5
-        }
-
-        if(InputSystem.shared.buttonState(for: .s) == .held) {
-            movementZ = -5
-        }
-
-        move.pointee.movement = Vector3(x: movementX, y: 0, z: movementZ)
-    }
-
-    System("MovementChanger") {
-        let delta = $0
-        let movement: UnsafeMutablePointer<MoveComponent> = $1
-
-        if InputSystem.shared.buttonState(for: .e) == .down {
-            movement.pointee.movement = Vector3(x: Float.random(in: -1..<1), y: Float.random(in: -1..<1), z: Float.random(in: -1..<1)) 
         }
     }
 }
