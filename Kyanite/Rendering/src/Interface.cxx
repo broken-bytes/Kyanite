@@ -23,7 +23,9 @@
 #include <debugapi.h>
 #include <dxgiformat.h>
 #include <glm/ext/quaternion_transform.hpp>
+#include <mutex>
 #include <thread>
+
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -64,6 +66,8 @@ float ambientIntensity = 1;
 
 glm::vec3 camPos;
 glm::vec3 camRot;
+
+std::mutex Mutex = {};
 
 namespace Renderer {
 struct MVPCBuffer {
@@ -762,8 +766,9 @@ auto Interface::DrawMesh(
   glm::mat4 transformY = glm::eulerAngleY(axis.y);
   glm::mat4 transformZ = glm::eulerAngleZ(axis.z);
   transform = transform * transformY * transformX * transformZ;
-
+  std::scoped_lock lock{ Mutex };
   _meshesToDraw.push_back({entityId, meshId, materialId, transform});
+
 }
 
 auto Interface::DrawLine(glm::vec3 from, glm::vec3 to, glm::vec4 color) -> void {

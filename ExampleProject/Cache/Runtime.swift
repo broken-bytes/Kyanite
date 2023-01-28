@@ -48,30 +48,7 @@ var updateNative: Update!
     var count = UnsafeMutablePointer<UInt64>.allocate(capacity: 1)
 
 
-    let playerMeshIds = AssetDatabase.shared.loadModel(at: "models/spaceship/scene.gltf")
-
-    let playerMatId = AssetDatabase.shared.createNewMaterial(named: "Player", shaderId: shaderId)
-    let playerMat = Material(internalRefId: playerMatId)
-    let playerTex = AssetDatabase.shared.loadTexture(at: "models/spaceship/textures/Material.001_baseColor.png")
-    let playerNor = AssetDatabase.shared.loadTexture(at: "models/spaceship/textures/Material.001_baseColor.png")
-    playerMat.setTexture(named: "Diffuse", texture: playerTex)
-    playerMat.setTexture(named: "Normal", texture: playerNor)
-
-    Entity("PlayerEntity") { 
-        TransformComponent(
-            position: Vector3(x: 0, y:0, z: 10),
-            rotation: Vector4(w: 0, x: 0, y: 0, z: 0),
-            scale: Vector3(x: 0.5, y: 0.5, z: 0.5)
-        )
-        MoveComponent(
-            movement: Vector3(x: 0, y: 0, z: 0)
-        )
-        MaterialComponent(material: playerMat)
-        MeshComponent(mesh: Mesh(internalRefId: playerMeshIds.first!))
-        PlayerComponent(id: 0)
-    }
-
-    let asteroidMeshIds = AssetDatabase.shared.loadModel(at: "models/asteroid/scene.gltf")
+    let asteroidMeshIds = AssetDatabase.shared.loadModel(at: "models/environment/floors/base_floor_stone_1.gltf")
     let asteroidMatId = AssetDatabase.shared.createNewMaterial(named: "Test", shaderId: shaderId)
     let asteroidMat = Material(internalRefId: asteroidMatId)
     let asteroidTex = AssetDatabase.shared.loadTexture(at: "models/asteroid/textures/Standard_baseColor.jpeg")
@@ -80,22 +57,17 @@ var updateNative: Update!
     asteroidMat.setTexture(named: "Normal", texture: asteroidNor)
 
 
-    for x in 0..<50 {
-        Entity("Test\(x)") { 
-            TransformComponent(
-                position: Vector3(x: Float.random(in: -50..<50), y: Float.random(in: -50..<50), z:10),
-                rotation: Vector4(w: 0, x: 0, y: 0, z: 0),
-                scale: Vector3(x: Float.random(in: -1..<5), y: Float.random(in: -1..<5), z: Float.random(in: -1..<5))
-            )
-            RigidBodyComponent(
-                mass: Float.random(in: 1..<50),
-                isStatic: false
-            )
-            SphereColliderComponent(
-                radius: Float.random(in: 0.1..<2)
-            )
-            MeshComponent(mesh: Mesh(internalRefId: asteroidMeshIds.first!))
-            MaterialComponent(material: asteroidMat)
+    for x in -50..<50 {
+        for y in -50..<50 {
+            Entity("Test\(x):\(y)") { 
+                TransformComponent(
+                    position: Vector3(x: Float(x), y: -15, z: Float(y)),
+                    rotation: Vector4(w: 0, x: 0, y: 0, z: 0),
+                    scale: Vector3.one
+                )
+                MeshComponent(mesh: Mesh(internalRefId: asteroidMeshIds.first!))
+                MaterialComponent(material: asteroidMat)
+            }
         }
     }
 }

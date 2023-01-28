@@ -107,11 +107,22 @@ namespace AssetLoader {
 				const float* norArr = reinterpret_cast<const float*>(&norBuff.data[norView.byteOffset + norAcc.byteOffset]);
 				const float* colArr = reinterpret_cast<const float*>(&colBuff.data[colView.byteOffset + colAcc.byteOffset]);
 
-				const uint32_t* indicesArr = reinterpret_cast<const uint32_t*>(&indBuff.data[indView.byteOffset + indAcc.byteOffset]);
 
-				for (size_t i = 0; i < indAcc.count; ++i) {
-					// Indices are uint32
-					inds.push_back(indicesArr[i]);
+				if (indAcc.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+					const uint16_t* indicesArr = reinterpret_cast<const uint16_t*>(&indBuff.data[indView.byteOffset + indAcc.byteOffset]);
+
+					for (size_t i = 0; i < indAcc.count; ++i) {
+						// Indices are uint16
+						inds.push_back(indicesArr[i]);
+					}
+				}
+				else {
+					const uint32_t* indicesArr = reinterpret_cast<const uint32_t*>(&indBuff.data[indView.byteOffset + indAcc.byteOffset]);
+
+					for (size_t i = 0; i < indAcc.count; ++i) {
+						// Indices are uint32
+						inds.push_back(indicesArr[i]);
+					}
 				}
 
 				for (size_t i = 0; i < posAcc.count; ++i) {
@@ -143,9 +154,9 @@ namespace AssetLoader {
 					verts.push_back(norArr[i * 3 + 2]);
 					verts.push_back(u);
 					verts.push_back(v);
-					auto r = colArr[i * 3 + 0];
-					auto g = colArr[i * 3 + 1];
-					auto b = colArr[i * 3 + 2];
+					auto r = 1;
+					auto g = 1;
+					auto b = 1;
 
 					verts.push_back(r);
 					verts.push_back(g);

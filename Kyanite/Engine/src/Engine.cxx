@@ -123,7 +123,7 @@ void SetupEntityRenderer() {
 	componentIds.push_back(ecs_id(TransformComponent));
 	componentIds.push_back(ecs_id(MeshComponent));
 	componentIds.push_back(ecs_id(MaterialComponent));
-	ECS_RegisterSystem("Renderer", RendererSystem, false , componentIds.data(), componentIds.size());
+	ECS_RegisterSystem("Renderer", RendererSystem, true , componentIds.data(), componentIds.size());
 }
 
 void SetupBuiltinSystems() {
