@@ -185,7 +185,7 @@ namespace AssetLoader {
 		asset.Description.IsLit = lighting == "default" ? true : false;
 
 		std::string instancing = shaderDescription["instancing"].as<std::string>();
-		asset.Description.InstancingEnabled = lighting == "enabled" ? true : false;
+		asset.Description.InstancingEnabled = instancing == "enabled" ? true : false;
 
 		std::string format = shaderDescription["format"].as<std::string>();
 
