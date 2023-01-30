@@ -173,8 +173,8 @@ void Engine_Shutdown() {
 void Engine_Update() {
 	auto start = std::chrono::system_clock::now();
 	HandleEvents();
-	Flecs_Update(Instance.DeltaTime);
 	Engine_StartRender();
+	Flecs_Update(Instance.DeltaTime);
 	Engine_EndRender();
 	InputHandler::Flush();
 	PhysicsHandler::Update(Instance.DeltaTime);
