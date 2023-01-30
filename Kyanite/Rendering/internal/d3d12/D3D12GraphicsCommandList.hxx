@@ -11,7 +11,7 @@
 namespace Renderer {
 	class D3D12GraphicsCommandList : public GraphicsCommandList {
 	public:
-		D3D12GraphicsCommandList(CommandType type, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList5> commandList);
+		D3D12GraphicsCommandList(CommandType type, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList5> commandList, std::string name);
 		virtual auto Close() -> void override;
         virtual auto Reset(std::shared_ptr<Allocator> allocator, std::shared_ptr<GraphicsPipelineState> pipelineState) -> void override;
         virtual auto ClearRenderTarget(std::shared_ptr<CPUDescriptorHandle> target, glm::vec4 color) -> void override;

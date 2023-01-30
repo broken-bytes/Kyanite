@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <dxgiformat.h>
+#include <string>
 #include <memory>
 #include "Renderer.hxx"
 #include "d3d12/D3D12ReadbackBuffer.hxx"
@@ -16,18 +17,33 @@
 #include "d3d12/D3D12Buffer.hxx"
 #include "d3d12/D3D12UploadBuffer.hxx"
 #include "d3d12/D3D12TextureBuffer.hxx"
+#include "Core/Logger.hxx"
 
 
 namespace Renderer {
-	D3D12GraphicsCommandList::D3D12GraphicsCommandList(CommandType type, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList5> commandList): GraphicsCommandList(type) {
+	D3D12GraphicsCommandList::D3D12GraphicsCommandList(CommandType type, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList5> commandList, std::string name): GraphicsCommandList(type, name) {
 		_commandList = commandList;
+		std::stringstream str;
+		str << "Creating CommandList " << name;
+		Logger::Info(str.str());
+
 	}
 
 	auto D3D12GraphicsCommandList::Close() -> void {
-		_commandList->Close();
+		std::stringstream str;
+		str << "Closing CommandList " << this->Name();
+		Logger::Info(str.str());
+		if (S_OK != _commandList->Close()) {
+			str.flush();
+			str << "Could not close commandlist " << this->Name();
+			Logger::Error(str.str());
+		}
 	}
 
 	auto D3D12GraphicsCommandList::Reset(std::shared_ptr<Allocator> allocator, std::shared_ptr<GraphicsPipelineState> pipelineState) -> void {
+		std::stringstream str;
+		str << "Resetting CommandList " << this->Name();
+		Logger::Info(str.str());
 		auto pipeline = static_pointer_cast<D3D12GraphicsPipelineState>(pipelineState);
 		_commandList->Reset(static_pointer_cast<D3D12Allocator>(allocator)->Native(), pipeline? pipeline-> Native() : nullptr);
 	}
@@ -218,6 +234,9 @@ namespace Renderer {
 	}
 
 	auto D3D12GraphicsCommandList::Copy(std::shared_ptr<RenderTarget> from, std::shared_ptr<ReadbackBuffer> to) -> void {
+		std::stringstream str;
+		str << "Calling Copy on CommandList " << this->Name();
+		Logger::Info(str.str());
 		auto renderTarget = static_pointer_cast<D3D12RenderTarget>(from);
 		auto readbackBuffer = static_pointer_cast<D3D12ReadbackBuffer>(to);
 
@@ -225,6 +244,9 @@ namespace Renderer {
 	}
 
 	auto D3D12GraphicsCommandList::Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<TextureBuffer> from, std::shared_ptr<ReadbackBuffer> to) -> void {
+		std::stringstream str;
+		str << "Calling Copy on CommandList " << this->Name();
+		Logger::Info(str.str());
 		auto texture = static_pointer_cast<D3D12TextureBuffer>(from);
 		auto readbackBuffer = static_pointer_cast<D3D12ReadbackBuffer>(to);
 
@@ -245,6 +267,9 @@ namespace Renderer {
 		return _commandList.Get();
 	}
 	auto D3D12GraphicsCommandList::UpdateSubresources(std::shared_ptr<Buffer> dst, std::shared_ptr<UploadBuffer> src, void* data, size_t rowPitch, size_t slicePitch) -> void {
+		std::stringstream str;
+		str << "Calling Update Subresources on CommandList " << this->Name();
+		Logger::Info(str.str());
 		D3D12_SUBRESOURCE_DATA subData = {};
 		subData.pData = data;
 		subData.RowPitch = rowPitch;
@@ -254,6 +279,9 @@ namespace Renderer {
 	}
 
 	auto D3D12GraphicsCommandList::UpdateSubresources(std::shared_ptr<TextureBuffer> dst, std::shared_ptr<UploadBuffer> src, void* data, size_t rowPitch, size_t slicePitch) -> void {
+		std::stringstream str;
+		str << "Calling Update Subresources on CommandList " << this->Name();
+		Logger::Info(str.str());
 		D3D12_SUBRESOURCE_DATA subData = {};
 		subData.pData = data;
 		subData.RowPitch = rowPitch;
@@ -263,6 +291,9 @@ namespace Renderer {
 	}
 
 	auto D3D12GraphicsCommandList::Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<RenderTarget> from, std::shared_ptr<TextureBuffer> to) -> void {
+		std::stringstream str;
+		str << "Calling Copy on CommandList " << this->Name();
+		Logger::Info(str.str());
 		auto d3dTexBuff = static_pointer_cast<D3D12TextureBuffer>(to);
 		auto d3d3Ren = static_pointer_cast<D3D12RenderTarget>(from);
 		D3D12_BOX sourceRegion;
@@ -285,6 +316,9 @@ namespace Renderer {
 	}
 
 	auto D3D12GraphicsCommandList::Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<TextureBuffer> from, std::shared_ptr<TextureBuffer> to) -> void {
+		std::stringstream str;
+		str << "Calling Copy on CommandList " << this->Name();
+		Logger::Info(str.str());
 		auto d3dTexBuff = static_pointer_cast<D3D12TextureBuffer>(to);
 		auto d3d3Ren = static_pointer_cast<D3D12TextureBuffer>(from);
 		D3D12_BOX sourceRegion;

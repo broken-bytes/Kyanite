@@ -21,6 +21,7 @@ set(HEADERS
     include/Rendering/DirectionalLight.hxx
     include/Rendering/Fence.hxx
     include/Rendering/Frame.hxx
+    include/Rendering/GPUResource.hxx
     include/Rendering/GraphicsCommandList.hxx
     include/Rendering/GraphicsPipelineState.hxx
     include/Rendering/GraphicsRootSignature.hxx
@@ -53,6 +54,7 @@ set(SRC
 if(WIN32)
 list(APPEND HEADERS
     internal/d3d12/D3D12Allocator.hxx
+    internal/d3d12/D3D12Renderer.hxx
     internal/d3d12/D3D12Adapter.hxx
     internal/d3d12/D3D12Buffer.hxx
     internal/d3d12/D3D12CommandQueue.hxx
@@ -66,6 +68,7 @@ list(APPEND HEADERS
     internal/d3d12/D3D12Heap.hxx
     internal/d3d12/D3D12IndexBuffer.hxx
     internal/d3d12/D3D12RenderTarget.hxx
+    internal/d3d12/D3D12Object.hxx
     internal/d3d12/D3D12Resource.hxx
     internal/d3d12/D3D12Shader.hxx
     internal/d3d12/D3D12ShaderBinding.hxx
@@ -125,7 +128,9 @@ target_include_directories(
 
 
 target_include_directories(Rendering PUBLIC glm::glm)
-
+target_include_directories(Rendering PRIVATE
+  ${CMAKE_SOURCE_DIR}/Kyanite/Core/include
+)
 target_include_directories(Rendering PUBLIC include/Rendering)
 target_include_directories(Rendering PUBLIC internal)
 

@@ -45,8 +45,8 @@ namespace Renderer {
 			uint32_t height
 		) ->
 			std::shared_ptr<SwapChain>;
-		[[nodiscard]] virtual auto CreateCommandAllocator(CommandType type) -> std::shared_ptr<Allocator>;
-        [[nodiscard]] virtual auto CreateCommandQueue(CommandType type) -> std::shared_ptr<CommandQueue>;
+		[[nodiscard]] virtual auto CreateCommandAllocator(CommandType type, std::string name) -> std::shared_ptr<Allocator>;
+        [[nodiscard]] virtual auto CreateCommandQueue(CommandType, std::string name) -> std::shared_ptr<CommandQueue>;
 		[[nodiscard]] virtual auto CreateCommandList(
 			CommandType type,
 			std::shared_ptr<Allocator> allocator,

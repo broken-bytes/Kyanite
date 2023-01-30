@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 #include "ReadbackBuffer.hxx"
 #include "glm/glm.hpp"
 #include <vector>
@@ -39,8 +40,9 @@ namespace Renderer {
         public:
 		friend class Device;
 
-		GraphicsCommandList(CommandType type) {
+		GraphicsCommandList(CommandType type, std::string name) {
 			_type = type;
+			_name = name;
 		}
 
 		auto Type() const -> CommandType {
@@ -100,8 +102,13 @@ namespace Renderer {
 		virtual auto Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<TextureBuffer> from, std::shared_ptr<TextureBuffer> to) -> void = 0;
 		virtual auto Copy(uint32_t startX, uint32_t startY, uint32_t width, uint32_t height, std::shared_ptr<RenderTarget> from, std::shared_ptr<TextureBuffer> to) -> void = 0;
 
+	protected:
+		auto Name() -> std::string {
+			return _name;
+		}
 #pragma endregion
         private:
 		CommandType _type;
+		std::string _name;
     };
 }

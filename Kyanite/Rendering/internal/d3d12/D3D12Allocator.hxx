@@ -10,7 +10,7 @@ namespace Renderer {
 	public:
 		friend class Device;
 
-		D3D12Allocator(CommandType type, Microsoft::WRL::ComPtr<ID3D12CommandAllocator> allocator);
+		D3D12Allocator(CommandType type, Microsoft::WRL::ComPtr<ID3D12CommandAllocator> allocator, std::string name);
 
 		virtual auto Reset() -> void;
 		auto Native()->ID3D12CommandAllocator*;

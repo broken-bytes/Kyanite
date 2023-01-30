@@ -127,6 +127,7 @@ namespace Renderer {
 
 		// Uploading
 		std::shared_ptr<GraphicsCommandList> _uploadCommandList;
+		std::shared_ptr<CommandQueue> _uploadQueue;
 		std::shared_ptr<Allocator> _uploadAllocator;
 		std::shared_ptr<Fence> _uploadFence;
 		std::uint64_t _uploadFenceValue;
@@ -190,9 +191,7 @@ namespace Renderer {
 		auto CreateAssets() -> void;
 		auto CreateUI(void* context) -> void;
 		auto FillCommandList() -> void;
-		auto MoveToNextFrame() -> void;
 		auto GenerateMipMaps() -> void;
-		auto WaitForGPU(std::shared_ptr<CommandQueue> queue) -> void;
 		auto FlushGPU() -> void;
     };
 }

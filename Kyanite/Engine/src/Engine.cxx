@@ -1,5 +1,5 @@
 #include "Engine.hxx"
-#include "Core/AssetLoader.hxx"
+#include "AssetLoader.hxx"
 #include "Mesh.hxx"
 #include "Rendering/Interface.hxx"
 #include "Rendering/Vertex.hxx"
@@ -34,6 +34,7 @@
 #include <SDL2/SDL_syswm.h>
 
 #include "Physics/PhysicsHandler.hxx"
+#include "Core/Logger.hxx"
 
 struct EngineInstance {
 	std::unique_ptr<Renderer::Interface> Renderer;
@@ -152,6 +153,7 @@ void SetupImGui() {
 
 #pragma region ENGINE_API
 void Engine_Init(uint32_t resolutionX, uint32_t resolutionY, void* window) {
+	Logger::Init();
 	SetupImGui();
 	Instance.Renderer = std::make_unique<Renderer::Interface>(
 		resolutionX, resolutionY, window, Renderer::RenderBackendAPI::DirectX12);

@@ -84,17 +84,20 @@ auto D3D12Device::CreateSwapChain(std::shared_ptr<CommandQueue> queue,
       queue, reinterpret_cast<HWND>(_window), *this, frameCount, width, height);
 }
 
-auto D3D12Device::CreateCommandAllocator(CommandType type)
+auto D3D12Device::CreateCommandAllocator(CommandType type, std::string name)
     -> std::shared_ptr<Allocator> {
   Microsoft::WRL::ComPtr<ID3D12CommandAllocator> alloc;
   _device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE(type),
                                   IID_PPV_ARGS(&alloc));
-  return std::make_shared<D3D12Allocator>(type, alloc);
+  wchar_t* wstr = new wchar_t[name.size() + 1];
+  mbstowcs(wstr, name.c_str(), name.size());
+  alloc->SetName(wstr);
+  return std::make_shared<D3D12Allocator>(type, alloc, name);
 }
 
-auto D3D12Device::CreateCommandQueue(CommandType type)
+auto D3D12Device::CreateCommandQueue(CommandType type, std::string name)
     -> std::shared_ptr<CommandQueue> {
-  return std::make_shared<D3D12CommandQueue>(type, *this);
+  return std::make_shared<D3D12CommandQueue>(type, *this, name);
 }
 
 auto D3D12Device::CreateCommandList(CommandType type,
@@ -116,7 +119,7 @@ auto D3D12Device::CreateCommandList(CommandType type,
     throw std::runtime_error("Commandlist is null");
   }
 
-  return std::make_shared<D3D12GraphicsCommandList>(type, commandList);
+  return std::make_shared<D3D12GraphicsCommandList>(type, commandList, name);
 }
 auto D3D12Device::CreateRenderTargetHeap(size_t count)
     -> std::shared_ptr<Heap> {

@@ -9,7 +9,7 @@
 namespace Renderer {
 	class D3D12CommandQueue : public CommandQueue {
     public:
-        D3D12CommandQueue(CommandType type, D3D12Device& device);
+        D3D12CommandQueue(CommandType type, D3D12Device& device, std::string name);
         virtual auto ExecuteCommandLists(std::vector<std::shared_ptr<GraphicsCommandList>> lists) -> void;
         [[nodiscard]] virtual auto Signal(std::shared_ptr<Fence> fence, uint64_t value)->uint8_t;
         [[nodiscard]] auto Native()->ID3D12CommandQueue*;

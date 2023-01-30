@@ -9,7 +9,8 @@ namespace Renderer {
 	}
 
 	auto D3D12Fence::GetCompletedValue()->std::uint64_t {
-		return _fence->GetCompletedValue();
+		auto val = _fence->GetCompletedValue();
+		return val;
 	}
 
 	auto D3D12Fence::SetOnCompletion(std::uint64_t value, HANDLE event) -> void {
@@ -17,7 +18,7 @@ namespace Renderer {
 	}
 
 	auto D3D12Fence::Wait(std::uint64_t value, HANDLE event) -> void {
-		if (_fence->GetCompletedValue() < value) {
+		if (GetCompletedValue() < value) {
 			_fence->SetEventOnCompletion(value, event);
 			WaitForSingleObjectEx(event, INFINITE, FALSE);
 		}

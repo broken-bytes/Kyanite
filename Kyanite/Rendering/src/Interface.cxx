@@ -56,6 +56,7 @@
 
 #include "d3d12/D3D12Heap.hxx"
 #include <iostream>
+#include <Core/Logger.hxx>
 
 float xPos = 1;
 float yPos = 50;
@@ -145,6 +146,7 @@ namespace Renderer {
 	}
 
 	auto Interface::StartFrame() -> void {
+		Logger::Info("Start Frame");
 #if _WIN32
 
 		ImGui_ImplWin32_NewFrame();
@@ -152,27 +154,17 @@ namespace Renderer {
 #endif
 		ImGui::NewFrame();
 		// Start Projection
-		_uploadFenceValue++;
+		// Execute upload here in case there were uploads between End and Start Frame (e.g. when the App starts and preloads resources)
 		_uploadCommandList->Close();
-		_mainQueue->ExecuteCommandLists({ _uploadCommandList });
+		_uploadQueue->ExecuteCommandLists({ _uploadCommandList });
 
-		auto _ = _mainQueue->Signal(_uploadFence, _uploadFenceValue);
-
+		auto _ = _uploadQueue->Signal(_uploadFence, _uploadFenceValue);
 		_uploadFence->Wait(_uploadFenceValue, _uploadFenceEvent);
+		_uploadFenceValue++;
 
-		_uploadBuffers.clear();
 
-		_computeFenceValue++;
-
-		_computeCommandList->Close();
-		_computeQueue->ExecuteCommandLists({ _computeCommandList });
-
-		_ = _computeQueue->Signal(_computeFence, _computeFenceValue);
-
-		_uploadFence->Wait(_computeFenceValue, _computeFenceEvent);
-
-		auto fenceValue = _frames[_frameIndex]->FenceValue();
-
+		_uploadAllocator->Reset();
+		_uploadCommandList->Reset(_uploadAllocator, nullptr);
 		_frames[_frameIndex]->Allocator()->Reset();
 		_mouseOverAllocator->Reset();
 		_commandList->Reset(_frames[_frameIndex]->Allocator(), nullptr);
@@ -210,6 +202,15 @@ namespace Renderer {
 	}
 
 	auto Interface::MidFrame() -> void {
+		Logger::Info("Mid Frame");
+		_uploadCommandList->Close();
+		_uploadQueue->ExecuteCommandLists({ _uploadCommandList });
+
+		auto _ = _uploadQueue->Signal(_uploadFence, _uploadFenceValue);
+		_uploadFence->Wait(_uploadFenceValue, _uploadFenceEvent);
+		_uploadFenceValue++;
+		_uploadBuffers.clear();
+
 
 		auto sun = SunLight{ sunColor, {xPos, yPos, zPos, 1}, true };
 
@@ -380,12 +381,13 @@ namespace Renderer {
 	}
 
 	auto Interface::EndFrame() -> void {
-		MoveToNextFrame();
+		Logger::Info("End Frame");
+		FlushGPU();
 		_device->Flush();
+
 		_uploadAllocator->Reset();
 		_uploadCommandList->Reset(_uploadAllocator, nullptr);
-		_computeAllocator->Reset();
-		_computeCommandList->Reset(_computeAllocator, nullptr);
+		_frameIndex = _swapChain->CurrentBackBufferIndex();
 	}
 
 	auto Interface::Resize(uint32_t width, uint32_t height) -> void {
@@ -489,9 +491,13 @@ namespace Renderer {
 		}
 
 		size_t vertSize = vertBuffer.size() * sizeof(Vertex);
-		auto vertUpload = _device->CreateUploadBuffer(vertSize, "UploadBuffer");
+		std::stringstream str;
+		str << "Vertex UploadBuffer Mesh " << _meshes.size();
+		auto vertUpload = _device->CreateUploadBuffer(vertSize, str.str());
 		size_t indSize = indBuffer.size() * sizeof(uint32_t);
-		auto indUpload = _device->CreateUploadBuffer(indSize, "UploadBuffer");
+		str.flush();
+		str << "Index UploadBuffer Mesh " << _meshes.size();
+		auto indUpload = _device->CreateUploadBuffer(indSize, str.str());
 
 		_uploadBuffers.push_back(vertUpload);
 		_uploadBuffers.push_back(indUpload);
@@ -499,9 +505,12 @@ namespace Renderer {
 		auto vao = std::make_shared<VertexArrayObject>(
 			_resourceCounter, _device->CreateVertexBuffer(vertBuffer, "VertexBuffer"),
 			_device->CreateIndexBuffer(indBuffer, "IndexBuffer"));
+		Logger::Info("Uploading mesh");
 		_uploadCommandList->UpdateSubresources(vao->VertexBuffer, vertUpload,
 			vertices,
 			vertBuffer.size() * sizeof(Vertex), 1);
+		Logger::Info("Uploaded mesh");
+
 		_uploadCommandList->Transition(static_pointer_cast<Buffer>(vao->VertexBuffer),
 			ResourceState::COPY_DEST,
 			ResourceState::VERTEX_CONST_BUFFER);
@@ -807,13 +816,16 @@ namespace Renderer {
 
 	auto Interface::CreatePipeline() -> void {
 		_resourceCounter = 0;
-		_mainQueue = _device->CreateCommandQueue(DIRECT);
+		_uploadFenceValue = 0;
+		_computeFenceValue = 0;
+		_mainQueue = _device->CreateCommandQueue(DIRECT, "Main Queue");
+		_uploadQueue = _device->CreateCommandQueue(DIRECT, "Upload Queue");
 		//_copyQueue = _device->CreateCommandQueue(COPY);
 		//_copyAllocator = _device->CreateCommandAllocator(COPY);
 		//_copyCommandList = _device->CreateCommandList(COPY, _copyAllocator, "Copy List");
-		_computeQueue = _device->CreateCommandQueue(COMPUTE);
-		_computeAllocator = _device->CreateCommandAllocator(COMPUTE);
-		_mouseOverAllocator = _device->CreateCommandAllocator(DIRECT);
+		_computeQueue = _device->CreateCommandQueue(COMPUTE, "Compute Queue");
+		_computeAllocator = _device->CreateCommandAllocator(COMPUTE, "Compute");
+		_mouseOverAllocator = _device->CreateCommandAllocator(DIRECT, "Mouse Over");
 		_computeCommandList =
 			_device->CreateCommandList(COMPUTE, _computeAllocator, "Compute List");
 
@@ -842,7 +854,7 @@ namespace Renderer {
 			auto rt = _swapChain->GetBuffer(x);
 			auto rtHandle = _rtvHeap->CpuHandleFor(x);
 			_device->CreateRenderTargetView(rtHandle, rt);
-			auto alloc = _device->CreateCommandAllocator(DIRECT);
+			auto alloc = _device->CreateCommandAllocator(DIRECT, "Main");
 			_frames[x] = _device->CreateFrame(alloc, rt);
 		}
 
@@ -855,11 +867,10 @@ namespace Renderer {
 					 0.0f,
 					 1.0f };
 
-		_fence = _device->CreateFence(_frames[0]->FenceValue());
 		_uploadFence = _device->CreateFence(_uploadFenceValue);
 
-		_imguiAllocator = _device->CreateCommandAllocator(DIRECT);
-		_uploadAllocator = _device->CreateCommandAllocator(DIRECT);
+		_imguiAllocator = _device->CreateCommandAllocator(DIRECT, "Imgui");
+		_uploadAllocator = _device->CreateCommandAllocator(DIRECT, "Upload");
 		_commandList = _device->CreateCommandList(
 			DIRECT, _frames[_frameIndex]->Allocator(), "Main CommandList");
 		_imguiCommandList = _device->CreateCommandList(
@@ -911,24 +922,17 @@ namespace Renderer {
 		_textures.push_back(backBufferTex);
 		_textures.push_back(frontBufferTex);
 
+_fence = _device->CreateFence(_frames[0]->FenceValue());
 
-		//_copyCommandList->Close();
-		_commandList->Close();
-		_mouseOverCommandList->Close();
-		_uploadCommandList->Close();
-		_imguiCommandList->Close();
-		auto commandLists = { _mouseOverCommandList, _commandList };
-		_mainQueue->ExecuteCommandLists(commandLists);
-
-		_frames[_frameIndex]->IncrementFenceValue();
-
-		// Create an event handle to use for frame synchronization.
+#if _WIN32
 		_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-		if (_fenceEvent == nullptr) {
+		if (_computeFenceEvent == nullptr) {
 			HRESULT_FROM_WIN32(GetLastError());
 		}
+#endif
 
-		_uploadFenceValue = 0;
+
+
 		_uploadFence = _device->CreateFence(_uploadFenceValue);
 #if _WIN32
 		_uploadFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -937,13 +941,6 @@ namespace Renderer {
 		}
 #endif
 
-		//_copyAllocator->Reset();
-		//_copyCommandList->Reset(_copyAllocator, nullptr);
-		_uploadAllocator->Reset();
-		_uploadCommandList->Reset(_uploadAllocator, nullptr);
-
-		_computeFenceValue = 0;
-		_computeFence = _device->CreateFence(_computeFenceValue);
 #if _WIN32
 		_computeFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 		if (_computeFenceEvent == nullptr) {
@@ -951,12 +948,31 @@ namespace Renderer {
 		}
 #endif
 
+		//_copyCommandList->Close();
+		_commandList->Close();
+		_mouseOverCommandList->Close();
+		_uploadCommandList->Close();
+		_imguiCommandList->Close();
+		auto commandLists = { _mouseOverCommandList, _commandList};
+		_mainQueue->ExecuteCommandLists(commandLists);
+		_uploadQueue->ExecuteCommandLists({ _uploadCommandList });
+
+
+		_mainQueue->Signal(_fence, _frames[_frameIndex]->FenceValue());
+		_uploadQueue->Signal(_uploadFence, _uploadFenceValue);
+		_fence->Wait(_frames[_frameIndex]->FenceValue(), _fenceEvent);
+		_uploadFence->Wait(_uploadFenceValue, _uploadFenceEvent);
+		_uploadFenceValue++;
+
+		_computeFenceValue = 0;
+		_computeFence = _device->CreateFence(_computeFenceValue);
+
 		_computeCommandList->Close();
 		_computeAllocator->Reset();
 		_computeCommandList->Reset(_computeAllocator, nullptr);
 
 		for (uint32_t x = 0; x < FRAME_COUNT; x++) {
-			_cbAllocator[x] = _device->CreateCommandAllocator(DIRECT);
+			_cbAllocator[x] = _device->CreateCommandAllocator(DIRECT, "CB");
 			_lightDataBuffer[x] =
 				_device->CreateUploadBuffer((sizeof(LightBuffer) + 255) & ~255, "Light Buffer");
 			_cbAllocator[x]->Reset();
@@ -974,8 +990,9 @@ namespace Renderer {
 			"Constant Buffer CommandList");
 		_cbCommandList->Close();
 
-		WaitForGPU(_mainQueue);
-		WaitForGPU(_computeQueue);
+		_uploadAllocator->Reset();
+		_uploadCommandList->Reset(_uploadAllocator, nullptr);
+
 		// WaitForGPU(_copyQueue);
 
 #if _WIN32
@@ -1000,45 +1017,20 @@ namespace Renderer {
 
 	auto Interface::FillCommandList() -> void {}
 
-	auto Interface::MoveToNextFrame() -> void {
-		const uint64_t currentFenceValue = _frames[_frameIndex]->FenceValue();
-		_mainQueue->Signal(_fence, currentFenceValue);
-
-		//_copyQueue->Signal(_fence, currentFenceValue);
-
-		// Update the frame index.
-		_frameIndex = _swapChain->CurrentBackBufferIndex();
-
-		auto target = _frames[_frameIndex]->FenceValue();
-		// If the next frame is not ready to be rendered yet, wait until it is ready.
-		_fence->Wait(_frames[_frameIndex]->FenceValue(), _fenceEvent);
-
-		// Set the fence value for the next frame.
-		_frames[_frameIndex]->IncrementFenceValue();
-	}
-
 	auto Interface::GenerateMipMaps() -> void {}
 
-	auto Interface::WaitForGPU(std::shared_ptr<CommandQueue> queue) -> void {
-		queue->Signal(_fence, _frames[_frameIndex]->FenceValue());
-
-		// Wait until the fence has been processed.
-		_fence->SetOnCompletion(_frames[_frameIndex]->FenceValue(), _fenceEvent);
-		_fence->Wait(_frames[_frameIndex]->FenceValue(), _fenceEvent);
-		// Increment the fence value for the current frame.
-		auto _ = _frames[_frameIndex]->IncrementFenceValue();
-	}
 
 	auto Interface::FlushGPU() -> void {
 		for (int x = 0; x < FRAME_COUNT; x++)
 		{
 			_mainQueue->Signal(_fence, _frames[x]->FenceValue());
-			// Wait until the fence has been processed.
-			_fence->SetOnCompletion(_frames[x]->FenceValue(), _fenceEvent);
 			_fence->Wait(_frames[x]->FenceValue(), _fenceEvent);
-			// Increment the fence value for the current frame.
 			auto _ = _frames[x]->IncrementFenceValue();
 		}
+
+		_uploadQueue->Signal(_uploadFence, _uploadFenceValue);
+		_uploadFence->Wait(_uploadFenceValue, _uploadFenceEvent);
+		_uploadFenceValue++;
 	}
 
 } // namespace Renderer
