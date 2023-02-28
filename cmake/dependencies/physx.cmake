@@ -1,0 +1,30 @@
+SET(
+    PhysXIncDir
+    ${CMAKE_SOURCE_DIR}/vendor/PhysX/include
+)
+
+if(DEBUG)
+    if(WIN32)
+        SET(
+            PhysXBinDir
+            ${CMAKE_SOURCE_DIR}/vendor/PhysX/bin/win64/debug
+        )
+        SET(
+            PhysXLibDir
+            ${CMAKE_SOURCE_DIR}/vendor/PhysX/lib/win64/debug
+        )
+    endif()
+endif()
+
+if(RELEASE)
+    if(WIN32)
+        SET(
+            PhysXBinDir
+            ${CMAKE_SOURCE_DIR}/vendor/PhysX/bin/win64/release
+        )
+        SET(
+            PhysXLibDir
+            ${CMAKE_SOURCE_DIR}/vendor/PhysX/lib/win64/release
+        )
+    endif()
+endif()

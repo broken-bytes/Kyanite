@@ -1,0 +1,30 @@
+SET(
+    RmlUiIncDir
+    ${CMAKE_SOURCE_DIR}/vendor/RmlUi/include
+)
+
+if(DEBUG)
+    if(WIN32)
+        SET(
+            RmlUiBinDir
+            ${CMAKE_SOURCE_DIR}/vendor/RmlUi/bin/win64/debug
+        )
+        SET(
+            RmlUiLibDir
+            ${CMAKE_SOURCE_DIR}/vendor/RmlUi/lib/win64/debug
+        )
+    endif()
+endif()
+
+if(RELEASE)
+    if(WIN32)
+        SET(
+            RmlUiBinDir
+            ${CMAKE_SOURCE_DIR}/vendor/RmlUi/bin/win64/release
+        )
+        SET(
+            RmlUiLibDir
+            ${CMAKE_SOURCE_DIR}/vendor/RmlUi/lib/win64/release
+        )
+    endif()
+endif()
