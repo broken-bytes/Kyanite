@@ -1,0 +1,5 @@
+module Rendering {
+    header "Rendering.hxx"
+    requires cplusplus
+    link "Rendering"
+}

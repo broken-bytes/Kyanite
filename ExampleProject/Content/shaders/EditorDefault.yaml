@@ -1,6 +1,0 @@
-name: EditorDefault
-path: shaders/EditorDefault.hlsl
-lighting: unlit
-format: rgba_float
-buffer:
-constants:

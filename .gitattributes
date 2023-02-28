@@ -1,3 +1,5 @@
 *.h linguist-detectable=false
 *.c linguist-detectable=false
-external/* linguist-vendored
+vendor/* linguist-vendored
+*.dll filter=lfs diff=lfs merge=lfs -text
+*.lib filter=lfs diff=lfs merge=lfs -text
