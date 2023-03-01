@@ -36,8 +36,6 @@ if(WIN32)
     )
 endif()
 
-target_link_libraries(Rendering PUBLIC SDL2::SDL2main SDL2::SDL2-static)
-
 set(
     SWIFT_SRC
     Sources/Renderer.swift

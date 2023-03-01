@@ -4,9 +4,10 @@
 #include "Frame.hxx"
 #include "RenderLayer.hxx"
 #include "DrawCall.hxx"
-#include "d3d12/D3D12Device.hxx"
 
-#include <SDL.h>
+#ifdef _WIN32
+#include "d3d12/D3D12Device.hxx"
+#endif
 
 #include <array>
 #include <iostream>
@@ -28,8 +29,9 @@ namespace Rendering {
                 case RenderBackendType::D3D12:
                 #ifndef _WIN32
                 throw std::runtime_error("Direct3D12 unailable");
-                #endif
+                #else
                 GPU = D3D12Device::MakeD3D12Device(window);
+                #endif
                 break;
                 case RenderBackendType::OpenGL:
                 case RenderBackendType::Vulkan:

@@ -1,11 +1,10 @@
 SET(
     SRC
-    src/WindowManager.cxx
+    src/Core.cxx
 )
 
 add_library(Core STATIC ${SRC})
 
-target_link_libraries(Core PRIVATE SDL2::SDL2-static)
 target_include_directories(Core PUBLIC include)
 target_include_directories(Core PUBLIC ${CMAKE_SOURCE_DIR}/GameKit/Modules/Core/include)
 target_include_directories(Core PUBLIC ${CMAKE_SOURCE_DIR}/GameKit/Modules/Core/include/Core)

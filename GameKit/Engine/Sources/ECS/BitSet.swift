@@ -26,22 +26,23 @@ public extension ECS {
             let byteIndex = UInt16(floor(Float(index) / Float(BitSet.elementSize)))
             let bitIndex: UInt16 = index - UInt16(BitSet.byteSize) * byteIndex
             
-            return (memory.advanced(by: Int(byteIndex)).pointee & UInt8(pow(Float(2), Float(bitIndex)))) > 0
+            
+            return (memory.advanced(by: Int(byteIndex)).pointee & UInt8(Math.pow(base: 2, raised: bitIndex))) > 0
         }
 
         public func setBit(at index: UInt16) -> Void {
             let overflow = floor(Float(index) / Float(BitSet.elementSize))
-            let byteIndex = UInt32(overflow)
-            let bitIndex: UInt32 = UInt32(index) - UInt32(BitSet.byteSize) * byteIndex
+            let byteIndex = UInt16(overflow)
+            let bitIndex: UInt16 = UInt16(index) - UInt16(BitSet.byteSize) * byteIndex
 
-            memory.advanced(by: Int(byteIndex)).pointee |= UInt8(pow(Float(2), Float(bitIndex)))
+            memory.advanced(by: Int(byteIndex)).pointee |= UInt8(Math.pow(base: 2, raised: bitIndex))
         }
 
         public func unsetBit(at index: UInt16) -> Void {
             let byteIndex = UInt16(floor(Float(index) / Float(BitSet.elementSize)))
             let bitIndex: UInt16 = index - UInt16(BitSet.byteSize) * byteIndex
 
-            memory.advanced(by: Int(byteIndex)).pointee &= ~UInt8(pow(Float(2), Float(bitIndex)))
+            memory.advanced(by: Int(byteIndex)).pointee &= ~UInt8(Math.pow(base: 2, raised: bitIndex))
         }
 
         public func hasAtLeast(other: BitSet) -> Bool {

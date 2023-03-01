@@ -17,18 +17,22 @@ extension ECS {
         // Currently deleted entity ids. We use this so we do not have to move entities when a delete before end happens.
         internal var freeIds: [Int] = []
         // The index to Type mapping
-        internal let componentOrder: [UInt8:Any.Type]
+        internal let componentOrder: [Any.Type]
 
         internal init(_ archetype: Archetype) {
             self.archetype = archetype
             memory = UnsafeMutableRawPointer.allocate(byteCount: archetype.size, alignment: MemoryLayout<UInt8>.alignment)
-            var order: [UInt8:Any.Type] = [:]
+            var order: [Any.Type] = []
 
             var index: UInt8 = 0
             for x: UInt16 in 0..<archetype.bitMask.count {
                 if archetype.bitMask.checkBit(at: x) {
-                    order[index] = ComponentIdMapping.shared.mappings[UInt16(pow(2, Float(x)))]
-                    index += 1
+                    if let compid = ComponentIdMapping.shared.mappings[UInt16(Math.pow(base: 2, raised: x))] {
+                        order.append(compid)
+                        index += 1
+                    } else {
+                        print(x)
+                    }
                 }
             }
             
@@ -83,11 +87,11 @@ extension ECS {
 
         internal func component<T>(of type: T.Type, at index: Int) -> UnsafeMutablePointer<T> {
             var offset = 0
-            let componentIndex = componentOrder.first(where: { $0.value == T.self })!.key
-
+            let componentIndex = componentOrder.firstIndex(where: { $0 == T.self })!
+            
             if componentIndex != 0 {
                 for x in 0..<componentIndex {
-                    offset += archetype.sizes[Int(x)]
+                    offset += archetype.sizes[x]
                 }
             }
 

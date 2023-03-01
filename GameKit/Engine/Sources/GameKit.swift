@@ -1,8 +1,5 @@
-@_implementationOnly import Core
 @_implementationOnly import Rendering
 import Foundation
-
-private var mainWindow: Window!
 
 private class MainThread: Thread {
     var running: Bool = true
@@ -48,7 +45,15 @@ private class MainThread: Thread {
         print("Health: \(world.registerComponent(Health.self))")
 
         for x in 0..<100000 {
-            world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Move(movement: 1), Rotate(rotation: Float.random(in: -10...10)))
+            var hasMoveOrRot = Int.random(in: 0..<10)
+            if hasMoveOrRot == 5 {
+                world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Move(movement: 1))
+            } else if hasMoveOrRot == 2 {
+                world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Rotate(rotation: Float.random(in: -10...10)))
+            } else {
+                world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4))
+
+            }
         }
 
 
@@ -86,23 +91,9 @@ public final class GameKit {
         mainThread = MainThread()
         mainThread.start()
 
-        WindowManager.initialise()
-        mainWindow = "MainWindow".withCString {
-            return WindowManager.createWindow(
-                description: WindowManager.WindowCreationDesc(
-                    name: $0, 
-                    width: 800, 
-                    height: 600, 
-                    resizable: false, 
-                    fullscreen: false
-                )
-            )
-        }
-
-        Rendering.Renderer.initialise(window: mainWindow, backend: .D3D12, width: 800, height: 600)
+        //Rendering.Renderer.initialise(window: mainWindow, backend: .D3D12, width: 800, height: 600)
 
         while true {
-            WindowManager.handleWindowEvents()
         }
     }
 }

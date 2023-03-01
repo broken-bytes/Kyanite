@@ -1,0 +1,7 @@
+add_executable(DevApp DevApp.swift EngineBridge.swift)
+target_link_libraries(DevApp PRIVATE GameKit_Test_Static)
+if(APPLE)
+target_compile_options(DevApp PRIVATE -Xfrontend -enable-experimental-cxx-interop)
+else()
+target_compile_options(DevApp PRIVATE -enable-experimental-cxx-interop)
+endif()

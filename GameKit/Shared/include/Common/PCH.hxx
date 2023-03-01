@@ -5,7 +5,11 @@
 #include <stdlib.h>
 #else
 #include <cstdint>
+#ifdef _WIN32
 #include <malloc.h>
+#else
+#include <stdlib.h>
+#endif
 #endif
 
 struct SDL_Window;
