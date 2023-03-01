@@ -87,7 +87,14 @@ extension ECS {
 
         internal func component<T>(of type: T.Type, at index: Int) -> UnsafeMutablePointer<T> {
             var offset = 0
-            let componentIndex = componentOrder.firstIndex(where: { $0 == T.self })!
+            var componentIndex = 0
+            
+            for x in 0..<componentOrder.count {
+                if componentOrder[x] == T.self {
+                    componentIndex = x
+                    break
+                }
+            }
             
             if componentIndex != 0 {
                 for x in 0..<componentIndex {
@@ -96,6 +103,31 @@ extension ECS {
             }
 
             return memory.advanced(by: (archetype.size * index) + offset).assumingMemoryBound(to: T.self)
+        }
+        
+        internal func offsetFor<T>(_ type: T.Type) -> Int {
+            var offset = 0
+            var componentIndex = 0
+            
+            for x in 0..<componentOrder.count {
+                if componentOrder[x] == T.self {
+                    componentIndex = x
+                    break
+                }
+            }
+            
+            if componentIndex != 0 {
+                for x in 0..<componentIndex {
+                    offset += archetype.sizes[x]
+                }
+            }
+            
+            return offset
+        }
+        
+        /// Returns the size of a single entity for this archetype
+        internal func sizeOf() -> Int {
+            archetype.sizes.reduce(0, +)
         }
 
         private func resize() {

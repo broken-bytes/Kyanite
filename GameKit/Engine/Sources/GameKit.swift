@@ -45,15 +45,7 @@ private class MainThread: Thread {
         print("Health: \(world.registerComponent(Health.self))")
 
         for x in 0..<100000 {
-            var hasMoveOrRot = Int.random(in: 0..<10)
-            if hasMoveOrRot == 5 {
-                world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Move(movement: 1))
-            } else if hasMoveOrRot == 2 {
-                world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Rotate(rotation: Float.random(in: -10...10)))
-            } else {
-                world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4))
-
-            }
+            world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Move(movement: 1), Rotate(rotation: 0))
         }
 
 
