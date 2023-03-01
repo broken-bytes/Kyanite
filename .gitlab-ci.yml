@@ -7,3 +7,5 @@ build-macOS:       # This job runs in the build stage, which runs first.
     - cmake -GXcode -B ./build -S ./
     - cd ./build
     - xcodebuild
+  tags:
+    - macos
