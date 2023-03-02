@@ -53,7 +53,7 @@ public extension ECS {
             return entity
         }
 
-        public mutating func createSystem(named: String, _ archetype: Any.Type..., pipeline: Pipeline, system: @escaping SystemIterFunc) throws -> Void {
+        public mutating func createSystem(named: String, _ archetype: Any.Type..., pipeline: Pipeline, multithreaded: Bool = false, system: @escaping SystemIterFunc) throws -> Void {
             let id = nextId()
             var mask = BitSet(length: numComponents)
             for comp in archetype {
@@ -72,12 +72,21 @@ public extension ECS {
 
                 mask.setBit(at: UInt16(bitIndex))
             }
-            pipeline.systems.append(System(id: id, name: named, archetype: mask, multithreaded: false, function: system))
+            pipeline.systems.append(System(id: id, name: named, archetype: mask, multithreaded: multithreaded, function: system))
         }
 
         public func tick() {
             for pipeline in pipelines {
-                pipeline.tick()
+                print("|>- Pipeline \(pipeline.name)")
+                let delta = pipeline.tick()
+                if delta > .milliseconds(8.3) {
+                    print("|>- 🔴 Total \(delta)")
+                } else if delta > .milliseconds(16.6) {
+                    print("|>- 🟠 Total \(delta)")
+                } else {
+                    print("|>- 🟢 Total \(delta)")
+                }
+                print("|")
             }
         }
     }

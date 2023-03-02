@@ -17,7 +17,7 @@ internal extension ECS {
 
         func addMapping<T>(for type: T.Type, index: UInt16) {
             mappings[index] = type
-            sizes[index] = MemoryLayout<T>.stride
+            sizes[index] = MemoryLayout<T>.size
         }
     }
 }

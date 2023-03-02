@@ -18,9 +18,10 @@ extension ECS {
         internal var freeIds: [Int] = []
         // The index to Type mapping
         internal let componentOrder: [Any.Type]
+        // The offsets for each component
+        internal let componentOffsets: [Int]
 
         internal init(_ archetype: Archetype) {
-            self.archetype = archetype
             memory = UnsafeMutableRawPointer.allocate(byteCount: archetype.size, alignment: MemoryLayout<UInt8>.alignment)
             var order: [Any.Type] = []
 
@@ -36,7 +37,26 @@ extension ECS {
                 }
             }
             
+            var offsets: [Int] = []
+            
+            var targetComponent = 0
+            var offset = 0
+    
+            for x in 0..<order.count {
+                if targetComponent != 0 {
+                    for y in 0..<x {
+                        offset += archetype.sizes[y]
+                    }
+                }
+                
+                offsets.append(offset)
+                targetComponent += 1
+                offset = 0
+            }
+            
+            self.archetype = archetype
             self.componentOrder = order
+            self.componentOffsets = offsets
         }
 
         internal func add(components: [Any]) -> Int {
@@ -85,8 +105,8 @@ extension ECS {
             freeIds.append(entity)
         }
 
+        @inlinable
         internal func component<T>(of type: T.Type, at index: Int) -> UnsafeMutablePointer<T> {
-            var offset = 0
             var componentIndex = 0
             
             for x in 0..<componentOrder.count {
@@ -96,11 +116,8 @@ extension ECS {
                 }
             }
             
-            if componentIndex != 0 {
-                for x in 0..<componentIndex {
-                    offset += archetype.sizes[x]
-                }
-            }
+            let offset = componentOffsets[componentIndex]
+
 
             return memory.advanced(by: (archetype.size * index) + offset).assumingMemoryBound(to: T.self)
         }

@@ -1,0 +1,5 @@
+module HardwareInfo {
+    header "HardwareInfo.hxx"
+    requires cplusplus
+    link "HardwareInfo"
+}

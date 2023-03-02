@@ -23,16 +23,51 @@ public extension ECS {
         }
 
         // Ticks the pipeline(Advances it) and returns the time it took for the pipeline to run in ms.
-        internal func tick() -> UInt64 {
+        internal func tick() -> Duration {
             let tick = ContinuousClock().measure {
                 for system in systems {
-                    system.function(SystemIterator(for: system.archetype))
+                    let delta = ContinuousClock().measure {
+                        var pools: [ArchetypePool] = []
+                        for arch in archetypes {
+                            if arch.bitMask.hasAtLeast(other: system.archetype) {
+                                pools.append(archetypePools[arch.bitMask]!)
+                            }
+                        }
+                        
+                        let count = pools.reduce(0, { $0 + $1.size})
+                        
+                        if system.multithreaded {
+                            let group = DispatchGroup()
+                            
+                            let cores = SystemInfo.numCores()
+                            // Use Cores - 2 Number of workers, or 4 fixed cores if only 4 cores are present
+                            let workers =  cores > 4 ? cores - 2 : cores
+                            
+                            for x in 0..<workers {
+                                group.enter()
+                                var individualCount = Int(floor(Float(count) / Float(workers)))
+                                // The last worker might need to work on one more element if count mod workers is not 0.
+                                if x == workers - 1 &&  count % Int(workers) != 0 {
+                                    individualCount += count - (individualCount * Int(workers))
+                                }
+                                system.function(SystemIterator(for: system.archetype, count: individualCount))
+                                group.leave()
+                            }
+                        } else {
+                            system.function(SystemIterator(for: system.archetype, count: count))
+                        }
+                    }
+                    if delta > .milliseconds(1) {
+                        print("||>- 🔴 System \(system.name) took \(delta)")
+                    } else if delta > .milliseconds(0.5) {
+                        print("||>- 🟠 System \(system.name) took \(delta)")
+                    } else {
+                        print("||>- 🟢 System \(system.name) took \(delta)")
+                    }
                 }
             }
 
-            print("Pipeline tick: \(tick)")
-
-            return 0
+            return tick
         }
     }
 }

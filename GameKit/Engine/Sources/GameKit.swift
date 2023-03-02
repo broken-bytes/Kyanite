@@ -44,30 +44,57 @@ private class MainThread: Thread {
         print("Enemy: \(world.registerComponent(Enemy.self))")
         print("Health: \(world.registerComponent(Health.self))")
 
-        for x in 0..<100000 {
-            world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Move(movement: 1), Rotate(rotation: 0))
+        for x in 0..<5000 {
+            if x % 2 == 0 {
+                world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Move(movement: 1), Rotate(rotation: 0))
+            } else if x % 4 == 0 {
+                world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Move(movement: 1))
+            } else {
+                world.createEntity(named: "Test", Move(movement: 1), Transform(q: 1, w: 3, x: 2, y: 5, z: 4))
+            }
         }
 
 
-        try! world.createSystem(named: "Rotator", Transform.self, Move.self, Rotate.self, pipeline: ECS.Pipeline.onUpdate) { iter in 
-            var transforms = iter.dataFor(Transform.self)
-            var rotations = iter.dataFor(Rotate.self)
-
-
+        try! world.createSystem(named: "Rotator", Transform.self, Rotate.self, pipeline: ECS.Pipeline.onUpdate, multithreaded: true) { iter in
             for x in 0..<iter.count {
-                transforms[x].pointee.x += rotations[x].pointee.rotation
+                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Rotate.self, at: x).pointee.rotation
             }
-
+        }
+        
+        try! world.createSystem(named: "Rotator2", Transform.self, Rotate.self, pipeline: ECS.Pipeline.onUpdate) { iter in
+            for x in 0..<iter.count {
+                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Rotate.self, at: x).pointee.rotation
+            }
         }
 
-        try! world.createSystem(named: "Mover", Transform.self, Move.self, Move.self, pipeline: ECS.Pipeline.onUpdate) { iter in 
-            var transforms = iter.dataFor(Transform.self)
-            var movements = iter.dataFor(Move.self)
-
+        try! world.createSystem(named: "Mover", Transform.self, Move.self, pipeline: ECS.Pipeline.onUpdate) { iter in
             for x in 0..<iter.count {
-                transforms[x].pointee.x += movements[x].pointee.movement
+                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
             }
-
+        }
+        
+        try! world.createSystem(named: "Mover2", Transform.self, Move.self, pipeline: ECS.Pipeline.onUpdate, multithreaded: true) { iter in
+            for x in 0..<iter.count {
+                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
+            }
+        }
+        
+        try! world.createSystem(named: "Move3", Transform.self, Move.self, pipeline: ECS.Pipeline.onUpdate) { iter in
+            for x in 0..<iter.count {
+                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
+            }
+        }
+        
+        try! world.createSystem(named: "Mover4", Transform.self, Move.self, pipeline: ECS.Pipeline.onUpdate) { iter in
+            for x in 0..<iter.count {
+                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
+            }
+        }
+        
+        try! world.createSystem(named: "MoveRotator", Transform.self, Move.self, Rotate.self, pipeline: ECS.Pipeline.onUpdate) { iter in
+            for x in 0..<iter.count {
+                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
+            }
         }
 
         while running {
