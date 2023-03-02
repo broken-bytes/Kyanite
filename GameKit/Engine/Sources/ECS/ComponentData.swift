@@ -1,7 +1,7 @@
 import Foundation
 
 public extension ECS {
-
+        
     struct ComponentData<A>: Sequence, IteratorProtocol {
         
         internal struct ComponentDataPoolInfo {

@@ -20,7 +20,7 @@ extension ECS {
         // The index of this entity inside of the pool it is contained in
         private var poolIndex: Int
 
-        internal init(id: UInt64, name: String, bitMask: BitSet, components: [Any]) {
+        internal init(id: UInt64, name: String, bitMask: BitSet, components: [Codable]) {
             self.id = id
             self.name = name
             self.bitMask = bitMask
@@ -38,9 +38,14 @@ extension ECS {
             }
             
             poolIndex = archetypePools[bitMask]!.add(components: components)
+            for arch in archetypes {
+                if arch.bitMask.hasExactly(other: self.bitMask) {
+                    arch.add(components)
+                }
+            }
         }
 
-        public func hasComponent<T>(_ component: T.Type) throws -> Bool {
+        public func hasComponent<T: Codable>(_ component: T.Type) throws -> Bool {
             guard let id = ComponentIdMapping.shared.mappings.first(where: { $0.value == T.self}) else {
                 throw ECSError.componentNotRegistered(type: T.self, message: "Trying to query a component that does not exist")
             }
@@ -48,7 +53,7 @@ extension ECS {
             return bitMask.checkBit(at: id.key)
         }
 
-        public func getComponent<T>(_ component: T.Type) throws -> UnsafeMutablePointer<T>? {
+        public func getComponent<T: Codable>(_ component: T.Type) throws -> UnsafeMutablePointer<T>? {
             guard let id = ComponentIdMapping.shared.mappings.first(where: { $0.value == T.self}) else {
                 throw ECSError.componentNotRegistered(type: T.self, message: "Trying to query a component that does not exist")
             }

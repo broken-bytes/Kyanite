@@ -7,7 +7,7 @@ private class MainThread: Thread {
     override func main() {
         print("Starting MainThread")
         
-        struct Transform {
+        struct Transform: Codable {
             var q: Float
             var w: Float
             var x: Float
@@ -15,23 +15,23 @@ private class MainThread: Thread {
             var z: Float
         }
 
-        struct Move {
+        struct Move: Codable {
             var movement: Float
         }
 
-        struct Rotate {
+        struct Rotate: Codable {
             var rotation: Float
         }
 
-        struct Player {
+        struct Player: Codable {
             let id: Int
         }
 
-        struct Enemy {
+        struct Enemy: Codable {
             let id: Int
         }
 
-        struct Health {
+        struct Health: Codable {
             let health: Float
         }
 
@@ -44,7 +44,7 @@ private class MainThread: Thread {
         print("Enemy: \(world.registerComponent(Enemy.self))")
         print("Health: \(world.registerComponent(Health.self))")
 
-        for x in 0..<5000 {
+        for x in 0..<50000 {
             if x % 2 == 0 {
                 world.createEntity(named: "Test", Transform(q: 1, w: 3, x: 2, y: 5, z: 4), Move(movement: 1), Rotate(rotation: 0))
             } else if x % 4 == 0 {
@@ -53,50 +53,11 @@ private class MainThread: Thread {
                 world.createEntity(named: "Test", Move(movement: 1), Transform(q: 1, w: 3, x: 2, y: 5, z: 4))
             }
         }
-
-
-        try! world.createSystem(named: "Rotator", Transform.self, Rotate.self, pipeline: ECS.Pipeline.onUpdate, multithreaded: true) { iter in
-            for x in 0..<iter.count {
-                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Rotate.self, at: x).pointee.rotation
-            }
+        
+        try! world.createSystem(named: "Rotator", pipeline: ECS.Pipeline.onUpdate) { (data: [(UnsafeMutablePointer<Transform>, UnsafeMutablePointer<Rotate>)]) -> Void in
+            data[0].0.pointee.x += data[0].1.pointee.rotation
         }
         
-        try! world.createSystem(named: "Rotator2", Transform.self, Rotate.self, pipeline: ECS.Pipeline.onUpdate) { iter in
-            for x in 0..<iter.count {
-                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Rotate.self, at: x).pointee.rotation
-            }
-        }
-
-        try! world.createSystem(named: "Mover", Transform.self, Move.self, pipeline: ECS.Pipeline.onUpdate) { iter in
-            for x in 0..<iter.count {
-                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
-            }
-        }
-        
-        try! world.createSystem(named: "Mover2", Transform.self, Move.self, pipeline: ECS.Pipeline.onUpdate, multithreaded: true) { iter in
-            for x in 0..<iter.count {
-                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
-            }
-        }
-        
-        try! world.createSystem(named: "Move3", Transform.self, Move.self, pipeline: ECS.Pipeline.onUpdate) { iter in
-            for x in 0..<iter.count {
-                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
-            }
-        }
-        
-        try! world.createSystem(named: "Mover4", Transform.self, Move.self, pipeline: ECS.Pipeline.onUpdate) { iter in
-            for x in 0..<iter.count {
-                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
-            }
-        }
-        
-        try! world.createSystem(named: "MoveRotator", Transform.self, Move.self, Rotate.self, pipeline: ECS.Pipeline.onUpdate) { iter in
-            for x in 0..<iter.count {
-                iter.dataFor(Transform.self, at: x).pointee.x += iter.dataFor(Move.self, at: x).pointee.movement
-            }
-        }
-
         while running {
             world.tick()
         }

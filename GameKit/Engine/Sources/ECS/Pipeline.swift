@@ -11,16 +11,13 @@ public extension ECS {
         // The Tickrate of this pipeline in ms. 1 = Once per Second = 1 FPS, 1000 = 1000x per second
         var tickRate: UInt16
         // The systems attached to this pipeline
-        var systems: [System] = []
+        var systems: [any SystemData] = []
 
         init(with name: String, ticking at: UInt16) {
             self.name = name
             self.tickRate = at
         }
 
-        public func register(system: System) {
-            //systems.append(system)
-        }
 
         // Ticks the pipeline(Advances it) and returns the time it took for the pipeline to run in ms.
         internal func tick() -> Duration {
@@ -50,11 +47,16 @@ public extension ECS {
                                 if x == workers - 1 &&  count % Int(workers) != 0 {
                                     individualCount += count - (individualCount * Int(workers))
                                 }
-                                system.function(SystemIterator(for: system.archetype, count: individualCount))
+                                
+                                print(system.typedef)
+                                                                
                                 group.leave()
                             }
                         } else {
-                            system.function(SystemIterator(for: system.archetype, count: count))
+                            var type = system.typedef
+                            var array: [type.self] = []
+
+                            //system.function(SystemIterator(for: system.archetype, count: count))
                         }
                     }
                     if delta > .milliseconds(1) {

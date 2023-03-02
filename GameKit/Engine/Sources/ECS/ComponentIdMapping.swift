@@ -4,7 +4,7 @@ internal extension ECS {
 
         static let shared = ComponentIdMapping()
 
-        internal private(set) var mappings: [UInt16:Any.Type] = [:]
+        internal private(set) var mappings: [UInt16:Codable.Type] = [:]
         internal private(set) var sizes: [UInt16:Int] = [:]
 
         private init() {
@@ -15,7 +15,7 @@ internal extension ECS {
             mappings = [:]
         }
 
-        func addMapping<T>(for type: T.Type, index: UInt16) {
+        func addMapping<T: Codable>(for type: T.Type, index: UInt16) {
             mappings[index] = type
             sizes[index] = MemoryLayout<T>.size
         }
