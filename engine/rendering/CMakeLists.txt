@@ -1,0 +1,19 @@
+FILE(GLOB_RECURSE HEADERS "include/**.h*")
+FILE(GLOB_RECURSE SRC "src/**.c*")
+
+add_library(Rendering SHARED ${SRC} ${HEADERS})
+
+target_include_directories(Rendering PRIVATE include)
+target_include_directories(Rendering PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/include)
+target_include_directories(Rendering PRIVATE ${CMAKE_SOURCE_DIR}/engine/math/include)
+target_include_directories(Rendering PRIVATE ${CMAKE_SOURCE_DIR}/engine/io/include)
+
+find_package(SDL2 CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+
+target_link_libraries(Rendering PUBLIC IO)
+target_link_libraries(Rendering PRIVATE SDL2::SDL2 spdlog::spdlog glm::glm)
+
+find_path(ATOMIC_QUEUE_INCLUDE_DIRS "atomic_queue/atomic_queue.h")
+target_include_directories(Rendering PRIVATE ${ATOMIC_QUEUE_INCLUDE_DIRS})

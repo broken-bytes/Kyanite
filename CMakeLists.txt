@@ -1,17 +1,14 @@
-cmake_minimum_required(VERSION 3.20)
-
+cmake_minimum_required(VERSION 3.26)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS ON)
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-project(GameKit LANGUAGES CXX Swift)
+set(PROJECT_NAME "Kyanite" LANGUAGES C CXX)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+project(${PROJECT_NAME})
 
-include(cmake/dependencies/dxheaders.cmake)
-#include(cmake/dependencies/flecs.cmake)
-include(cmake/dependencies/freeimage.cmake)
-include(cmake/dependencies/physx.cmake)
-include(cmake/dependencies/sdl.cmake)
-#include(cmake/dependencies/tinygltf.cmake)
+enable_testing()
 
-add_subdirectory(GameKit)
+add_subdirectory(engine)
 
+add_subdirectory(testapp)

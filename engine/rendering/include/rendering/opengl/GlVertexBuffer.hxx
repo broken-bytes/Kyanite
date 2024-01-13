@@ -1,0 +1,20 @@
+#pragma once
+
+#include "../VertexBuffer.hxx"
+
+#include <glad/glad.h>
+
+#include <cstdint>
+
+namespace rendering::opengl {
+	class GlVertexBuffer : public VertexBuffer {
+		public:
+		GlVertexBuffer(const void* data, size_t size);
+		~GlVertexBuffer();
+
+		auto Id() const -> GLuint { return _id; }
+
+	private:
+		GLuint _id;
+	};
+}

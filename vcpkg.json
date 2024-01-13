@@ -1,0 +1,36 @@
+{
+    "name": "kyanite",
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "version": "0.0.1",
+    "builtin-baseline": "27fb19bdcc1f6ddb1261cffb5372724ac1d63a93",
+    "dependencies": [
+        "atomic-queue",
+        "audiofile",
+        "cereal",
+        "concurrentqueue",
+        "directx-dxc",
+        "flecs",
+        "freealut",
+        "freeimage",
+        "gamenetworkingsockets",
+        "glad",
+        "glm",
+        "gtest",
+        "joltphysics",
+        "libjpeg-turbo",
+        "libpng",
+        "libsodium",
+        "libvorbis",
+        "openal-soft",
+        "protobuf",
+        "rmlui",
+        {
+            "name": "sdl2",
+            "features": ["vulkan"]
+        },
+        "spdlog",
+        "sqlite3",
+        "tinygltf",
+        "zlib"
+    ]
+}
