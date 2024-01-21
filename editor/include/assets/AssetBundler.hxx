@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine>
+#include <engine/Engine.hxx>
 
 namespace kyanite::editor {
 	class AssetPackager {

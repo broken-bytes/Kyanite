@@ -1,15 +1,18 @@
 #include "app/App.hxx"
+#include "app/AppStartScreen.hxx"
+#include "app/AppStartScreenViewModel.hxx"
 #include <assetpackages/AssetPackages.hxx>
-
 #include <rendering/Texture.hxx>
 
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qmainwindow.h>
 
 #include <filesystem>
+#include <memory>
 #include <sstream>
 
 namespace assetpackages = kyanite::engine::assetpackages;
+namespace editor = kyanite::editor;
 
 int main(int argc, char** argv) {
 	QApplication app(argc, argv);
@@ -17,12 +20,10 @@ int main(int argc, char** argv) {
 	app.setApplicationName("Kyanite");
 	app.setApplicationVersion("0.0.1");	
 
-	QMainWindow mainWindow;
-	mainWindow.setWindowTitle("Kyanite");
-	mainWindow.setGeometry(100, 100, 400, 300); // (x, y, width, height)
+	auto startScreen = new kyanite::editor::AppStartScreen(nullptr, std::make_unique<editor::AppStartScreenViewModel>());
 
 	// Show the main window
-	mainWindow.show();
+	startScreen->show();
 
 	auto currentDir = std::filesystem::current_path();
 
