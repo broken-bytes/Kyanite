@@ -2,7 +2,7 @@
 
 #include "GpuResource.hxx"
 
-namespace rendering {
+namespace kyanite::engine::rendering {
 	class RenderTarget : public GpuResource {
 	public:
         explicit RenderTarget(uint64_t address) : GpuResource(address) {}

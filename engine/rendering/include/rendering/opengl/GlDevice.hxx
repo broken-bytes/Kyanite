@@ -2,7 +2,7 @@
 
 #include "../Device.hxx"
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	class GlDevice : public Device {
 	public:
         GlDevice();

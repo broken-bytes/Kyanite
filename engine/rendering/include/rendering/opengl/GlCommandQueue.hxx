@@ -2,7 +2,7 @@
 
 #include "../CommandQueue.hxx"
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	class GlCommandQueue : public CommandQueue {
 	public:
 		GlCommandQueue(CommandListType type);

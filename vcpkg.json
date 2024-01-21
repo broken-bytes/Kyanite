@@ -21,6 +21,8 @@
         "libpng",
         "libsodium",
         "libvorbis",
+        "libzip",
+        "nlohmann-json",
         "openal-soft",
         "protobuf",
         "rmlui",
@@ -30,7 +32,6 @@
         },
         "spdlog",
         "sqlite3",
-        "tinygltf",
-        "zlib"
+        "tinygltf"
     ]
 }

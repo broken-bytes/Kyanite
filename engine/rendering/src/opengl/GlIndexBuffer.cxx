@@ -1,6 +1,6 @@
 #include "rendering/opengl/GlIndexBuffer.hxx"
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	GlIndexBuffer::GlIndexBuffer(const std::vector<uint32_t>& indices) {
 		_id = 0;
 		glGenBuffers(1, &_id);

@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	class GlIndexBuffer : public IndexBuffer {
 	public:
 		GlIndexBuffer(const std::vector<uint32_t>& data);

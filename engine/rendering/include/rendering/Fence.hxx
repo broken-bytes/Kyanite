@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace rendering {
+namespace kyanite::engine::rendering {
 	class Fence {
 	public:
 		virtual ~Fence() = default;

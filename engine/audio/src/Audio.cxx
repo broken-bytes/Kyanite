@@ -3,6 +3,7 @@
 #include "audio/AudioDevice.hxx"
 
 #include <core/exceptions/FileNotFoundError.hxx>
+#include <core/Core.hxx>
 
 #include <AudioFile.h>
 #include <al/alut.h>
@@ -10,7 +11,9 @@
 #include <string>
 #include <vector>
 
-namespace audio {
+namespace core = kyanite::engine::core;
+
+namespace kyanite::engine::audio {
     std::vector<AudioClip*> AudioClips = {};
 
     auto QueryDevices() -> std::vector<std::string> {
@@ -60,5 +63,11 @@ namespace audio {
         AudioClips.push_back(clip);
         
         return clip;
+    }
+
+    auto LoadAudioClip(std::string_view path) -> AudioClip {
+        auto buffer = core::LoadFileToBuffer(path);
+
+        return AudioClip({}, 0, 0, 0, 0, 0 , true);
     }
 }

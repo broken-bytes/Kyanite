@@ -4,8 +4,10 @@
 #include "audio/AudioSource.hxx"
 #include "audio/AudioClip.hxx"
 
-#include <core/Exported.hxx>
-#include <core/NativePointer.hxx>
+#include <shared/Exported.hxx>
+#include <shared/NativePointer.hxx>
+
+namespace audio = kyanite::engine::audio;
 
 NativePointer Bridge_Audio_CreateDevice() {
     return reinterpret_cast<NativePointer>(audio::CreateDevice());

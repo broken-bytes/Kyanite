@@ -1,6 +1,6 @@
 #pragma once
 
-namespace rendering {
+namespace kyanite::engine::rendering {
 	enum class Topology {
 		TriangleList,
 		TriangleStrip,

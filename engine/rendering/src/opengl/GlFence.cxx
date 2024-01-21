@@ -1,6 +1,6 @@
 #include "rendering/opengl/GlFence.hxx"
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	GlFence::GlFence() {
 		_value = 0;
 	}

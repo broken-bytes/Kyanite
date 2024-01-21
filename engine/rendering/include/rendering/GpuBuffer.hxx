@@ -2,7 +2,7 @@
 
 #include "GpuResource.hxx"
 
-namespace rendering {
+namespace kyanite::engine::rendering {
     class GpuBuffer : public GpuResource {
     };
 }

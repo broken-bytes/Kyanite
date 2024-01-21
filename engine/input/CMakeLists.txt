@@ -5,6 +5,7 @@ add_library(Input SHARED ${SRC} ${HEADERS})
 
 target_include_directories(Input PRIVATE include)
 target_include_directories(Input PRIVATE ${CMAKE_SOURCE_DIR}/engine/math/include)
+target_include_directories(Input PRIVATE ${CMAKE_SOURCE_DIR}/engine/shared/include)
 target_include_directories(Input PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/include)
 
 

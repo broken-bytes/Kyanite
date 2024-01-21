@@ -1,6 +1,6 @@
 #pragma once
 
-namespace rendering {
+namespace kyanite::engine::rendering {
 	class RenderPass {
 	public:
 		RenderPass() = default;

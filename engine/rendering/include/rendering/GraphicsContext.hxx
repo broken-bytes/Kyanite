@@ -5,7 +5,7 @@
 #include "Device.hxx"
 #include <memory>
 
-namespace rendering {
+namespace kyanite::engine::rendering {
     class RenderTarget;
 
     class GraphicsContext: public Context {

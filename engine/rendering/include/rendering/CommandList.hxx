@@ -5,12 +5,12 @@
 #include "Vertex.hxx"
 #include "IndexBuffer.hxx"
 #include "VertexBuffer.hxx"
-#include "core/Mesh.hxx"
-#include "core/Material.hxx"
+#include "Mesh.hxx"
+#include "Material.hxx"
 
 #include <glm/glm.hpp>
 
-namespace rendering {
+namespace kyanite::engine::rendering {
 	class CommandList {
 	public:
 		CommandList(CommandListType type) : _type(type) {};

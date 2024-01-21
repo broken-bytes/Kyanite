@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace rendering {
+namespace kyanite::engine::rendering {
     class GpuResource {
     public:
         GpuResource(uint64_t address) : _address(address) { };

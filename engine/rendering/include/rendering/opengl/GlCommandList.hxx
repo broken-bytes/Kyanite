@@ -8,7 +8,7 @@
 #include <functional>
 #include <vector>
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	class GlCommandList: public CommandList {
 
 	// Used by GlCommandQueue to access the _commands vector

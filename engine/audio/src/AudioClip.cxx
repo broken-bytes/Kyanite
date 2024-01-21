@@ -4,7 +4,11 @@
 #include <stdint.h>
 #include <iostream>
 
-namespace audio {
+namespace kyanite::engine::audio {
+    AudioClip::AudioClip() {
+
+    }
+
     AudioClip::AudioClip(
         std::vector<float> buffer,
         int sampleRate, 

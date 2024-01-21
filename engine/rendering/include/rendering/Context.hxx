@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace rendering {
+namespace kyanite::engine::rendering {
     class Context {
     public:
         explicit Context(CommandListType type, std::shared_ptr<Device> device) : _type(type), _device(device) {

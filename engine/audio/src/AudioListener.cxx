@@ -2,7 +2,7 @@
 
 #include <AL/al.h>
 
-namespace audio {
+namespace kyanite::engine::audio {
     AudioListener::AudioListener() {
         SetPosition(0, 0, 1.0f);
         SetRotation(0, 0, 0);

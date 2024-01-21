@@ -3,7 +3,7 @@
 struct ALCdevice;
 struct ALCcontext;
 
-namespace audio {
+namespace kyanite::engine::audio {
     class AudioDevice {
         public:
         AudioDevice();

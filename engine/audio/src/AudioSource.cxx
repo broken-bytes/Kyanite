@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace audio {
+namespace kyanite::engine::audio {
     AudioSource::AudioSource(float x, float y, float z) {
         ALuint source;
         alGenSources(1, &source);

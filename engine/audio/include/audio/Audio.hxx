@@ -2,12 +2,15 @@
 
 #include "AudioClip.hxx"
 
+#include <shared/Exported.hxx>
+
 #include <string>
 
-namespace audio {
+namespace kyanite::engine::audio {
     struct AudioDevice;
     
-    auto QueryDevices() -> std::vector<std::string>;
-    auto CreateDevice() -> AudioDevice*;
-    auto CreateAudioClip(std::string path) -> AudioClip*;
+    EXPORTED auto QueryDevices() -> std::vector<std::string>;
+    EXPORTED auto CreateDevice() -> AudioDevice*;
+    EXPORTED auto CreateAudioClip(std::string path) -> AudioClip*;
+    EXPORTED auto LoadAudioClip(std::string_view path) -> AudioClip;
 }

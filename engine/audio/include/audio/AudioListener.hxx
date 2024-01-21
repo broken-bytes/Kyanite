@@ -1,6 +1,6 @@
 #pragma once
 
-namespace audio {
+namespace kyanite::engine::audio {
     class AudioListener {
         public:
         AudioListener();

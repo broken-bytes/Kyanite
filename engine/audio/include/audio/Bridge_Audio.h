@@ -1,7 +1,7 @@
 #pragma once
 
-#include <core/Exported.hxx>
-#include <core/NativePointer.hxx>
+#include <shared/Exported.hxx>
+#include <shared/NativePointer.hxx>
 
 #include <stdint.h>
 

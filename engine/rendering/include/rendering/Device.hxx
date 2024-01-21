@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace rendering {
+namespace kyanite::engine::rendering {
 	class Buffer;
 	class RenderTarget;
 

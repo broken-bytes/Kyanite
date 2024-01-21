@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace audio {
+namespace kyanite::engine::audio {
     struct AudioClip;
 
     class AudioSource {

@@ -8,7 +8,7 @@
 
 #include <stdexcept>
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	GlCommandList::GlCommandList(CommandListType type) : CommandList(type) {
 
 	}

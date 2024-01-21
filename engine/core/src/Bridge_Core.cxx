@@ -1,11 +1,13 @@
 #include "core/Bridge_Core.h"
 #include "core/Core.hxx"
 
-#include <core/NativePointer.hxx>
+#include <shared/NativePointer.hxx>
 
 #include <SDL2/SDL.h>
 #include <Windows.h>
 #include <iostream>
+
+namespace core = kyanite::engine::core;
 
 void Bridge_Core_Init() {
 	core::InitCore();
@@ -30,7 +32,7 @@ NativePointer Bridge_Core_CreateWindow(
 	} else if(renderBackend == 2) {
 		// TODO: Implement DirectX 12
 	} else {
-		throw std::runtime_error("Invalid render backend");
+		// throw std::runtime_error("Invalid render backend");
 	}
 
 	if (silent) {

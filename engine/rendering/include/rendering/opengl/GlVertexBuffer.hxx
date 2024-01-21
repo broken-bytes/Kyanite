@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	class GlVertexBuffer : public VertexBuffer {
 		public:
 		GlVertexBuffer(const void* data, size_t size);

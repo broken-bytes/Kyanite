@@ -2,7 +2,7 @@
 
 #include "../Fence.hxx"
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	class GlFence : public Fence {
 	public:
 		GlFence();

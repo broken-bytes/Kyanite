@@ -2,7 +2,7 @@
 
 #include <al/alut.h>
 
-namespace audio {
+namespace kyanite::engine::audio {
     AudioDevice::AudioDevice() {
         auto* device = alcOpenDevice(nullptr);
         

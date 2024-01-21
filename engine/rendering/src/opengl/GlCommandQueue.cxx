@@ -2,7 +2,7 @@
 #include "rendering/opengl/GlCommandList.hxx"
 #include "rendering/opengl/GlFence.hxx"
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	GlCommandQueue::GlCommandQueue(CommandListType type) : CommandQueue(type) {
 
 	}

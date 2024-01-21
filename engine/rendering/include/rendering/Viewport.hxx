@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace rendering {
+namespace kyanite::engine::rendering {
 	struct Viewport {
 		uint32_t X;
 		uint32_t Y;

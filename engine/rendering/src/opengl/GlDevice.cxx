@@ -3,7 +3,7 @@
 #include "rendering/opengl/GlCommandQueue.hxx"
 #include "rendering/opengl/GlFence.hxx"
 
-namespace rendering::opengl {
+namespace kyanite::engine::rendering::opengl {
 	GlDevice::GlDevice() {
 
 	}

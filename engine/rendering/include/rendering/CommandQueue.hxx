@@ -6,7 +6,7 @@
 
 #include <vector>
 
-namespace rendering {
+namespace kyanite::engine::rendering {
 	class CommandQueue {
 	public:
 		CommandQueue(CommandListType type) : _type(type) {}
