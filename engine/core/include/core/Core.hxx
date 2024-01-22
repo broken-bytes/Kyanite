@@ -11,6 +11,7 @@ namespace kyanite::engine::core {
     EXPORTED auto InitCore() -> void;
     EXPORTED auto LoadFileToBuffer(std::string_view path) -> std::vector<uint8_t>;
     EXPORTED auto SaveBufferToFile(std::string_view path, std::vector<uint8_t>& buffer) -> void;
+    EXPORTED auto CreateDirectory(std::string_view path) -> void;
     EXPORTED auto CreateArchive(std::string_view path) -> void;
     EXPORTED auto OpenArchive(std::string path) -> void;
     EXPORTED auto CheckIfFileExists(std::string archivePath, std::string filePath) -> bool;

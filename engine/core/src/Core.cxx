@@ -9,7 +9,6 @@
 #include <fstream>
 #include <string>
 #include <string_view>
-#include <Windows.h>
 
 namespace kyanite::engine::core {
 	auto InitCore() -> void {
@@ -26,6 +25,10 @@ namespace kyanite::engine::core {
 	auto SaveBufferToFile(std::string_view path, std::vector<uint8_t>& buffer) -> void {
 		auto file = std::ofstream(std::filesystem::path(path));
 		file.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+	}
+
+	auto CreateDirectory(std::string_view path) -> void {
+		std::filesystem::create_directory(std::filesystem::path(path));
 	}
 
 	auto CreateArchive(std::string_view path) -> void {

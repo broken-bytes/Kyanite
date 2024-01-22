@@ -2,6 +2,7 @@ FILE(GLOB_RECURSE HEADERS "include/*.h*")
 FILE(GLOB_RECURSE SRC "src/*.c*")
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(SQLite3 REQUIRED)
 
 qt_standard_project_setup()
 
@@ -14,7 +15,7 @@ target_include_directories(Editor PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/includ
 target_include_directories(Editor PRIVATE ${CMAKE_SOURCE_DIR}/engine/audio/include)
 target_include_directories(Editor PRIVATE ${CMAKE_SOURCE_DIR}/engine/rendering/include)
 target_include_directories(Editor PRIVATE ${CMAKE_SOURCE_DIR}/engine/input/include)
-target_link_libraries(Editor PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(Editor PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets SQLite3)
 
 # Link all engine libraries
 target_link_libraries(Editor PRIVATE Core Audio Rendering Input AssetPackages)

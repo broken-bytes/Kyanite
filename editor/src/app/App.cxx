@@ -1,11 +1,15 @@
 #include "app/App.hxx"
 #include "app/AppStartScreen.hxx"
 #include "app/AppStartScreenViewModel.hxx"
+#include "editor/EditorScreen.hxx"
+#include "editor/EditorScreenViewModel.hxx"
+#include "project/ProjectService.hxx"
 #include <assetpackages/AssetPackages.hxx>
 #include <rendering/Texture.hxx>
 
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qmainwindow.h>
+#include <QtWidgets/qmessagebox.h>
 
 #include <filesystem>
 #include <memory>
@@ -18,24 +22,56 @@ int main(int argc, char** argv) {
 	QApplication app(argc, argv);
 
 	app.setApplicationName("Kyanite");
-	app.setApplicationVersion("0.0.1");	
+	app.setApplicationVersion("0.0.1");
 
-	auto startScreen = new kyanite::editor::AppStartScreen(nullptr, std::make_unique<editor::AppStartScreenViewModel>());
+	// Iterate the command line arguments and check for '-p' or '--project'. If found, the next argument is the project file to open.
+	// Also check for -c or --create. If found, create a new project file and open it.
+	// If both -p and -c are found, -p takes precedence.
+	// -c also needs a name for the project which is passed via the next argument.
 
-	// Show the main window
-	startScreen->show();
+	std::string projectFile = "";
+	std::string name = "";
+	bool createProject = false;
 
-	auto currentDir = std::filesystem::current_path();
+	for (int i = 0; i < argc; i++) {
+		std::string arg = argv[i];
+		if (arg == "-p" || arg == "--project") {
+			if (i + 1 < argc) {
+				projectFile = argv[i + 1];
+				createProject = false;
+				break;
+			}
+		}
+		else if (arg == "-c" || arg == "--create") {
+			if (i + 1 < argc) {
+				projectFile = argv[i + 1];
+				if (i + 2 >= argc) {
+					QMessageBox::critical(nullptr, "Error", "The project name is missing.");
+					exit(-1);
+				}
+				name = argv[i + 2];
+				createProject = true;
+				break;
+			}
+		}
+	}
 
-	auto packageDir = currentDir / "packages";
+	// Check if the project file exists. If it does, open it. If not, open the start screen.
 
-	auto testPackage = packageDir / "test.kpack";
+	if (projectFile != "") {
+		auto editor = new kyanite::editor::EditorScreen(
+			nullptr,
+			projectFile,
+			createProject,
+			name,
+			std::make_unique<editor::EditorScreenViewModel>(std::make_unique<kyanite::editor::ProjectService>())
+		);
+		editor->show();
+	}
+	else {
+		auto startScreen = new kyanite::editor::AppStartScreen(nullptr, std::make_unique<editor::AppStartScreenViewModel>());
+		startScreen->show();
+	}
 
-	auto texture = kyanite::engine::rendering::Texture(0, 128, 128, 4);
-
-	auto package = assetpackages::CreateAssetPackage(testPackage.string());
-	assetpackages::AddToAssetPackage(package, "test", texture);
-
-	auto data = assetpackages::LoadAssetFromPackage<kyanite::engine::rendering::Texture>(package, "test");
 	app.exec();
 }
