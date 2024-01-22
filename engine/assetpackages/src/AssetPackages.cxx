@@ -14,12 +14,22 @@
 #include <sstream>
 
 namespace kyanite::engine::assetpackages {
+	std::unique_ptr<IAssetLoader> assetLoader;
+
+	auto Initialize(IAssetLoader* loader) -> void {
+		if(loader != nullptr) {
+			assetLoader = std::unique_ptr<IAssetLoader>(loader);
+		} else {
+			assetLoader = std::make_unique<AssetPackageLoader>();
+		}
+	}
+
 	auto LoadPackage(const std::string path) -> AssetPackage* {
-		return AssetPackageLoader().LoadPackage(path);
+		return assetLoader->LoadPackage(path);
 	}
 
 	auto PackageHasAsset(const AssetPackage* package, std::string path) -> bool {
-		return AssetPackageLoader().CheckIfPackageHasAsset(package, path);
+		return assetLoader->CheckIfPackageHasAsset(package, path);
 	}
 
 	template auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> audio::AudioClip;
@@ -30,8 +40,9 @@ namespace kyanite::engine::assetpackages {
 
 	template <typename T>
 	auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> T {
+		T data;
+
 		try {
-			T data;
 			auto asset = AssetPackageLoader().LoadAsset(package, path);
 			std::stringstream stream(std::string(asset.begin(), asset.end()));
 			cereal::BinaryInputArchive archive(stream);
@@ -40,6 +51,8 @@ namespace kyanite::engine::assetpackages {
 		catch (std::exception e) {
 			throw std::runtime_error("Failed to load asset from package: " + std::string(e.what()));
 		}
+
+		return data;
 	}
 
 	auto CreateAssetPackage(std::string path) -> AssetPackage* {

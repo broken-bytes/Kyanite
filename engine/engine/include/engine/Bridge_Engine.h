@@ -12,7 +12,7 @@ extern "C" {
 	/**
 	 * @brief Initializes the ECS
 	 */
-	EXPORTED void Bridge_Engine_Init(NativePointer meshRenderer);
+	EXPORTED void Bridge_Engine_Init(NativePointer window, NativePointer assetLoader);
 
 	/**
 	 * @brief Creates a new entity

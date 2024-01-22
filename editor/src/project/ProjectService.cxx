@@ -25,12 +25,16 @@ namespace kyanite::editor {
 			archive(project);
 		}
 
+		_projectPath = std::filesystem::path(path).parent_path();
+
 		return project;
 	}
 
 	auto ProjectService::CreateProject(const std::string& path, std::string& name) -> Project {
 		CreateFolderStructure(path, name);
 		CreateProjectFile(path, name);
+		_projectPath = path;
+
 		
 		std::filesystem::path projPath(path);
 		projPath /= name + ".kproj";
@@ -38,15 +42,47 @@ namespace kyanite::editor {
 		return LoadProject(projPath.string());
 	}
 
+	auto ProjectService::AssembliesPath() -> std::filesystem::path {
+		return CachePath() / "assemblies";
+	}
+
+	auto ProjectService::BlobsPath() -> std::filesystem::path {
+		return CachePath() / "blobs";
+	}
+
+	auto ProjectService::BuildPath() -> std::filesystem::path {
+		return ProjectPath() / ".build";
+	}
+	
+	auto ProjectService::CachePath() -> std::filesystem::path {
+		return ProjectPath() / ".cache";
+	}
+	
+	auto ProjectService::ContentPath() -> std::filesystem::path {
+		return ProjectPath() / "content";
+	}
+	
+	auto ProjectService::LogsPath() -> std::filesystem::path {
+		return ProjectPath() / ".logs";
+	}
+	
+	auto ProjectService::ProjectPath() -> std::filesystem::path {
+		return _projectPath;
+	}
+	
+	auto ProjectService::SourcePath() -> std::filesystem::path {
+		return ProjectPath() / "src";
+	}
+
 	auto ProjectService::CreateFolderStructure(const std::string& path, const std::string& name) -> void {
 		std::filesystem::path projPath(path);
-		auto cachePath = projPath / ".cache";
-		auto blobsPath = cachePath / "blobs";
-		auto buildPath = cachePath / "build";
-		auto assembliesPath = cachePath / "assemblies";
-		auto contentPath = projPath / "content";
-		auto srcPath = projPath / "src";
-		auto logsPath = projPath / ".logs";
+		auto cachePath = CachePath();
+		auto blobsPath = BlobsPath();
+		auto buildPath = BuildPath();
+		auto assembliesPath = AssembliesPath();
+		auto contentPath = ContentPath();
+		auto srcPath = SourcePath();
+		auto logsPath = LogsPath();
 
 		kyanite::engine::core::CreateDirectory(cachePath.string());
 		kyanite::engine::core::CreateDirectory(blobsPath.string());

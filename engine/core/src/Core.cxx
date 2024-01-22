@@ -59,6 +59,15 @@ namespace kyanite::engine::core {
 		}
 	}
 
+	auto CreateFile(std::string path) -> void {
+		auto file = std::ofstream(std::filesystem::path(path));
+		file.close();
+	}
+
+	auto CheckIfFileExists(std::string path) -> bool {
+		return std::filesystem::exists(std::filesystem::path(path));
+	}
+
 	auto CheckIfFileExists(std::string archivePath, std::string filePath) -> bool {
 		zip_t* archive;
 		int err;

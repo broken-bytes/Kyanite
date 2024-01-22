@@ -1,15 +1,19 @@
 #pragma once
 
+#include "IAssetLoader.hxx"
+
 #include <shared/Exported.hxx>
 #include <shared/Serializable.hxx>
 
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
 
 namespace kyanite::engine::assetpackages {
 	class AssetPackage;
-	struct Metadata;
+
+	EXPORTED auto Initialize(IAssetLoader* loader) -> void;
 
 	/**
 		@brief Loads an asset from a file

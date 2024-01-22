@@ -24,5 +24,8 @@ namespace kyanite::editor {
 	private:
 		std::unique_ptr<EditorScreenViewModel> _viewModel;
 		std::string _projectPath;
+
+		auto SetupLayout(QWidget* worldView) -> void;
+		auto SetupEngine(WId windowId) -> void;
 	};
 }

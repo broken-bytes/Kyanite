@@ -5,7 +5,6 @@
 #include "editor/EditorScreenViewModel.hxx"
 #include "project/ProjectService.hxx"
 #include <assetpackages/AssetPackages.hxx>
-#include <rendering/Texture.hxx>
 
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qmainwindow.h>
@@ -64,7 +63,10 @@ int main(int argc, char** argv) {
 			projectFile,
 			createProject,
 			name,
-			std::make_unique<editor::EditorScreenViewModel>(std::make_unique<kyanite::editor::ProjectService>())
+			std::make_unique<editor::EditorScreenViewModel>(
+				std::make_unique<kyanite::editor::ProjectService>(),
+				std::make_unique<kyanite::editor::AssetDatabase>()
+			)
 		);
 		editor->show();
 	}

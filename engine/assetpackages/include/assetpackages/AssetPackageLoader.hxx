@@ -1,13 +1,14 @@
 #pragma once
 
+#include "IAssetLoader.hxx"
+
 #include <string>
 #include <vector>
 
 namespace kyanite::engine::assetpackages {
 	class AssetPackage;
-	struct Metadata;
 
-	class AssetPackageLoader {
+	class AssetPackageLoader: public IAssetLoader {
 	public:
 		AssetPackageLoader();
 		~AssetPackageLoader();

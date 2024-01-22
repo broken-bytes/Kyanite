@@ -1,4 +1,7 @@
 #include "editor/EditorScreen.hxx"
+#include "editor/WorldView.hxx"
+
+#include <qgridlayout.h>
 
 #include <filesystem>
 #include <sstream>
@@ -23,9 +26,24 @@ namespace kyanite::editor {
 		std::stringstream ss;
 		ss << "Kyanite Editor - " << project.name;
 		setWindowTitle(ss.str().c_str());
+
+		auto worldView = new WorldView(this);
+		SetupLayout(worldView);
+		SetupEngine(worldView->winId());
 	}
 
 	EditorScreen::~EditorScreen() {
 
+	}
+
+	auto EditorScreen::SetupLayout(QWidget* worldView) -> void {
+		auto layout = new QGridLayout(this);
+		setLayout(layout);
+
+		layout->addWidget(worldView, 1, 1);
+	}
+
+	auto EditorScreen::SetupEngine(WId windowId) -> void {
+		_viewModel->InitializeEngine(windowId);
 	}
 }
