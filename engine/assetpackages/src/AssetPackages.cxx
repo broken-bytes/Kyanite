@@ -14,13 +14,13 @@
 #include <sstream>
 
 namespace kyanite::engine::assetpackages {
-	std::unique_ptr<IAssetLoader> assetLoader;
+	std::shared_ptr<IAssetLoader> assetLoader;
 
-	auto Initialize(IAssetLoader* loader) -> void {
+	auto Initialize(std::shared_ptr<IAssetLoader> loader) -> void {
 		if(loader != nullptr) {
-			assetLoader = std::unique_ptr<IAssetLoader>(loader);
+			assetLoader = loader;
 		} else {
-			assetLoader = std::make_unique<AssetPackageLoader>();
+			assetLoader = std::make_shared<AssetPackageLoader>();
 		}
 	}
 

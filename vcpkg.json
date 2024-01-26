@@ -4,11 +4,13 @@
     "version": "0.0.1",
     "builtin-baseline": "27fb19bdcc1f6ddb1261cffb5372724ac1d63a93",
     "dependencies": [
+        "assimp",
         "atomic-queue",
         "audiofile",
         "cereal",
         "concurrentqueue",
         "directx-dxc",
+        "fastgltf",
         "flecs",
         "freealut",
         "freeimage",
@@ -24,6 +26,7 @@
         "libzip",
         "nlohmann-json",
         "openal-soft",
+        "openfbx",
         "protobuf",
         "rmlui",
         {
@@ -32,6 +35,7 @@
         },
         "spdlog",
         "sqlite3",
+        "stduuid",
         "tinygltf"
     ]
 }

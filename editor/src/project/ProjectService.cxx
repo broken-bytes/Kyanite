@@ -91,7 +91,6 @@ namespace kyanite::editor {
 		kyanite::engine::core::CreateDirectory(srcPath.string());
 		kyanite::engine::core::CreateDirectory(assembliesPath.string());
 		kyanite::engine::core::CreateDirectory(logsPath.string());
-
 	}
 
 	auto ProjectService::CreateProjectFile(const std::string& path, const std::string& name) -> void {

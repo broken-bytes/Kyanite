@@ -2,7 +2,9 @@
 
 #include "project/Project.hxx"
 #include "project/ProjectService.hxx"
-#include "assets/AssetDatabase.hxx"
+#include "editor/FileWatchdog.hxx"
+#include "mappers/ModelMapper.hxx"
+#include <assets/AssetDatabase.hxx>
 
 #include <qwidget.h>
 
@@ -25,5 +27,13 @@ namespace kyanite::editor {
 	private:
 		std::unique_ptr<ProjectService> _service;
 		std::unique_ptr<AssetDatabase> _assetDatabase;
+		std::unique_ptr<FileWatchdog> _sourceWatchdog;
+		std::unique_ptr<FileWatchdog> _contentWatchdog;
+		std::unique_ptr<mappers::ModelMapper> _modelMapper;
+
+		template<typename T>
+		auto SaveMeta(std::string name, std::filesystem::path path, T& meta) -> void;
+
+		auto SetupEditorEnvironment() -> void;
 	};
 }

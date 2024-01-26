@@ -1,14 +1,18 @@
 #include "core/Core.hxx"
+#include "core/ILogger.hxx"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_Vulkan.h>
 #include <sodium.h>
 #include <zip.h>
+#include <stduuid/uuid.h>
 
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <string_view>
+#include <cassert>
 
 namespace kyanite::engine::core {
 	auto InitCore() -> void {
@@ -16,7 +20,7 @@ namespace kyanite::engine::core {
 	}
 
 	auto LoadFileToBuffer(std::string_view path) -> std::vector<uint8_t> {
-		auto file = std::ifstream(std::filesystem::path(path));
+		auto file = std::ifstream(std::filesystem::path(path), std::ios::binary);
 		auto buffer = std::vector<uint8_t>(std::istreambuf_iterator<char>(file), {});
 
 		return buffer;
@@ -159,5 +163,22 @@ namespace kyanite::engine::core {
 		result = zip_close(archive);
 
 		return buffer;
+	}
+
+	auto CreateUUID() -> std::string {
+		std::random_device rd;
+		auto seed_data = std::array<int, std::mt19937::state_size> {};
+		std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+		std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+		std::mt19937 generator(seq);
+		uuids::uuid_random_generator gen{ generator };
+
+		uuids::uuid const id = gen();
+		assert(!id.is_nil());
+		assert(id.as_bytes().size() == 16);
+		assert(id.version() == uuids::uuid_version::random_number_based);
+		assert(id.variant() == uuids::uuid_variant::rfc);
+
+		return uuids::to_string(id);
 	}
 }

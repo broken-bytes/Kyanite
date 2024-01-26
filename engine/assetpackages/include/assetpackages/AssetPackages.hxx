@@ -13,7 +13,11 @@
 namespace kyanite::engine::assetpackages {
 	class AssetPackage;
 
-	EXPORTED auto Initialize(IAssetLoader* loader) -> void;
+	/**
+		@brief Initializes the asset package system
+		@param loader The asset loader to use
+	*/
+	EXPORTED auto Initialize(std::shared_ptr<IAssetLoader> loader) -> void;
 
 	/**
 		@brief Loads an asset from a file

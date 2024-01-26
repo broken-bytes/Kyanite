@@ -9,10 +9,16 @@
 extern "C" {
 #endif
 
+	enum Mode {
+		EDITOR,
+        GAME_DEBUG,
+		GAME_RELEASE
+	};
+
 	/**
 	 * @brief Initializes the ECS
 	 */
-	EXPORTED void Bridge_Engine_Init(NativePointer window, NativePointer assetLoader);
+	EXPORTED void Bridge_Engine_Init(NativePointer window, NativePointer assetLoader, enum Mode mode, NativePointer logger);
 
 	/**
 	 * @brief Creates a new entity

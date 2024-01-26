@@ -13,13 +13,15 @@ struct sqlite3;
 
 namespace kyanite::editor {
 	enum class AssetType {
-		SPRITE,
-		MODEL,
-		MESH,
+		ANIMATION,
 		MATERIAL,
-		TEXTURE,
-		TERRAIN,
+		MESH,
+		MODEL,
+		SHADER,
 		SOUND,
+		SPRITE,
+		TERRAIN,
+		TEXTURE,
 		WORLD,
 	};
 
@@ -27,7 +29,7 @@ namespace kyanite::editor {
 	public:
 		AssetDatabase();
 		~AssetDatabase();
-		auto AddAsset(std::string uuid, std::string path) -> void;
+		auto AddAsset(std::string name, std::string path, AssetType type) -> std::string;
 		auto Load(std::filesystem::path path) -> void; 
 		auto LoadPackageList(std::string path) -> std::vector<assetpackages::AssetPackage*> override;
 		auto CheckIfPackageHasAsset(const assetpackages::AssetPackage* package, std::string path) -> bool override;

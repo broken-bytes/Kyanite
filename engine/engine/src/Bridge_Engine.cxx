@@ -5,6 +5,10 @@
 #include <assetpackages/AssetPackages.hxx>
 #include <assetpackages/IAssetLoader.hxx>
 #include <rendering/IMeshRenderer.hxx>
+#include <rendering/Rendering.hxx>
+#include <core/Core.hxx>
+#include <core/Logger.hxx>
+#include <core/ILogger.hxx>
 
 #include <SDL2/SDL.h>
 
@@ -12,7 +16,7 @@
 
 std::unique_ptr<kyanite::engine::Engine> engine;
 
-void Bridge_Engine_Init(NativePointer window, NativePointer assetLoader) {
+void Bridge_Engine_Init(NativePointer window, NativePointer assetLoader, enum Mode mode, NativePointer logger) {
 	engine = std::make_unique<kyanite::engine::Engine>();
 	if(window != nullptr) {
 		engine->window = window;
@@ -20,8 +24,17 @@ void Bridge_Engine_Init(NativePointer window, NativePointer assetLoader) {
 		SDL_CreateWindow("Kyanite", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, SDL_WINDOW_OPENGL);
 	}
 	auto assetLoaderPtr = reinterpret_cast<kyanite::engine::assetpackages::IAssetLoader*>(assetLoader);
+	auto loggerPtr = reinterpret_cast<kyanite::engine::core::ILogger*>(logger);
 
+	engine->assetLoader = std::shared_ptr<kyanite::engine::assetpackages::IAssetLoader>(assetLoaderPtr);
+	engine->logger = std::shared_ptr<kyanite::engine::core::ILogger>(loggerPtr);
 	engine->renderer = std::make_unique<rendering::Renderer>();
+
+	// Initilize subsystems
+	kyanite::engine::core::InitCore();
+	kyanite::engine::core::logger::SetLogger(engine->logger);
+	kyanite::engine::assetpackages::Initialize(engine->assetLoader);
+	kyanite::engine::rendering::Init(window);
 
 	auto meshRendererPtr = reinterpret_cast<kyanite::engine::rendering::IMeshRenderer*>(engine->renderer.get());
 	ecs::EntityRegistry::Init(meshRendererPtr);
