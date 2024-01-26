@@ -1,7 +1,6 @@
 #include "engine/Bridge_Engine.h"
 #include "engine/Engine.hxx"
 #include "engine/ecs/EntityRegistry.hxx"
-#include "engine/VendorSerializers/GlmSerializers.hxx"
 #include <assetpackages/AssetPackages.hxx>
 #include <assetpackages/IAssetLoader.hxx>
 #include <rendering/IMeshRenderer.hxx>

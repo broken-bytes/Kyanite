@@ -1,5 +1,6 @@
 #include "core/Core.hxx"
 #include "core/ILogger.hxx"
+#include "core/VendorSerializers/GlmSerializers.hxx"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_Vulkan.h>
@@ -27,6 +28,7 @@ namespace kyanite::engine::core {
 	}
 
 	auto SaveBufferToFile(std::string_view path, std::vector<uint8_t>& buffer) -> void {
+		std::filesystem::create_directories(std::filesystem::path(path).parent_path());
 		auto file = std::ofstream(std::filesystem::path(path));
 		file.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
 	}

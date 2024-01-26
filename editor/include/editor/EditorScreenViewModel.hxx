@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace kyanite::editor {
 	class EditorScreenViewModel {
@@ -33,6 +34,9 @@ namespace kyanite::editor {
 
 		template<typename T>
 		auto SaveMeta(std::string name, std::filesystem::path path, T& meta) -> void;
+
+		template<typename T>
+		auto SaveBlob(std::string uuid, T& blob) -> void;
 
 		auto SetupEditorEnvironment() -> void;
 	};

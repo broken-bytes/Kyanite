@@ -1,11 +1,17 @@
 #include "editor/EditorScreenViewModel.hxx"
 #include <engine/Bridge_Engine.h>
 #include <core/Core.hxx>
+#include <core/VendorSerializers/GlmSerializers.hxx>
+#include <rendering/Model.hxx>
 
 #include <cereal/cereal.hpp>
 #include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
 
 #include <sstream>
+#include <vector>
 
 namespace assetpackages = kyanite::engine::assetpackages;
 
@@ -67,6 +73,28 @@ namespace kyanite::editor {
 		kyanite::engine::core::SaveBufferToFile(metaPath, buffer);
 	}
 
+	template auto EditorScreenViewModel::SaveBlob<kyanite::engine::rendering::ModelData>(
+		std::string uuid,
+		kyanite::engine::rendering::ModelData& data
+	) -> void;
+
+	template<typename T>
+	auto EditorScreenViewModel::SaveBlob(std::string uuid, T& data) -> void {
+		std::stringstream ss;
+		{
+			cereal::BinaryOutputArchive archive(ss);
+			archive(data);
+		}
+
+		// Move string file data to buffer
+		std::vector<uint8_t> buffer;
+		buffer.resize(ss.str().size());
+		auto str = ss.str();
+		std::memcpy(buffer.data(), str.c_str(), str.size());
+		auto blobPath = (_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob";
+		kyanite::engine::core::SaveBufferToFile(blobPath, buffer);
+	}
+
 	auto EditorScreenViewModel::SetupEditorEnvironment() -> void {
 		_sourceWatchdog = std::make_unique<FileWatchdog>(_service->SourcePath(), std::chrono::milliseconds(100));
 		_sourceWatchdog->SetCallback([this](FileEvent event, std::filesystem::directory_entry file) {
@@ -99,9 +127,9 @@ namespace kyanite::editor {
 						data.first.name = name;
 
 						SaveMeta<meta::ModelMeta>(name, file.path(), data.first);
-						kyanite::engine::core::SaveBufferToFile(file.path().string(), data.second);
+						auto modelData = kyanite::engine::rendering::ModelData(data.second);
+						SaveBlob<kyanite::engine::rendering::ModelData>(uuid, modelData);
 					}
-
 				}
 				break;
 			case FileEvent::DELETED:

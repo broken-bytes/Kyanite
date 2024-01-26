@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Vertex.hxx"
+#include <core/VendorSerializers/GlmSerializers.hxx>
 
 #include <cereal/access.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
 #include <glm/glm.hpp>
 
 #include <cstdint>
@@ -14,6 +17,14 @@ namespace kyanite::engine::rendering {
 		std::string name;
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
+
+	private:
+		friend class cereal::access;
+
+		template <class Archive>
+		void serialize(Archive& Data) {
+			Data(name, vertices, indices);
+		}
 	};
 
 	struct Mesh {
