@@ -14,27 +14,34 @@
 #include <vector>
 
 namespace kyanite::engine::assetpackages {
+	enum class AssetType {
+		ANIMATION,
+		MATERIAL,
+		MESH,
+		MODEL,
+		SHADER,
+		SOUND,
+		SPRITE,
+		TERRAIN,
+		TEXTURE,
+		WORLD,
+	};
+
 	struct Asset {
+		std::string uuid;
+		std::string name;
 		std::string path;
-		std::string type;
-		size_t size;
-		size_t offset;
+		AssetType type;
+		int64_t time;
 
 		Asset() = default;
 
-		Asset(std::string_view path, std::string_view type, size_t size, size_t offset) :
+		Asset(std::string_view uuid, std::string name, std::string_view path, AssetType type, int64_t time) :
+			uuid(uuid),
+			name(name),
 			path(path),
 			type(type),
-			size(size),
-			offset(offset) {}
-
-	private:
-		friend class cereal::access;
-
-		template <class Archive>
-		void serialize(Archive& ar) {
-			ar(path, type, size, offset);
-		}
+			time(time) {}
 	};
 
 	// Asset packages are binary storage files for assets.

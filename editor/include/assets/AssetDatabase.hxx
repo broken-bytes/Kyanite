@@ -12,26 +12,14 @@ namespace assetpackages = kyanite::engine::assetpackages;
 struct sqlite3;
 
 namespace kyanite::editor {
-	enum class AssetType {
-		ANIMATION,
-		MATERIAL,
-		MESH,
-		MODEL,
-		SHADER,
-		SOUND,
-		SPRITE,
-		TERRAIN,
-		TEXTURE,
-		WORLD,
-	};
-
 	class AssetDatabase: public assetpackages::IAssetLoader {
 	public:
 		AssetDatabase();
 		~AssetDatabase();
-		auto AddAsset(std::string name, std::string path, AssetType type, std::filesystem::file_time_type time) -> std::string;
+		auto AddAsset(std::string name, std::string path, assetpackages::AssetType type, std::filesystem::file_time_type time) -> std::string;
 		auto UpdateAsset(std::string uuid, std::filesystem::file_time_type time) -> void;
 		auto RemoveAsset(std::string uuid) -> void;
+		auto GetAllAssets() -> std::vector<assetpackages::Asset>;
 		auto Load(std::filesystem::path path) -> void; 
 		auto GetModifiedTime(std::string uuid) -> std::time_t;
 		auto GetUuidForPath(std::string path) -> std::string;

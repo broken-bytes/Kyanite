@@ -115,7 +115,7 @@ namespace kyanite::editor {
 		auto uuid = _assetDatabase->AddAsset(
 			name,
 			file.path().string(),
-			AssetType::MODEL,
+			assetpackages::AssetType::MODEL,
 			file.last_write_time()
 		);
 		meta::ModelMeta meta;
@@ -160,6 +160,9 @@ namespace kyanite::editor {
 				}
 				break;
 			case FileEvent::DELETED:
+				if (file.is_regular_file()) {
+					HandleFileRemoved(file.path());
+				}
 				break;
 			case FileEvent::MODIFIED:
 				if (file.is_regular_file()) {
@@ -186,6 +189,14 @@ namespace kyanite::editor {
 			}
 
 			HandleData(file);
+		}
+
+		// Now we need to check if any files have been removed
+		auto assetDatabaseFiles = _assetDatabase->GetAllAssets();
+		for(auto& file : assetDatabaseFiles) {
+			if (!engine::core::CheckIfFileExists(file.path)) {
+				HandleFileRemoved(file.path);
+			}
 		}
 	}
 
@@ -245,11 +256,14 @@ namespace kyanite::editor {
 			// Now we need to remove the asset from the asset database
 			_assetDatabase->RemoveAsset(uuid);
 			// Now we need to remove the blob
-			engine::core::RemoveFile((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob");
+			if (engine::core::CheckIfFileExists((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob")) {
+				engine::core::RemoveFile((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob");
+			}
 
-			// Reimport the asset
-			std::filesystem::directory_entry entry(file.parent_path() / file.stem());
-			HandleFileAdded(entry);
+			// Reimport the asset if it exists
+			if (engine::core::CheckIfFileExists((file.parent_path() / file.stem()).string())) {
+				HandleFileAdded(std::filesystem::directory_entry((file.parent_path() / file.stem()).string()));
+			}
 		}
 		else {
 			std::string uuid = _assetDatabase->GetUuidForPath(file.string());
@@ -257,6 +271,12 @@ namespace kyanite::editor {
 			_assetDatabase->RemoveAsset(uuid);
 			// Also remove the blob
 			engine::core::RemoveFile((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob");
+
+			// Also remove the meta file if it exists
+			auto metaPath = file.string() + ".meta";
+			if (engine::core::CheckIfFileExists(metaPath)) {
+				engine::core::RemoveFile(metaPath);
+			}
 		}
 	}
 

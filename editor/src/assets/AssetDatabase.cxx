@@ -5,38 +5,38 @@
 
 namespace kyanite::editor {
 
-	auto AssetTypeToString(AssetType type) -> std::string {
+	auto AssetTypeToString(assetpackages::AssetType type) -> std::string {
 		std::string typeString = "";
 
 		switch (type) {
-		case AssetType::ANIMATION:
+		case assetpackages::AssetType::ANIMATION:
 			typeString = "ANIMATION";
 			break;
-		case AssetType::MATERIAL:
+		case assetpackages::AssetType::MATERIAL:
 			typeString = "MATERIAL";
 			break;
-		case AssetType::MESH:
+		case assetpackages::AssetType::MESH:
 			typeString = "MESH";
 			break;
-		case AssetType::MODEL:
+		case assetpackages::AssetType::MODEL:
 			typeString = "MODEL";
 			break;
-		case AssetType::SHADER:
+		case assetpackages::AssetType::SHADER:
 			typeString = "SHADER";
 			break;
-		case AssetType::SPRITE:
+		case assetpackages::AssetType::SPRITE:
 			typeString = "SPRITE";
 			break;
-		case AssetType::TERRAIN:
+		case assetpackages::AssetType::TERRAIN:
 			typeString = "TERRAIN";
 			break;
-		case AssetType::TEXTURE:
+		case assetpackages::AssetType::TEXTURE:
 			typeString = "TEXTURE";
 			break;
-		case AssetType::SOUND:
+		case assetpackages::AssetType::SOUND:
 			typeString = "SOUND";
 			break;
-		case AssetType::WORLD:
+		case assetpackages::AssetType::WORLD:
 			typeString = "WORLD";
 			break;
 		}
@@ -44,38 +44,38 @@ namespace kyanite::editor {
 		return typeString;
 	}
 
-	auto StringToAssetType(std::string typeStr) -> AssetType {
-		AssetType type = AssetType::ANIMATION;
+	auto StringToAssetType(std::string typeStr) -> assetpackages::AssetType {
+		assetpackages::AssetType type = assetpackages::AssetType::ANIMATION;
 
 		if (typeStr == "ANIMATION") {
-			type = AssetType::ANIMATION;
+			type = assetpackages::AssetType::ANIMATION;
 		}
 		else if (typeStr == "MATERIAL") {
-			type = AssetType::MATERIAL;
+			type = assetpackages::AssetType::MATERIAL;
 		}
 		else if (typeStr == "MESH") {
-			type = AssetType::MESH;
+			type = assetpackages::AssetType::MESH;
 		}
 		else if (typeStr == "MODEL") {
-			type = AssetType::MODEL;
+			type = assetpackages::AssetType::MODEL;
 		}
 		else if (typeStr == "SHADER") {
-			type = AssetType::SHADER;
+			type = assetpackages::AssetType::SHADER;
 		}
 		else if (typeStr == "SPRITE") {
-			type = AssetType::SPRITE;
+			type = assetpackages::AssetType::SPRITE;
 		}
 		else if (typeStr == "TERRAIN") {
-			type = AssetType::TERRAIN;
+			type = assetpackages::AssetType::TERRAIN;
 		}
 		else if (typeStr == "TEXTURE") {
-			type = AssetType::TEXTURE;
+			type = assetpackages::AssetType::TEXTURE;
 		}
 		else if (typeStr == "SOUND") {
-			type = AssetType::SOUND;
+			type = assetpackages::AssetType::SOUND;
 		}
 		else if (typeStr == "WORLD") {
-			type = AssetType::WORLD;
+			type = assetpackages::AssetType::WORLD;
 		}
 
 		return type;
@@ -89,7 +89,7 @@ namespace kyanite::editor {
 
 	}
 
-	auto AssetDatabase::AddAsset(std::string name, std::string path, AssetType type, std::filesystem::file_time_type time) -> std::string {
+	auto AssetDatabase::AddAsset(std::string name, std::string path, assetpackages::AssetType type, std::filesystem::file_time_type time) -> std::string {
 		// Generate a UUID for the asset
 		auto uuid = kyanite::engine::core::CreateUUID();
 
@@ -152,6 +152,57 @@ namespace kyanite::editor {
 		sqlite3_finalize(statement);
 	}
 
+	auto AssetDatabase::GetAllAssets() -> std::vector<assetpackages::Asset> {
+		std::vector<assetpackages::Asset> assets;
+
+		sqlite3_stmt* statement;
+		sqlite3_prepare_v3(
+			_database,
+			"SELECT uuid, name, path, type, updated_at FROM assets",
+			-1,
+			SQLITE_PREPARE_PERSISTENT,
+			&statement,
+			nullptr
+		);
+
+		while (sqlite3_step(statement) == SQLITE_ROW) {
+			auto uuidPtr = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
+			auto namePtr = reinterpret_cast<const char*>(sqlite3_column_text(statement, 1));
+			auto pathPtr = reinterpret_cast<const char*>(sqlite3_column_text(statement, 2));
+			auto typePtr = reinterpret_cast<const char*>(sqlite3_column_text(statement, 3));
+			auto time = sqlite3_column_int64(statement, 4);
+
+			std::string uuid = "";
+			std::string name = "";
+			std::string path = "";
+			std::string typeStr = "";
+
+			if (uuidPtr != nullptr) {
+				uuid = std::string(uuidPtr, strlen(uuidPtr));
+			}
+
+			if (namePtr != nullptr) {
+				name = std::string(namePtr, strlen(namePtr));
+			}
+
+			if (pathPtr != nullptr) {
+				path = std::string(pathPtr, strlen(pathPtr));
+			}
+
+			if (typePtr != nullptr) {
+				typeStr = std::string(typePtr, strlen(typePtr));
+			}
+
+			auto type = StringToAssetType(typeStr);
+
+			assets.push_back(assetpackages::Asset(uuid, name, path, type, time));
+		}
+
+		sqlite3_finalize(statement);
+
+		return assets;
+	}
+
 	auto AssetDatabase::Load(std::filesystem::path path) -> void {
 		auto dbPath = path / "assets.db";
 
@@ -201,7 +252,7 @@ namespace kyanite::editor {
 		sqlite3_finalize(statement);
 
 		std::string uuidStr = "";
-		if(uuidPtr != nullptr) {
+		if (uuidPtr != nullptr) {
 			uuidStr = std::string(uuidPtr, strlen(uuidPtr));
 		}
 

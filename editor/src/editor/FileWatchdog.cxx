@@ -51,6 +51,15 @@ namespace kyanite::editor {
 						}
 					}
 				}
+
+				// Now we need to check if any files have been removed
+				for (const auto& file : _files) {
+					if (std::find(currentEntries.begin(), currentEntries.end(), file) == currentEntries.end()) {
+						// File has been removed
+						_callback(FileEvent::DELETED, file);
+					}
+				}
+
 				_files = currentEntries;
 			}
 		});
