@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Meta.hxx"
+
 #include <cereal/access.hpp>
 #include <cereal/types/string.hpp>
 
@@ -7,9 +9,7 @@
 #include <vector>
 
 namespace kyanite::editor::meta {
-	struct ModelMeta {
-		std::string name;
-		std::string uuid;
+	struct ModelMeta: public meta::Meta {
 		std::vector<std::string> meshes;
 
 	private:

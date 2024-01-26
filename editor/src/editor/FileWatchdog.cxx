@@ -51,10 +51,9 @@ namespace kyanite::editor {
 						}
 					}
 				}
-
 				_files = currentEntries;
 			}
-			});
+		});
 	}
 
 	auto FileWatchdog::Stop() -> void {

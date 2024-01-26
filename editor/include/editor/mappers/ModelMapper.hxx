@@ -16,6 +16,6 @@ namespace kyanite::editor::mappers {
 
 		auto MapFbx(
 			std::vector<uint8_t> data
-		)->std::pair<kyanite::editor::meta::ModelMeta, std::vector<kyanite::engine::rendering::MeshData>>;
+		)-> std::vector<kyanite::engine::rendering::MeshData>;
 	};
 }

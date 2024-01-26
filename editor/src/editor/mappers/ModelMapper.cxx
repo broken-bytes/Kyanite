@@ -12,7 +12,7 @@ namespace rendering = kyanite::engine::rendering;
 
 auto kyanite::editor::mappers::ModelMapper::MapFbx(
 	std::vector<uint8_t> data
-) -> std::pair<kyanite::editor::meta::ModelMeta, std::vector<kyanite::engine::rendering::MeshData>> {
+) -> std::vector<kyanite::engine::rendering::MeshData> {
 	auto loader = kyanite::editor::loaders::FbxLoader();
 
 	return loader.LoadFromBuffer(data);

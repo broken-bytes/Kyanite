@@ -41,7 +41,7 @@ namespace kyanite::editor {
 			break;
 		}
 
-		return typeString;	
+		return typeString;
 	}
 
 	auto StringToAssetType(std::string typeStr) -> AssetType {
@@ -89,14 +89,14 @@ namespace kyanite::editor {
 
 	}
 
-	auto AssetDatabase::AddAsset(std::string name, std::string path, AssetType type) -> std::string {
+	auto AssetDatabase::AddAsset(std::string name, std::string path, AssetType type, std::filesystem::file_time_type time) -> std::string {
 		// Generate a UUID for the asset
 		auto uuid = kyanite::engine::core::CreateUUID();
 
 		sqlite3_stmt* statement;
 		sqlite3_prepare_v3(
 			_database,
-			"INSERT INTO assets (uuid, name, path, type) VALUES (?, ?, ?, ?)",
+			"INSERT INTO assets (uuid, name, path, type, updated_at) VALUES (?, ?, ?, ?, ?)",
 			-1,
 			SQLITE_PREPARE_PERSISTENT,
 			&statement,
@@ -107,11 +107,49 @@ namespace kyanite::editor {
 		sqlite3_bind_text(statement, 3, path.c_str(), -1, SQLITE_STATIC);
 		auto typeStr = AssetTypeToString(type);
 		sqlite3_bind_text(statement, 4, typeStr.c_str(), -1, SQLITE_STATIC);
+		auto timeSinceEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
+		sqlite3_bind_int64(statement, 5, timeSinceEpoch);
 
 		sqlite3_step(statement);
 		sqlite3_finalize(statement);
 
 		return uuid;
+	}
+
+	auto AssetDatabase::UpdateAsset(std::string uuid, std::filesystem::file_time_type time) -> void {
+		// Update the asset's modified time
+		sqlite3_stmt* statement;
+
+		sqlite3_prepare_v3(
+			_database,
+			"UPDATE assets SET updated_at = ? WHERE uuid = ?",
+			-1,
+			SQLITE_PREPARE_PERSISTENT,
+			&statement,
+			nullptr
+		);
+
+		sqlite3_bind_int64(statement, 1, std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count());
+		sqlite3_bind_text(statement, 2, uuid.c_str(), -1, SQLITE_STATIC);
+
+		sqlite3_step(statement);
+		sqlite3_finalize(statement);
+	}
+
+	auto AssetDatabase::RemoveAsset(std::string uuid) -> void {
+		sqlite3_stmt* statement;
+		sqlite3_prepare_v3(
+			_database,
+			"DELETE FROM assets WHERE uuid = ? OR path = ?",
+			-1,
+			SQLITE_PREPARE_PERSISTENT,
+			&statement,
+			nullptr
+		);
+		sqlite3_bind_text(statement, 1, uuid.c_str(), -1, SQLITE_STATIC);
+
+		sqlite3_step(statement);
+		sqlite3_finalize(statement);
 	}
 
 	auto AssetDatabase::Load(std::filesystem::path path) -> void {
@@ -125,11 +163,77 @@ namespace kyanite::editor {
 		}
 	}
 
+	auto AssetDatabase::GetModifiedTime(std::string uuid) -> std::time_t {
+		sqlite3_stmt* statement;
+		sqlite3_prepare_v3(
+			_database,
+			"SELECT updated_at FROM assets WHERE uuid = ?",
+			-1,
+			SQLITE_PREPARE_PERSISTENT,
+			&statement,
+			nullptr
+		);
+
+		sqlite3_bind_text(statement, 1, uuid.c_str(), -1, SQLITE_STATIC);
+
+		sqlite3_step(statement);
+		auto time = sqlite3_column_int64(statement, 0);
+		sqlite3_finalize(statement);
+
+		return time;
+	}
+
+	auto AssetDatabase::GetUuidForPath(std::string path) -> std::string {
+		sqlite3_stmt* statement;
+		sqlite3_prepare_v3(
+			_database,
+			"SELECT uuid FROM assets WHERE path = ?",
+			-1,
+			SQLITE_PREPARE_PERSISTENT,
+			&statement,
+			nullptr
+		);
+
+		sqlite3_bind_text(statement, 1, path.c_str(), -1, SQLITE_STATIC);
+
+		sqlite3_step(statement);
+		auto uuidPtr = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
+		sqlite3_finalize(statement);
+
+		std::string uuidStr = "";
+		if(uuidPtr != nullptr) {
+			uuidStr = std::string(uuidPtr, strlen(uuidPtr));
+		}
+
+		return uuidStr;
+	}
+
 	auto AssetDatabase::LoadPackageList(std::string path)->std::vector<assetpackages::AssetPackage*> {
 		return {};
 	}
 
 	auto AssetDatabase::CheckIfPackageHasAsset(const assetpackages::AssetPackage* package, std::string path) -> bool {
+		// TODO: Check if package has asset via uuid
+		sqlite3_stmt* statement;
+		sqlite3_prepare_v3(
+			_database,
+			"SELECT uuid FROM assets WHERE uuid = ?",
+			-1,
+			SQLITE_PREPARE_PERSISTENT,
+			&statement,
+			nullptr
+		);
+
+		sqlite3_bind_text(statement, 1, path.c_str(), -1, SQLITE_STATIC);
+
+		sqlite3_step(statement);
+		auto uuid = sqlite3_column_text(statement, 0);
+		sqlite3_finalize(statement);
+
+		if (uuid == nullptr) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -143,7 +247,7 @@ namespace kyanite::editor {
 	}
 
 	auto AssetDatabase::CreateDatabase(std::filesystem::path path) -> void {
-		if(!kyanite::engine::core::CheckIfFileExists(path.string())) {
+		if (!kyanite::engine::core::CheckIfFileExists(path.string())) {
 			kyanite::engine::core::CreateFile(path.string());
 		}
 
@@ -159,7 +263,7 @@ namespace kyanite::editor {
 		// - Asset Blob Path
 		if (sqlite3_exec(
 			_database,
-			"CREATE TABLE IF NOT EXISTS assets (uuid TEXT PRIMARY KEY, name TEXT, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, type TEXT, path TEXT)", nullptr, nullptr, nullptr) != 0) {
+			"CREATE TABLE IF NOT EXISTS assets (uuid TEXT PRIMARY KEY, name TEXT, updated_at INT8, type TEXT, path TEXT)", nullptr, nullptr, nullptr) != 0) {
 			throw std::runtime_error("Failed to create assets table");
 		}
 

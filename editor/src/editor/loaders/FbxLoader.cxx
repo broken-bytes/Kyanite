@@ -11,8 +11,7 @@ namespace kyanite::editor::loaders {
 	FbxLoader::~FbxLoader() {
 	}
 
-	auto FbxLoader::LoadFromBuffer(std::vector<uint8_t> buffer) -> std::pair<meta::ModelMeta, std::vector<engine::rendering::MeshData>> {
-		meta::ModelMeta meta;
+	auto FbxLoader::LoadFromBuffer(std::vector<uint8_t> buffer) -> std::vector<engine::rendering::MeshData> {
 		std::vector<engine::rendering::MeshData> meshes = {};
 
 		Assimp::Importer importer;
@@ -61,6 +60,6 @@ namespace kyanite::editor::loaders {
 			indices.clear();
 		}
 
-		return std::make_pair(meta, meshes);
+		return meshes;
 	}
 }

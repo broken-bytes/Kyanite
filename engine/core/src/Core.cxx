@@ -70,6 +70,20 @@ namespace kyanite::engine::core {
 		file.close();
 	}
 
+	auto RemoveFile(std::string path) -> void {
+		std::filesystem::remove(std::filesystem::path(path));
+	}
+
+	auto GetFileList(std::filesystem::path path) -> std::vector<std::filesystem::directory_entry> {
+		auto files = std::vector<std::filesystem::directory_entry>();
+
+		for (auto& p : std::filesystem::directory_iterator(path)) {
+			files.push_back(p);
+		}
+
+		return files;
+	}
+
 	auto CheckIfFileExists(std::string path) -> bool {
 		return std::filesystem::exists(std::filesystem::path(path));
 	}

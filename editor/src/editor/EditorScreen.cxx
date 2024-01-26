@@ -30,6 +30,7 @@ namespace kyanite::editor {
 		auto worldView = new WorldView(this);
 		SetupLayout(worldView);
 		SetupEngine(worldView->winId());
+		_viewModel->SetupEditorEnvironment();
 	}
 
 	EditorScreen::~EditorScreen() {

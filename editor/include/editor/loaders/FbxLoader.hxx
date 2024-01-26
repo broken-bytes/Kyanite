@@ -12,6 +12,6 @@ namespace kyanite::editor::loaders {
 	public:
 		FbxLoader();
 		~FbxLoader();
-		auto LoadFromBuffer(std::vector<uint8_t> buffer) -> std::pair<meta::ModelMeta, std::vector<engine::rendering::MeshData>>;
+		auto LoadFromBuffer(std::vector<uint8_t> buffer) -> std::vector<engine::rendering::MeshData>;
 	};
 }
