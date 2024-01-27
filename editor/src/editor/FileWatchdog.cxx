@@ -39,7 +39,7 @@ namespace kyanite::editor {
 				for (const auto& file : currentEntries) {
 					if (std::find(_files.begin(), _files.end(), file) == _files.end()) {
 						// File has been added
-						_callback(FileEvent::ADDED, file);
+						FileAdded(file);
 					}
 					else {
 						// File does exist, check if it has been modified
@@ -47,7 +47,7 @@ namespace kyanite::editor {
 							std::filesystem::last_write_time(file) !=
 							std::filesystem::last_write_time(*std::find(_files.begin(), _files.end(), file))
 							) {
-							_callback(FileEvent::MODIFIED, file);
+							FileModified(file);
 						}
 					}
 				}
@@ -56,7 +56,7 @@ namespace kyanite::editor {
 				for (const auto& file : _files) {
 					if (std::find(currentEntries.begin(), currentEntries.end(), file) == currentEntries.end()) {
 						// File has been removed
-						_callback(FileEvent::DELETED, file);
+						FileDeleted(file);
 					}
 				}
 
@@ -67,9 +67,5 @@ namespace kyanite::editor {
 
 	auto FileWatchdog::Stop() -> void {
 
-	}
-
-	auto FileWatchdog::SetCallback(std::function<void(FileEvent, std::filesystem::directory_entry)> callback) -> void {
-		_callback = callback;
 	}
 }

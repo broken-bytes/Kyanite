@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qwidget.h>
+
 #include <chrono>
 #include <filesystem>
 #include <functional>
@@ -13,7 +15,8 @@ namespace kyanite::editor {
 		MODIFIED
 	};
 
-	class FileWatchdog {
+	class FileWatchdog: public QObject {
+		Q_OBJECT;
 	public:
 		FileWatchdog(std::filesystem::path path, std::chrono::milliseconds interval);
 		~FileWatchdog();
@@ -21,13 +24,15 @@ namespace kyanite::editor {
 		auto Start() -> void;
 		auto Stop() -> void;
 
-		auto SetCallback(std::function<void(FileEvent, std::filesystem::directory_entry)> callback) -> void;
+	signals:
+		auto FileAdded(std::filesystem::directory_entry file) -> void;
+		auto FileDeleted(std::filesystem::directory_entry file) -> void;
+		auto FileModified(std::filesystem::directory_entry file) -> void;
 
 	private:
 		std::thread _watchThread;
 		std::filesystem::path _path;
 		std::vector<std::filesystem::directory_entry> _files;
-		std::function<void(FileEvent, std::filesystem::directory_entry)> _callback;
 		bool _running;
 		std::chrono::milliseconds _interval;
 	};

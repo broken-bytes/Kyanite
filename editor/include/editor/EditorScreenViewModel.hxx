@@ -7,13 +7,15 @@
 #include <assets/AssetDatabase.hxx>
 
 #include <qwidget.h>
+#include <qprogressdialog.h>
 
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace kyanite::editor {
-	class EditorScreenViewModel {
+	class EditorScreenViewModel: public QObject {
+		Q_OBJECT;
 	public:
 		EditorScreenViewModel(
 			std::unique_ptr<ProjectService> service,
@@ -25,6 +27,11 @@ namespace kyanite::editor {
 		auto CreateProject(const std::string& path, std::string& name) -> Project;
 		auto InitializeEngine(WId window) -> void;
 		auto SetupEditorEnvironment() -> void;
+
+	public slots:
+		auto OnFileAdded(std::filesystem::directory_entry file) -> void;
+		auto OnFileModified(std::filesystem::directory_entry file) -> void;
+		auto OnFileRemoved(std::filesystem::path path) -> void;
 
 	private:
 		std::unique_ptr<ProjectService> _service;
@@ -52,5 +59,6 @@ namespace kyanite::editor {
 
 		auto HandleMetaData(std::filesystem::directory_entry file) -> void;
 		auto HandleData(std::filesystem::directory_entry file) -> void;
+		auto ShowAssetProcessingDialog() -> QProgressDialog*;
 	};
 }

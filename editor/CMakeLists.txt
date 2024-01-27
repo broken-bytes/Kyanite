@@ -1,7 +1,7 @@
 FILE(GLOB_RECURSE HEADERS "include/*.h*")
 FILE(GLOB_RECURSE SRC "src/*.c*")
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Concurrent)
 find_package(unofficial-sqlite3 REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 
@@ -16,7 +16,7 @@ target_include_directories(Editor PRIVATE ${CMAKE_SOURCE_DIR}/engine/shared/incl
 target_include_directories(Editor PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/include)
 target_include_directories(Editor PRIVATE ${CMAKE_SOURCE_DIR}/engine/rendering/include)
 
-target_link_libraries(Editor PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets unofficial::sqlite3::sqlite3 assimp::assimp)
+target_link_libraries(Editor PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent unofficial::sqlite3::sqlite3 assimp::assimp)
 
 
 # Link all engine libraries
