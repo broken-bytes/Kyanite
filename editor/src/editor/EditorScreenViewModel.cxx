@@ -252,7 +252,8 @@ namespace kyanite::editor {
 		if (file.extension() == ".meta") {
 			// Delete the asset via its path since we don't have the uuid anymore
 			// Get the uuid from the asset database
-			auto uuid = _assetDatabase->GetUuidForPath(file.string());
+			auto filePath = file.parent_path() / file.stem();
+			auto uuid = _assetDatabase->GetUuidForPath(filePath.string());
 			// Now we need to remove the asset from the asset database
 			_assetDatabase->RemoveAsset(uuid);
 			// Now we need to remove the blob

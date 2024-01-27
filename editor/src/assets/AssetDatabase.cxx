@@ -218,7 +218,7 @@ namespace kyanite::editor {
 		sqlite3_stmt* statement;
 		sqlite3_prepare_v3(
 			_database,
-			"SELECT updated_at FROM assets WHERE uuid = ?",
+			"SELECT updated_at FROM assets WHERE uuid = ? LIMIT 1",
 			-1,
 			SQLITE_PREPARE_PERSISTENT,
 			&statement,
@@ -238,7 +238,7 @@ namespace kyanite::editor {
 		sqlite3_stmt* statement;
 		sqlite3_prepare_v3(
 			_database,
-			"SELECT uuid FROM assets WHERE path = ?",
+			"SELECT uuid FROM assets WHERE path = ? LIMIT 1",
 			-1,
 			SQLITE_PREPARE_PERSISTENT,
 			&statement,
@@ -246,17 +246,19 @@ namespace kyanite::editor {
 		);
 
 		sqlite3_bind_text(statement, 1, path.c_str(), -1, SQLITE_STATIC);
+		std::string uuid = "";
 
-		sqlite3_step(statement);
-		auto uuidPtr = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
-		sqlite3_finalize(statement);
-
-		std::string uuidStr = "";
-		if (uuidPtr != nullptr) {
-			uuidStr = std::string(uuidPtr, strlen(uuidPtr));
+		while (sqlite3_step(statement) == SQLITE_ROW) {
+			const char* uuidPtr = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
+			if (uuidPtr != nullptr) {
+				uuid = uuidPtr;
+				break; // Assuming only one UUID is expected
+			}
 		}
 
-		return uuidStr;
+		sqlite3_finalize(statement);
+
+		return uuid;
 	}
 
 	auto AssetDatabase::LoadPackageList(std::string path)->std::vector<assetpackages::AssetPackage*> {
