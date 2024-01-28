@@ -1,6 +1,7 @@
 #include "engine/ecs/EntityRegistry.hxx"
 #include "engine/ecs/systems/RenderSystem.hxx"
 #include <rendering/IMeshRenderer.hxx>
+#include <core/Core.hxx>
 
 #define FLECS_CORE
 #define FLECS_SYSTEM
@@ -25,8 +26,18 @@ namespace ecs::EntityRegistry {
 	
 	auto Init(rendering::IMeshRenderer* renderer, bool debugServer) -> void {
 		renderSystem = std::make_unique<systems::RenderSystem>(renderer);
-		world.set<flecs::Rest>({ });
-		world.import<flecs::monitor>();
+
+		// If we are in debug mode, we want to start the debug server and load all component metadata
+		if (debugServer) {
+			world.set<flecs::Rest>({ });
+			world.import<flecs::monitor>();
+			auto metafiles = kyanite::engine::core::GetFileList(std::filesystem::current_path() / "meta");
+			for (auto& file : metafiles) {
+				auto data = kyanite::engine::core::LoadFileToBuffer(file.path().string());
+				std::string value(data.begin(), data.end());
+				world.plecs_from_str((file.path().stem()).string().c_str(), value.c_str());
+			}
+		}
 	}
 
 	auto GetRegistry() -> ecs_world_t* {
@@ -38,7 +49,7 @@ namespace ecs::EntityRegistry {
 	}
 
 	auto DestroyEntity(ecs_entity_t entity) -> void {
-		world.delete_with(entity);
+		world.entity(entity).destruct();
 	}
 
 	auto CreateComponent(std::string name, size_t size, size_t alignment) -> ecs_entity_t {
@@ -47,12 +58,20 @@ namespace ecs::EntityRegistry {
 		desc.type.size = size;
 		desc.type.alignment = alignment;
 		desc.type.name = name.c_str();
+
+		ecs_entity_desc_t entityDesc = {};
+		entityDesc.name = name.c_str();
+		desc.entity = ecs_entity_init(world, &entityDesc);
 		
 		return ecs_component_init(world, &desc);
 	}
 
 	auto AddComponent(ecs_entity_t entity, ecs_entity_t component) -> void {
 		ecs_add_id(world, entity, component);
+	}
+
+	auto SetComponent(ecs_entity_t entity, ecs_entity_t component, void* data) -> void {
+		world.entity(entity).set_ptr(component, data);
 	}
 
 	auto RemoveComponent(ecs_entity_t entity, ecs_entity_t component) -> void {

@@ -47,6 +47,14 @@ extern "C" {
 	*/
 	EXPORTED void Bridge_Engine_AddComponent(uint64_t entity, uint64_t component);
 
+    /**
+    * @brief Sets a component of an entity
+    * @param entity The entity to use
+    * @param component The component to set
+    * @param data The data to set the component to
+    */
+    EXPORTED void Bridge_Engine_SetComponent(uint64_t entity, uint64_t component, void* data);
+
 	/**
 	* @brief Removes a component from an entity
 	* @param entity The entity to remove the component from

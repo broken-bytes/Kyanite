@@ -9,6 +9,7 @@ public struct Kyanite {
         let entity = Entity(name: "Test1")
         entity.addComponent(TransformComponent())
         let entity2 = Entity(name: "Test2")
+        entity2.addComponent(TransformComponent())
 
         let engine = Engine()
         engine.start()
@@ -18,3 +19,8 @@ public struct Kyanite {
         _ComponentRegistry.shared._register(TransformComponent())
     }
 }
+
+// Macros
+@attached(member)
+@attached(extension, conformances: Component, Hashable)
+public macro Component() = #externalMacro(module: "Macros", type: "ComponentMacro")

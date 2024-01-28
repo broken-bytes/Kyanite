@@ -61,6 +61,10 @@ void Bridge_Engine_AddComponent(uint64_t entity, uint64_t component) {
 	ecs::EntityRegistry::AddComponent(entity, component);
 }
 
+void Bridge_Engine_SetComponent(uint64_t entity, uint64_t component, void* data) {
+	ecs::EntityRegistry::SetComponent(entity, component, data);
+}
+
 void Bridge_Engine_RemoveComponent(uint64_t entity, uint64_t component) {
 
 }

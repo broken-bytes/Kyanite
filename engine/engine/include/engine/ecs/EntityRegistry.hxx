@@ -60,6 +60,14 @@ namespace ecs::EntityRegistry {
 	auto AddComponent(ecs_entity_t entity, ecs_entity_t type) -> void;
 
 	/**
+	* @brief Sets a component on an entity
+	* @param entity The entity to set the component on
+	* @param component The component to set
+	* @param data The data to set the component to
+	*/
+	auto SetComponent(ecs_entity_t entity, ecs_entity_t component, void* data) -> void;
+
+	/**
 	* @brief Removes a component from an entity
 	* @param entity The entity to remove the component from
 	*/
