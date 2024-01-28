@@ -11,9 +11,15 @@
 
 #include <SDL2/SDL.h>
 
+#include <map>
 #include <memory>
 
 std::unique_ptr<kyanite::engine::Engine> engine;
+
+// Store all the component types in a map of int -> uint64_t
+// The int is the hash value coming from swift and the uint64_t is the component ID
+// This is so we can easily get the component ID from the hash value
+std::map<int64_t, uint64_t> componentTypes;
 
 void Bridge_Engine_Init(NativePointer window, NativePointer assetLoader, enum Mode mode, NativePointer logger) {
 	engine = std::make_unique<kyanite::engine::Engine>();
@@ -36,11 +42,15 @@ void Bridge_Engine_Init(NativePointer window, NativePointer assetLoader, enum Mo
 	kyanite::engine::rendering::Init(window);
 
 	auto meshRendererPtr = reinterpret_cast<kyanite::engine::rendering::IMeshRenderer*>(engine->renderer.get());
-	ecs::EntityRegistry::Init(meshRendererPtr);
+	ecs::EntityRegistry::Init(meshRendererPtr, mode == Mode::EDITOR);
 }
 
-uint64_t Bridge_Engine_CreateEntity() {	
-	return ecs::EntityRegistry::CreateEntity();
+void Bridge_Engine_Update(float delta) {
+	ecs::EntityRegistry::Update(delta);
+}
+
+uint64_t Bridge_Engine_CreateEntity(const char* name) {
+	return ecs::EntityRegistry::CreateEntity(name);
 }
 
 void Bridge_Engine_DestroyEntity(uint64_t entity) {
@@ -55,9 +65,8 @@ void Bridge_Engine_RemoveComponent(uint64_t entity, uint64_t component) {
 
 }
 
-uint64_t Bridge_Engine_RegisterComponent(size_t size) {
-	return 0;
-	// TODO: Implement this function and return the component ID
+uint64_t Bridge_Engine_RegisterComponent(const char* name, size_t size, size_t alignment) {
+	return ecs::EntityRegistry::CreateComponent(name, size, alignment);
 }
 
 void Bridge_Engine_RegisterSystem(void* systemFuncPtr) {

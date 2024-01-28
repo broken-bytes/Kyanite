@@ -2,12 +2,18 @@
 
 #include <rendering/IMeshRenderer.hxx>
 
+#define FLECS_CORE
 #define FLECS_SYSTEM
+#define FLECS_PIPELINE
+#define FLECS_META
 #define FLECS_META_C
 #define FLECS_PIPELINE
+#define FLECS_HTTP
 #define FLECS_TIMER
 #define FLECS_REST
 #define FLECS_STATS
+#define FLECS_MONITOR
+#define FLECS_CPP
 #include <flecs.h>
 
 #include <stdint.h>
@@ -18,7 +24,7 @@ namespace ecs::EntityRegistry {
 	/**
 	* @brief Initializes the entity registry
 	*/
-	auto Init(rendering::IMeshRenderer* renderer) -> void;
+	auto Init(rendering::IMeshRenderer* renderer, bool debugServer) -> void;
 
 	/**
 	* @brief Gets the entity registry
@@ -30,7 +36,7 @@ namespace ecs::EntityRegistry {
 	* @brief Creates an entity
 	* @return The created entity
 	*/
-	auto CreateEntity() -> ecs_entity_t;
+	auto CreateEntity(std::string name) -> ecs_entity_t;
 
 	/**
 	* @brief Destroys an entity
@@ -44,7 +50,7 @@ namespace ecs::EntityRegistry {
 	* @param alignment The alignment of the component
 	* @return The created component
 	*/
-	auto CreateComponent(size_t size, size_t alignment) -> ecs_entity_t;
+	auto CreateComponent(std::string name, size_t size, size_t alignment) -> ecs_entity_t;
 
 	/**
 	* @brief Adds a component to an entity
@@ -58,4 +64,10 @@ namespace ecs::EntityRegistry {
 	* @param entity The entity to remove the component from
 	*/
 	auto RemoveComponent(ecs_entity_t entity, ecs_entity_t component) -> void;
+
+	/**
+	* @brief Advances the ecs world by delta time
+	* @param delta The delta time
+	*/
+	auto Update(float delta) -> void;
 }

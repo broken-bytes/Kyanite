@@ -11,7 +11,7 @@ extern "C" {
 
 	enum Mode {
 		EDITOR,
-        GAME_DEBUG,
+		GAME_DEBUG,
 		GAME_RELEASE
 	};
 
@@ -21,11 +21,17 @@ extern "C" {
 	EXPORTED void Bridge_Engine_Init(NativePointer window, NativePointer assetLoader, enum Mode mode, NativePointer logger);
 
 	/**
+	* @brief Updates the engine
+	* @param delta The time since the last frame
+	*/
+	EXPORTED void Bridge_Engine_Update(float delta);
+
+	/**
 	 * @brief Creates a new entity
 	 *
 	 * @return The new entity
 	 */
-	EXPORTED uint64_t Bridge_Engine_CreateEntity();
+	EXPORTED uint64_t Bridge_Engine_CreateEntity(const char* name);
 
 	/**
 	 * @brief Destroys an entity
@@ -39,7 +45,7 @@ extern "C" {
 	* @param entity The entity to add the component to
 	* @param component The component to add
 	*/
-    EXPORTED void Bridge_Engine_AddComponent(uint64_t entity, uint64_t component);
+	EXPORTED void Bridge_Engine_AddComponent(uint64_t entity, uint64_t component);
 
 	/**
 	* @brief Removes a component from an entity
@@ -51,9 +57,10 @@ extern "C" {
 	/**
 	* @brief Registers a component type
 	* @param size The size of the component type
+	* @param alignment The alignment of the component type
 	* @return The component type
 	*/
-	EXPORTED uint64_t Bridge_Engine_RegisterComponent(size_t size);
+	EXPORTED uint64_t Bridge_Engine_RegisterComponent(const char* name, size_t size, size_t alignment);
 
 	/**
 	* @brief Registers a system

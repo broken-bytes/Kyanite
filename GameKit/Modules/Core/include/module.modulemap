@@ -1,5 +1,0 @@
-module Core {
-    header "Core.hxx"
-    requires cplusplus
-    link "Core"
-}
