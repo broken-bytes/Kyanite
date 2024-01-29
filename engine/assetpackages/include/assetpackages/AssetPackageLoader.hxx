@@ -13,6 +13,7 @@ namespace kyanite::engine::assetpackages {
 		AssetPackageLoader();
 		~AssetPackageLoader();
 
+		auto LoadFileListForPackage(const AssetPackage* package) -> std::map<std::string, std::string>;
 		auto LoadPackageList(std::string path) -> std::vector<AssetPackage*>;
 		auto CheckIfPackageHasAsset(const AssetPackage* package, std::string path) -> bool;
 		auto LoadPackage(std::string path) -> AssetPackage*;

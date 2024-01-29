@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -8,6 +9,7 @@ namespace kyanite::engine::assetpackages {
 
 	class IAssetLoader {
 	public:
+		virtual auto LoadFileListForPackage(const AssetPackage* package) -> std::map<std::string, std::string> = 0;
 		virtual auto LoadPackageList(std::string path) -> std::vector<AssetPackage*> = 0;
 		virtual auto CheckIfPackageHasAsset(const AssetPackage* package, std::string path) -> bool = 0;
 		virtual auto LoadPackage(std::string path) -> AssetPackage* = 0;

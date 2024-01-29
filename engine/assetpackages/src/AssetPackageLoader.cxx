@@ -5,6 +5,7 @@
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/memory.hpp>
+#include <cereal/types/map.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/archives/json.hpp>
@@ -24,6 +25,20 @@ namespace kyanite::engine::assetpackages {
 
 	AssetPackageLoader::~AssetPackageLoader() {
 
+	}
+
+	auto AssetPackageLoader::LoadFileListForPackage(const AssetPackage* package) -> std::map<std::string, std::string> {
+		auto mapping = core::LoadFileFromArchive(package->_path, "mapping.json");
+		std::stringstream ss;
+		ss.write(reinterpret_cast<const char*>(mapping.data()), mapping.size());
+
+		std::map<std::string, std::string> map;
+		{
+			cereal::JSONInputArchive archive(ss);
+			archive(map);
+		}
+
+		return map;
 	}
 
 	auto AssetPackageLoader::LoadPackageList(std::string path) -> std::vector<AssetPackage*> {

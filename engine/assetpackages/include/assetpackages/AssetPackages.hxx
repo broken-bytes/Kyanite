@@ -5,6 +5,7 @@
 #include <shared/Exported.hxx>
 #include <shared/Serializable.hxx>
 
+#include <map>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -20,12 +21,19 @@ namespace kyanite::engine::assetpackages {
 	EXPORTED auto Initialize(std::shared_ptr<IAssetLoader> loader) -> void;
 
 	/**
+		@brief Loads a list of files from a directory
+		@param package The package
+		@return The mapping of the files to their UUIDs
+	*/
+	EXPORTED auto LoadFileListForPackage(const AssetPackage* package) -> std::map<std::string, std::string>;
+	
+	/**
 		@brief Loads an asset from a file
 		@param path The path to the asset file
 		@return The loaded asset
 		@note This function is not type safe, and will return a void pointer. Used internally by the engine. Caller clears the memory
 	*/
-	auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> void*;
+	EXPORTED auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> void*;
 
 	/**
 		@brief Loads a package from a file
@@ -41,7 +49,7 @@ namespace kyanite::engine::assetpackages {
 		@param path The path to the asset
 		@return Whether the package has the asset
 	*/
-	EXPORTED auto PackageHasAsset(const AssetPackage* package, std::string path) -> bool;
+	EXPORTED auto PackageHasAsset(const AssetPackage* package, std::string uuid) -> bool;
 
 	/**
 		@brief Loads an asset from the package
@@ -50,7 +58,7 @@ namespace kyanite::engine::assetpackages {
 		@return The loaded asset
 	*/
 	template<typename T>
-	EXPORTED auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> T;
+	EXPORTED auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> T;
 
 	/**
 		@brief Creates a new package

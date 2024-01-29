@@ -1,6 +1,6 @@
 import Foundation
 
-public class Mesh {
+public class Shader {
     internal var uuid: String
 
     internal init(uuid: String) {

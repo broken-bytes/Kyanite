@@ -261,8 +261,20 @@ namespace kyanite::editor {
 		return uuid;
 	}
 
+	auto AssetDatabase::LoadFileListForPackage(const assetpackages::AssetPackage* package) -> std::map<std::string, std::string> {
+		auto assets = GetAllAssets();
+		std::map<std::string, std::string> fileList;
+
+		for (auto& asset : assets) {
+			fileList.emplace(asset.uuid, asset.path);
+		}
+
+		return fileList;
+	}
+
 	auto AssetDatabase::LoadPackageList(std::string path)->std::vector<assetpackages::AssetPackage*> {
-		return {};
+		// The editor has no concept of packages, so we just return an empty vector
+		return { nullptr };
 	}
 
 	auto AssetDatabase::CheckIfPackageHasAsset(const assetpackages::AssetPackage* package, std::string path) -> bool {

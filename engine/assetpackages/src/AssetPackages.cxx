@@ -24,6 +24,10 @@ namespace kyanite::engine::assetpackages {
 		}
 	}
 
+	auto LoadFileListForPackage(const AssetPackage* package) -> std::map<std::string, std::string> {
+		return assetLoader->LoadFileListForPackage(package);
+	}
+
 	auto LoadPackage(const std::string path) -> AssetPackage* {
 		return assetLoader->LoadPackage(path);
 	}
@@ -32,18 +36,18 @@ namespace kyanite::engine::assetpackages {
 		return assetLoader->CheckIfPackageHasAsset(package, path);
 	}
 
-	template auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> audio::AudioClip;
-	template auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> rendering::Material;
-	template auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> rendering::Mesh;
-	template auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> rendering::Shader;
-	template auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> rendering::Texture;
+	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> audio::AudioClip;
+	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::Material;
+	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::Mesh;
+	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::Shader;
+	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::Texture;
 
 	template <typename T>
-	auto LoadAssetFromPackage(const AssetPackage* package, std::string path) -> T {
+	auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> T {
 		T data;
 
 		try {
-			auto asset = AssetPackageLoader().LoadAsset(package, path);
+			auto asset = AssetPackageLoader().LoadAsset(package, uuid);
 			std::stringstream stream(std::string(asset.begin(), asset.end()));
 			cereal::BinaryInputArchive archive(stream);
 			archive(data);

@@ -17,7 +17,7 @@ public struct StringifyMacro: ExpressionMacro {
     }
 }
 
-public struct ComponentMacro: MemberMacro, ExtensionMacro {
+public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro {
     public static func expansion(
         of node: SwiftSyntax.AttributeSyntax, 
         attachedTo declaration: some SwiftSyntax.DeclGroupSyntax, 
@@ -31,6 +31,40 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro {
         ]
     }
 
+    public static func expansion(of node: SwiftSyntax.AttributeSyntax, attachedTo declaration: some SwiftSyntax.DeclGroupSyntax, providingAttributesFor member: some SwiftSyntax.DeclSyntaxProtocol, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.AttributeSyntax] {
+        // Generate attributes when inside the editor
+        #if EDITOR        
+        guard let structDecl = declaration.as(StructDeclSyntax.self) else {
+            fatalError("Component macro can only be used on structs")
+        }
+
+        // Now get all members and add attributes if they are public
+
+        let members = structDecl.memberBlock.members        
+
+        var decls: [DeclSyntax] = []
+        for member in members {
+            if let variable = member.as(MemberBlockItemSyntax.self) {
+                guard 
+                    let variable = variable.decl.as(VariableDeclSyntax.self),
+                    let name = variable.bindings.first?.pattern.description,
+                    let type = variable.bindings.first?.typeAnnotation?.type.description,
+                    let access = variable.modifiers?.first?.name.description
+                else {
+                    fatalError("Component member invalid")
+                }
+
+                decls.append(DeclSyntax("@Reference()"))
+            }
+        }
+
+        return decls
+        #endif
+
+        // In engine mode we don't want to generate any attributes
+        return []
+    }
+
     public static func expansion(
         of node: AttributeSyntax, 
         providingMembersOf declaration: some DeclGroupSyntax, 
@@ -42,7 +76,8 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro {
         }
 
         var metadata = "using flecs.meta"
-        metadata += "\n\nStruct \(structDecl.name.text) {\n"
+        metadata += "\n\n@brief \(structDecl.name.text) component"
+        metadata += "Struct \(structDecl.name.text) {\n"
 
         let members = structDecl.memberBlock.members        
 
@@ -69,25 +104,25 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro {
                 switch type {
                     // Builtin types are always allowed
                 case "Int8":
-                    metadata += "   \(name) :- i8\n"
+                    metadata += "   \(name) :- {i8}\n"
                     break
                 case "Int16":
-                    metadata += "   \(name) :- i16\n"
+                    metadata += "   \(name) :- {i16}\n"
                     break
                 case "Int32":
-                    metadata += "   \(name) :- i32\n"
+                    metadata += "   \(name) :- {i32}\n"
                     break
                 case "Int64":
-                    metadata += "   \(name) :- i64\n"
+                    metadata += "   \(name) :- {i64}\n"
                     break
                 case "Float":
-                    metadata += "   \(name) :- f32\n"
+                    metadata += "   \(name) :- {f32}\n"
                     break
                 case "Double":
-                    metadata += "   \(name) :- f64\n"
+                    metadata += "   \(name) :- {f64}\n"
                     break
                 case "Bool":
-                    metadata += "   \(name) :- bool\n"
+                    metadata += "   \(name) :- {bool}\n"
                     break
                 default:
                     // We just assume that the type is valid because we can't check it

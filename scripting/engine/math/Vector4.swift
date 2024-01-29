@@ -14,7 +14,7 @@ public struct Vec4<T> where T: Hashable, T: Comparable, T: Numeric {
     }
 }
 
-typealias Vector4 = Vec4<Float>
+public typealias Vector4 = Vec4<Float>
 
 extension Vec4: Hashable {
     public static func == (lhs: Vec4<T>, rhs: Vec4<T>) -> Bool {
