@@ -104,3 +104,7 @@ yarn.lock
 **/bin/
 **/obj/
 **/.vs/
+
+
+# Engine and Editor
+.meta/
