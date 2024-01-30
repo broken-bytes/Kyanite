@@ -47,13 +47,13 @@ extern "C" {
 	*/
 	EXPORTED void Bridge_Engine_AddComponent(uint64_t entity, uint64_t component);
 
-    /**
-    * @brief Sets a component of an entity
-    * @param entity The entity to use
-    * @param component The component to set
-    * @param data The data to set the component to
-    */
-    EXPORTED void Bridge_Engine_SetComponent(uint64_t entity, uint64_t component, void* data);
+	/**
+	* @brief Sets a component of an entity
+	* @param entity The entity to use
+	* @param component The component to set
+	* @param data The data to set the component to
+	*/
+	EXPORTED void Bridge_Engine_SetComponent(uint64_t entity, uint64_t component, void* data);
 
 	/**
 	* @brief Removes a component from an entity
@@ -75,6 +75,29 @@ extern "C" {
 	* @param systemFuncPtr The function pointer to the system
 	*/
 	EXPORTED void Bridge_Engine_RegisterSystem(void* systemFuncPtr);
+
+	// --- Asset loading ---
+	/**
+	* @brief Loads a texture
+	* @param uuid The uuid of the texture
+	* @return The texture
+	*/
+	EXPORTED NativePointer Bridge_Engine_LoadTexture(NativePointer assetPackage, const char* uuid);
+
+	/**
+	* @brief Loads a mesh
+	* @param uuid The uuid of the mesh
+	* @return The mesh
+	*/
+	EXPORTED NativePointer Bridge_Engine_LoadMesh(NativePointer assetPackage, const char* uuid);
+
+	/**
+	* @brief Loads an audioclip
+	* @param uuid The uuid of the audioclip
+	* @return The audioclip
+	*/
+	EXPORTED NativePointer Bridge_Engine_LoadAudioClip(NativePointer assetPackage, const char* uuid);
+
 
 #ifdef __cplusplus 
 }

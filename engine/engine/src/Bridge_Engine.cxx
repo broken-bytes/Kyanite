@@ -3,8 +3,10 @@
 #include "engine/ecs/EntityRegistry.hxx"
 #include <assetpackages/AssetPackages.hxx>
 #include <assetpackages/IAssetLoader.hxx>
+#include <audio/AudioClip.hxx>
 #include <rendering/IMeshRenderer.hxx>
 #include <rendering/Rendering.hxx>
+#include <rendering/Mesh.hxx>
 #include <core/Core.hxx>
 #include <core/Logger.hxx>
 #include <core/ILogger.hxx>
@@ -75,4 +77,53 @@ uint64_t Bridge_Engine_RegisterComponent(const char* name, size_t size, size_t a
 
 void Bridge_Engine_RegisterSystem(void* systemFuncPtr) {
 
+}
+
+// --- Asset loading ---
+NativePointer Bridge_Engine_LoadTexture(NativePointer assetPackage, const char* uuid) {
+	auto package = reinterpret_cast<kyanite::engine::assetpackages::AssetPackage*>(assetPackage);
+	auto buffer = engine->assetLoader->LoadAsset(package, uuid);
+	// Convert the buffer to a mesh
+	std::stringstream ss;
+	ss.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+	kyanite::engine::rendering::Texture texture;
+	cereal::BinaryInputArchive archive(ss);
+	archive(texture);
+
+	kyanite::engine::rendering::Texture* texturePtr = new kyanite::engine::rendering::Texture;
+	*texturePtr = texture;
+
+	return reinterpret_cast<NativePointer>(texturePtr);
+}
+
+NativePointer Bridge_Engine_LoadMesh(NativePointer assetPackage, const char* uuid) {
+	auto package = reinterpret_cast<kyanite::engine::assetpackages::AssetPackage*>(assetPackage);
+	auto buffer = engine->assetLoader->LoadAsset(package, uuid);
+	// Convert the buffer to a mesh
+	std::stringstream ss;
+	ss.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+	kyanite::engine::rendering::Mesh mesh;
+	cereal::BinaryInputArchive archive(ss);
+	archive(mesh);
+
+	kyanite::engine::rendering::Mesh* meshPtr = new kyanite::engine::rendering::Mesh;
+	*meshPtr = mesh;
+
+	return reinterpret_cast<NativePointer>(meshPtr);
+}
+
+NativePointer Bridge_Engine_LoadAudioClip(NativePointer assetPackage, const char* uuid) {
+	auto package = reinterpret_cast<kyanite::engine::assetpackages::AssetPackage*>(assetPackage);
+	auto buffer = engine->assetLoader->LoadAsset(package, uuid);
+	// Convert the buffer to a mesh
+	std::stringstream ss;
+	ss.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+	kyanite::engine::audio::AudioClip clip;
+	cereal::BinaryInputArchive archive(ss);
+	archive(clip);
+
+	kyanite::engine::audio::AudioClip* clipPtr = new kyanite::engine::audio::AudioClip;
+	*clipPtr = clip;
+
+	return reinterpret_cast<NativePointer>(clipPtr);
 }

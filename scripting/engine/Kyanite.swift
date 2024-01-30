@@ -17,7 +17,7 @@ public struct Kyanite {
 
     private static func registerComponents() {
         _ComponentRegistry.shared._register(TransformComponent())
-        _ComponentRegistry.shared._register(MaterialComponent())
+        _ComponentRegistry.shared._register(MaterialComponent(material: "String"))
     }
 }
 

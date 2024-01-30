@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+#include <cereal/access.hpp>
 #include <cereal/cereal.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/memory.hpp>

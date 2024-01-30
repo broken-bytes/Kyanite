@@ -1,13 +1,14 @@
 public class AssetPackage {
-    public init(path: String) {
+    internal let handle: UnsafeMutableRawPointer
 
+    public init(path: String) {
     }
 
-    public func hasAsset<T>(type: T.Type, uuid: String) -> Bool {
+    public func hasAsset(uuid: String) -> Bool {
         return false
     }
 
-    public func getAsset<T>(type: T.Type, uuid: String) -> T? {
-        return nil
+    public func getAsset(uuid: String) -> UnsafeMutableRawPointer {
+        // Load the asset from the package
     }
 }

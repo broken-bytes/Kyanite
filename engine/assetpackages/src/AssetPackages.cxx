@@ -34,7 +34,7 @@ namespace kyanite::engine::assetpackages {
 
 	auto PackageHasAsset(const AssetPackage* package, std::string path) -> bool {
 		return assetLoader->CheckIfPackageHasAsset(package, path);
-	}
+	} 
 
 	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> audio::AudioClip;
 	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::Material;

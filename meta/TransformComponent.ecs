@@ -1,6 +1,6 @@
 using flecs.meta
 
-Struct TransformComponent {
+@brief TransformComponent componentStruct TransformComponent {
    position :- Vector3 
    rotation :- Quaternion 
    scale :- Vector3 
