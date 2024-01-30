@@ -78,6 +78,13 @@ extern "C" {
 
 	// --- Asset loading ---
 	/**
+	* @brief Loads an asset package
+	* @param path The path to the asset package
+	* @return The asset package
+	*/
+	EXPORTED NativePointer Bridge_Engine_LoadAssetPackages(const char* path, size_t* numPackages);
+	
+	/**
 	* @brief Loads a texture
 	* @param uuid The uuid of the texture
 	* @return The texture

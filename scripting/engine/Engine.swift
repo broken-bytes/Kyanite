@@ -7,13 +7,7 @@ class Engine {
     }
 
     func start() {
-        let material = MaterialComponent()
-        print(material)
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-        let data = try! encoder.encode(material)
-        print(String(data: data, encoding: .utf8)!)
-
+        AssetManager.shared.loadAsset(uuid: "0")
         while true {
             var measure = ContinuousClock().measure {
                 // Attoseconds to milliseconds

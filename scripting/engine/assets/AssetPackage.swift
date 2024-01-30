@@ -1,7 +1,8 @@
 public class AssetPackage {
     internal let handle: UnsafeMutableRawPointer
 
-    public init(path: String) {
+    public init(handle: UnsafeMutableRawPointer) {
+        self.handle = handle
     }
 
     public func hasAsset(uuid: String) -> Bool {
@@ -10,5 +11,6 @@ public class AssetPackage {
 
     public func getAsset(uuid: String) -> UnsafeMutableRawPointer {
         // Load the asset from the package
+        fatalError("Not implemented")
     }
 }

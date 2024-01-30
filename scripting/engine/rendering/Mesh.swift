@@ -3,13 +3,23 @@ import Foundation
 public class Mesh: Object {
     internal var uuid: String
 
-    internal init(uuid: String) {
+    required internal init(uuid: String) {
         self.uuid = uuid
 
         super.init(handle: AssetManager.shared.loadAsset(uuid: uuid))
     }
 
-    public init() {
-        self.uuid = UUID().uuidString
+    public convenience init() {
+        self.init(uuid: UUID().uuidString)
+    }
+}
+
+extension Mesh: Hashable {
+    public static func == (lhs: Mesh, rhs: Mesh) -> Bool {
+        return lhs.uuid == rhs.uuid
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
     }
 }

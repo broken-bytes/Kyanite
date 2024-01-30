@@ -1,6 +1,7 @@
 #include "engine/Bridge_Engine.h"
 #include "engine/Engine.hxx"
 #include "engine/ecs/EntityRegistry.hxx"
+#include <assetpackages/AssetPackage.hxx>
 #include <assetpackages/AssetPackages.hxx>
 #include <assetpackages/IAssetLoader.hxx>
 #include <audio/AudioClip.hxx>
@@ -80,6 +81,19 @@ void Bridge_Engine_RegisterSystem(void* systemFuncPtr) {
 }
 
 // --- Asset loading ---
+NativePointer Bridge_Engine_LoadAssetPackages(const char* path, size_t* numPackages) {
+	auto packages = engine->assetLoader->LoadPackageList(path);
+	*numPackages = packages.size();
+
+	kyanite::engine::assetpackages::AssetPackage** packagesPtr = new kyanite::engine::assetpackages::AssetPackage*[*numPackages];
+
+	for(size_t x = 0; x < *numPackages; x++) {
+		packagesPtr[x] = packages[x];
+	}
+
+	return reinterpret_cast<NativePointer>(packagesPtr);
+}
+
 NativePointer Bridge_Engine_LoadTexture(NativePointer assetPackage, const char* uuid) {
 	auto package = reinterpret_cast<kyanite::engine::assetpackages::AssetPackage*>(assetPackage);
 	auto buffer = engine->assetLoader->LoadAsset(package, uuid);
