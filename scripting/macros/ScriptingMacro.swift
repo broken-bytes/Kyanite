@@ -165,14 +165,17 @@ public struct SystemMacro: MemberMacro {
         }
 
         // Check the parameters of the run function
-        guard let runFunc = classDecl.memberBlock.members.first(
-            where: {
-                $0.decl.as(FunctionDeclSyntax.self) != nil && 
-                $0.decl.as(FunctionDeclSyntax.self)!.name.text == "run"
-            }
-        )?.decl.as(FunctionDeclSyntax.self)
+        guard 
+            let runFunc = classDecl.memberBlock.members.first(
+                where: {
+                    $0.decl.as(FunctionDeclSyntax.self) != nil && 
+                    $0.decl.as(FunctionDeclSyntax.self)!.name.text == "run"
+                }
+            )?.decl.as(FunctionDeclSyntax.self),
+            runFunc.name.text == "run",
+            runFunc.modifiers.first(where: { $0.name.text == "static" }) != nil
         else {
-            fatalError("System lacks a run function. Please provide a function named `run`")
+            fatalError("System lacks a static run function. Please provide a function named `static run(...)`")
         }
 
         let runFunctionParameters = runFunc.signature.parameterClause.parameters
@@ -183,14 +186,16 @@ public struct SystemMacro: MemberMacro {
             runCall += "\n"
         }
 
-        runCall += runFunc.body?.statements.map { $0.description + "\n" }.joined() ?? ""
+        //runCall += runFunc.body?.statements.map { $0.description + "\n" }.joined() ?? ""
+        runCall += "\(name).run(\(runFunctionParameters.map { $0.firstName.text + ":" + $0.firstName.text}.joined(separator: ",")))"
 
         return [
             DeclSyntax(
 """
 init() {
-    print("Registering \(raw: name)")
     let id = _SystemRegistry.shared._register(name: "\(raw: name)", components: [\(raw: runFunctionParameters.map { 
+        print($0.type.syntaxNodeType)
+        print($0.debugDescription)
         guard 
             let generic = $0.type.as(IdentifierTypeSyntax.self)?.genericArgumentClause?.arguments.first?.argument.description 
         else {
@@ -204,7 +209,6 @@ init() {
         let iterator = SystemIterator(handle: iter)
         \(raw: runCall)
     }
-    print("Registered \(raw: name) with id \\(id)")
 }
 """
             )

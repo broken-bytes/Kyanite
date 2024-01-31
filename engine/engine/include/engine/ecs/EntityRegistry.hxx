@@ -92,5 +92,5 @@ namespace ecs::EntityRegistry {
 	* @param index The index of the component
 	* @return The components
 	*/
-	auto GetComponentBuffer(ecs_iter_t* iter, size_t componentSize, uint8_t index) -> void*;
+	auto GetComponentBuffer(ecs_iter_t* iter, uint8_t index, size_t componentSize) -> void*;
 }

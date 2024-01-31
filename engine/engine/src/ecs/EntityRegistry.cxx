@@ -86,25 +86,26 @@ namespace ecs::EntityRegistry {
 		ecs_system_desc_t desc = {};
 		ecs_entity_desc_t entityDesc = {};
 		entityDesc.name = name.c_str();
+		entityDesc.add[0] = ecs_pair(EcsDependsOn, EcsOnUpdate);
 		ecs_entity_t system = ecs_entity_init(world, &entityDesc);
 		desc.entity = system;
 		desc.callback = func;
 		for (int x = 0; x < filter.size(); x++) {
-			desc.query.filter.terms[x].field_index = x + 1;
 			desc.query.filter.terms[x].id = filter[x];
 			desc.query.filter.terms[x].oper = EcsAnd;
 		}
-		desc.tick_source = EcsOnUpdate;
 
-		std::cout << "Registering system " << name << "with component filter: " << std::endl;
 		for (auto& component : filter) {
 			std::cout << component << std::endl;
 		}
 		
-		return ecs_system_init(world, &desc);
+		auto sysId = ecs_system_init(world, &desc);
+		std::cout << ecs_query_str(ecs_system_get_query(world, sysId)) << std::endl;
+
+		return sysId;
 	}
 
-	auto GetComponentBuffer(ecs_iter_t* iter, size_t componentSize, uint8_t index) -> void* {
+	auto GetComponentBuffer(ecs_iter_t* iter, uint8_t index, size_t componentSize) -> void* {
 		return ecs_field_w_size(iter, componentSize, index);
 	}
 }
