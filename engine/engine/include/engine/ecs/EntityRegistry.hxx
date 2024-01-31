@@ -79,5 +79,18 @@ namespace ecs::EntityRegistry {
 	*/
 	auto Update(float delta) -> void;
 
-	auto RegisterSystem(void*(*func)(ecs_iter_t* it)) -> void;
+	/**
+	* @brief Registers a system
+	* @param func The function to register
+	*/
+	auto RegisterSystem(std::string name, void (*func)(ecs_iter_t* it)) -> void;
+
+	/**
+	* @brief Gets all the components of an entity for a given index
+	* @param iter The iterator
+	* @param componentSize The size of the component
+	* @param index The index of the component
+	* @return The components
+	*/
+	auto GetComponentBuffer(ecs_iter_t* iter, size_t componentSize, uint8_t index) -> void*;
 }

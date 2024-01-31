@@ -82,7 +82,17 @@ namespace ecs::EntityRegistry {
 		world.progress();
 	}
 
-	auto RegisterSystem(void* (*func)(ecs_iter_t* it)) -> void {
+	auto RegisterSystem(std::string name, void (*func)(ecs_iter_t* it)) -> void {
+		ecs_system_desc_t desc = {};
+		ecs_entity_desc_t entityDesc = {};
+		entityDesc.name = name.c_str();
+		ecs_entity_t system = ecs_entity_init(world, &entityDesc);
+		desc.entity = system;
+		desc.callback = func;
+		ecs_system_init(world, &desc);
+	}
 
+	auto GetComponentBuffer(ecs_iter_t* iter, size_t componentSize, uint8_t index) -> void* {
+		return ecs_field_w_size(iter, componentSize, index);
 	}
 }

@@ -1,5 +1,5 @@
 using flecs.meta
 
 @brief MeshComponent componentStruct MeshComponent {
-   mesh :- Mesh
+   mesh :- Mesh 
 }

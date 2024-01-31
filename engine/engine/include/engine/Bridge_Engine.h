@@ -72,23 +72,25 @@ extern "C" {
 
 	/**
 	* @brief Registers a system
-	* @param funcPtr The function pointer to the system
+	* @param funcPtr The function pointer to the system. Takes the components and the number of components as arguments
 	*/
-	EXPORTED void Bridge_Engine_RegisterSystem(void (*funcPtr)(NativePointer));
+	EXPORTED void Bridge_Engine_RegisterSystem(const char* name, void (*func)(NativePointer));
 
 	/**
-	* @brief Gets the components for an iterator
+	* @brief Gets components for an iterator
 	* @param iterator The iterator to get the components from
-	* @param index The index of the component. 0 = first component, 1 = second component, etc.
-	* @param components The components
-	* @param numComponents The number of components
+	* @param index The index of the component
+	* @param componentSize The size of the component
+	* @return The components
 	*/
-	EXPORTED void Bridge_Engine_GetComponentsFromIterator(
-		NativePointer iterator, 
-		uint8_t index, 
-		NativePointer* components, 
-		size_t* numComponents
-	);
+	EXPORTED NativePointer Bridge_Engine_GetComponentsFromIterator(NativePointer iterator, uint8_t index, size_t componentSize);
+
+	/**
+	* @brief Gets the number of components for an iterator
+	* @param iterator The iterator to get the components from
+	* @return The number of components
+	*/
+	EXPORTED size_t Bridge_Engine_GetIteratorSize(NativePointer iterator);
 
 	// --- Asset loading ---
 	/**

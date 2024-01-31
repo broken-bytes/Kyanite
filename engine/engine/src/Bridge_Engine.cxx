@@ -76,12 +76,18 @@ uint64_t Bridge_Engine_RegisterComponent(const char* name, size_t size, size_t a
 	return ecs::EntityRegistry::CreateComponent(name, size, alignment);
 }
 
-void Bridge_Engine_RegisterSystem(void (*funcPtr)(NativePointer)) {
-	//return ecs::EntityRegistry::RegisterSystem(funcPtr);
+void Bridge_Engine_RegisterSystem(const char* name, void (*func)(NativePointer)) {
+	ecs::EntityRegistry::RegisterSystem(name, reinterpret_cast<void (*)(ecs_iter_t*)>(func));
 }
 
-void Bridge_Engine_GetComponentsFromIterator(NativePointer iterator, uint8_t index, NativePointer* components, size_t* numComponents) {
+NativePointer Bridge_Engine_GetComponentsFromIterator(NativePointer iterator, uint8_t index, size_t componentSize) {
+	auto iter = reinterpret_cast<ecs_iter_t*>(iterator);
 
+	return ecs::EntityRegistry::GetComponentBuffer(iter, index, componentSize);
+}
+
+size_t Bridge_Engine_GetIteratorSize(NativePointer iterator) {
+	return reinterpret_cast<ecs_iter_t*>(iterator)->count;
 }
 
 

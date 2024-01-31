@@ -9,13 +9,13 @@ public struct Entity {
         self.id = Bridge_Engine_CreateEntity(name.cString(using: .utf8))
     }
 
-    public func addComponent<T: Component>(_ component: T) {
+    public func addComponent<T: Component>(_ component: T.Type) {
         let componentId = _ComponentRegistry.shared._get(T.self)
         Bridge_Engine_AddComponent(self.id, componentId)
 
         // Convert the component data to a pointer
         let data = UnsafeMutablePointer<T>.allocate(capacity: 1)
-        data.initialize(to: component)
+        data.initialize(to: T())
         Bridge_Engine_SetComponent(self.id, componentId, data)
     }
 

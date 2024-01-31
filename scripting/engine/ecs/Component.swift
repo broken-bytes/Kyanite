@@ -1,3 +1,5 @@
 import Foundation
 
-public protocol Component: Hashable {}
+public protocol Component: Hashable {
+    init()
+}

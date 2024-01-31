@@ -136,7 +136,10 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
         // Generate flecs compatible metadata so we can use the component in the rest api and explorer
         let filename = URL(fileURLWithPath: "./meta/\(structDecl.name.text).ecs")
         try? metadata.write(to: filename, atomically: true, encoding: String.Encoding.utf8)
-        return []
+
+        return [
+            DeclSyntax("public init() {}")
+        ]
     }
 }
 
@@ -171,18 +174,28 @@ public struct SystemMacro: MemberMacro {
 
         let runFunctionParameters = runFunc.signature.parameterClause.parameters
 
-        print(runFunctionParameters)
+        var runCall = ""
+        for (index, parameter) in runFunctionParameters.enumerated() {
+            runCall += "\(parameter.firstName.text): \("iterator.get(index: \(index))")"
+            if index != runFunctionParameters.count - 1 {
+                runCall += ", "
+            }
+        }
 
         return [
             DeclSyntax(
 """
+var iterator: SystemIterator
+
 init() {
-    Bridge_Engine_RegisterSystem { iter in 
-        _SystemRegistry.shared._register() { (\(raw: runFunctionParameters.map { 
-            $0.firstName.description + ": " + $0.type.description 
-        }.joined(separator: ","))) -> Void in
-            
-        }
+    _SystemRegistry.shared._register(name: "\(raw: name)") { [weak self] iter in 
+        guard let self else { fatalError("System \(raw: name) was not initialized")}
+        guard let iter else { fatalError("System \(raw: name) was not initialized")}
+
+        let iterator = SystemIterator(handle: iter)
+        self.iterator = iterator
+
+        run(\(raw: runCall))
     }
 }
 """

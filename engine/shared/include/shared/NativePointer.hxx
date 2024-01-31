@@ -2,4 +2,4 @@
 
 #include <stdint.h>
 
-typedef uint64_t* NativePointer;
+typedef void* NativePointer;

@@ -9,7 +9,7 @@ public struct Kyanite {
 }
 
 // Macros
-@attached(member)
+@attached(member, names: named(init))
 @attached(memberAttribute)
 @attached(extension, conformances: Component, Hashable)
 public macro Component() = #externalMacro(module: "Macros", type: "ComponentMacro")
