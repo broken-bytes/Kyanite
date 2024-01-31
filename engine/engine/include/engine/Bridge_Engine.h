@@ -72,9 +72,23 @@ extern "C" {
 
 	/**
 	* @brief Registers a system
-	* @param systemFuncPtr The function pointer to the system
+	* @param funcPtr The function pointer to the system
 	*/
-	EXPORTED void Bridge_Engine_RegisterSystem(void* systemFuncPtr);
+	EXPORTED void Bridge_Engine_RegisterSystem(void (*funcPtr)(NativePointer));
+
+	/**
+	* @brief Gets the components for an iterator
+	* @param iterator The iterator to get the components from
+	* @param index The index of the component. 0 = first component, 1 = second component, etc.
+	* @param components The components
+	* @param numComponents The number of components
+	*/
+	EXPORTED void Bridge_Engine_GetComponentsFromIterator(
+		NativePointer iterator, 
+		uint8_t index, 
+		NativePointer* components, 
+		size_t* numComponents
+	);
 
 	// --- Asset loading ---
 	/**
@@ -83,7 +97,7 @@ extern "C" {
 	* @return The asset package
 	*/
 	EXPORTED NativePointer Bridge_Engine_LoadAssetPackages(const char* path, size_t* numPackages);
-	
+
 	/**
 	* @brief Loads a texture
 	* @param uuid The uuid of the texture
@@ -99,12 +113,31 @@ extern "C" {
 	EXPORTED NativePointer Bridge_Engine_LoadMesh(NativePointer assetPackage, const char* uuid);
 
 	/**
+	* @brief Loads a material
+	* @param uuid The uuid of the material
+	* @return The material
+	*/
+	EXPORTED NativePointer Bridge_Engine_LoadMaterial(NativePointer assetPackage, const char* uuid);
+
+	/**
+	*	@brief Loads a shader
+	* @param uuid The uuid of the shader
+	* @return The shader
+	*/
+	EXPORTED NativePointer Bridge_Engine_LoadShader(NativePointer assetPackage, const char* uuid);
+
+	/**
 	* @brief Loads an audioclip
 	* @param uuid The uuid of the audioclip
 	* @return The audioclip
 	*/
 	EXPORTED NativePointer Bridge_Engine_LoadAudioClip(NativePointer assetPackage, const char* uuid);
 
+	/**
+	* @brief Clears an asset
+	* @param asset The asset to clear
+	*/
+	EXPORTED void Bridge_Engine_DisposeAsset(NativePointer asset);
 
 #ifdef __cplusplus 
 }

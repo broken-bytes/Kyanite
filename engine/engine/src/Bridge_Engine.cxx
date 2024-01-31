@@ -76,9 +76,14 @@ uint64_t Bridge_Engine_RegisterComponent(const char* name, size_t size, size_t a
 	return ecs::EntityRegistry::CreateComponent(name, size, alignment);
 }
 
-void Bridge_Engine_RegisterSystem(void* systemFuncPtr) {
+void Bridge_Engine_RegisterSystem(void (*funcPtr)(NativePointer)) {
+	//return ecs::EntityRegistry::RegisterSystem(funcPtr);
+}
+
+void Bridge_Engine_GetComponentsFromIterator(NativePointer iterator, uint8_t index, NativePointer* components, size_t* numComponents) {
 
 }
+
 
 // --- Asset loading ---
 NativePointer Bridge_Engine_LoadAssetPackages(const char* path, size_t* numPackages) {
@@ -140,4 +145,16 @@ NativePointer Bridge_Engine_LoadAudioClip(NativePointer assetPackage, const char
 	*clipPtr = clip;
 
 	return reinterpret_cast<NativePointer>(clipPtr);
+}
+
+NativePointer Bridge_Engine_LoadMaterial(NativePointer assetPackage, const char* uuid) {
+	return nullptr;
+}
+
+NativePointer Bridge_Engine_LoadShader(NativePointer assetPackage, const char* uuid) {
+	return nullptr;
+}
+
+void Bridge_Engine_DisposeAsset(NativePointer asset) {
+	delete asset;
 }

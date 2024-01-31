@@ -81,4 +81,8 @@ namespace ecs::EntityRegistry {
 	auto Update(float delta) -> void {
 		world.progress();
 	}
+
+	auto RegisterSystem(void* (*func)(ecs_iter_t* it)) -> void {
+
+	}
 }

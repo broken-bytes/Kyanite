@@ -10,7 +10,7 @@ public class Material: Object {
         self.name = name
         self.uuid = uuid
 
-        super.init(handle: AssetManager.shared.loadAsset(uuid: uuid))
+        super.init(handle: AssetManager.shared.loadAsset(type: Material.self, uuid: uuid))
     }
 
     public convenience init() {

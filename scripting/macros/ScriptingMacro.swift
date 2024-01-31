@@ -140,9 +140,61 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
     }
 }
 
+public struct SystemMacro: MemberMacro {
+    public static func expansion(
+        of node: AttributeSyntax, 
+        providingMembersOf declaration: some DeclGroupSyntax, 
+        conformingTo protocols: [TypeSyntax], 
+        in context: some MacroExpansionContext
+    ) throws -> [DeclSyntax] {
+        guard let classDecl = declaration.as(ClassDeclSyntax.self) else {
+            fatalError("System macro can only be used on classes")
+        }
+
+        // Get the name of the system
+        let name = classDecl.name.text
+
+        classDecl.memberBlock.members.map {
+            print($0.decl.syntaxNodeType)
+        }
+
+        // Check the parameters of the run function
+        guard let runFunc = classDecl.memberBlock.members.first(
+            where: {
+                $0.decl.as(FunctionDeclSyntax.self) != nil && 
+                $0.decl.as(FunctionDeclSyntax.self)!.name.text == "run"
+            }
+        )?.decl.as(FunctionDeclSyntax.self)
+        else {
+            fatalError("System lacks a run function. Please provide a function named `run`")
+        }
+
+        let runFunctionParameters = runFunc.signature.parameterClause.parameters
+
+        print(runFunctionParameters)
+
+        return [
+            DeclSyntax(
+"""
+init() {
+    Bridge_Engine_RegisterSystem { iter in 
+        _SystemRegistry.shared._register() { (\(raw: runFunctionParameters.map { 
+            $0.firstName.description + ": " + $0.type.description 
+        }.joined(separator: ","))) -> Void in
+            
+        }
+    }
+}
+"""
+            )
+        ]
+    }
+}
+
 @main
 struct ScriptingPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         ComponentMacro.self,
+        SystemMacro.self
     ]
 }

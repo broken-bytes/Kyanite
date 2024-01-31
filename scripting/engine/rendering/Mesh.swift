@@ -6,7 +6,7 @@ public class Mesh: Object {
     required internal init(uuid: String) {
         self.uuid = uuid
 
-        super.init(handle: AssetManager.shared.loadAsset(uuid: uuid))
+        super.init(handle: AssetManager.shared.loadAsset(type: Mesh.self, uuid: uuid))
     }
 
     public convenience init() {

@@ -78,4 +78,6 @@ namespace ecs::EntityRegistry {
 	* @param delta The delta time
 	*/
 	auto Update(float delta) -> void;
+
+	auto RegisterSystem(void*(*func)(ecs_iter_t* it)) -> void;
 }

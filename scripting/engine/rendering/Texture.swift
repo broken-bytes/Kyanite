@@ -6,7 +6,7 @@ public class Texture: Object {
     required internal init(uuid: String) {
         self.uuid = uuid
 
-        super.init(handle: AssetManager.shared.loadAsset(uuid: uuid))
+        super.init(handle: AssetManager.shared.loadAsset(type: Texture.self, uuid: uuid))
     }
 
     public convenience init() {

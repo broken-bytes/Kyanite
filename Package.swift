@@ -37,9 +37,8 @@ let package = Package(
             dependencies: ["Macros"],
             path: "scripting/engine",
             swiftSettings: [
-                .unsafeFlags(["-import-objc-header", "./engine/engine/include/engine/Bridge_Engine.h"]),
+                .unsafeFlags(["-import-objc-header", "./scripting/Bridging_Header.h"]),
                 .unsafeFlags(["-I", "./engine/shared/include"]),
-                .unsafeFlags(["-l./build/engine/engine/Debug/Engine.lib"]),
             ]
         ),
     ]

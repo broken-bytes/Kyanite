@@ -1,22 +1,13 @@
 public class Object {
-    internal var refCount: Int = 0
-    internal var handle: UnsafeMutableRawPointer? = nil
+    internal var handle: NativePointer? = nil
 
-    init(handle: UnsafeMutableRawPointer) {
+    init(handle: NativePointer) {
         self.handle = handle
-        self.refCount = 1
     }
 
-    func retain() {
-        self.refCount += 1
-    }
-
-    func release() {
-        self.refCount -= 1
-
-        if self.refCount == 0 {
-            // Clear the resource on the native side
-            self.handle = nil
+    deinit {
+        if let handle {
+            AssetManager.shared.unloadAsset(handle: handle)
         }
     }
 }
