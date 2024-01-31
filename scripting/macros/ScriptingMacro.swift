@@ -76,7 +76,7 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
         }
 
         var metadata = "using flecs.meta"
-        metadata += "\n\n@brief \(structDecl.name.text) component"
+        metadata += "\n\n@brief \(structDecl.name.text) component\n"
         metadata += "Struct \(structDecl.name.text) {\n"
 
         let members = structDecl.memberBlock.members        
@@ -124,9 +124,12 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
                 case "Bool":
                     metadata += "   \(name) :- {bool}\n"
                     break
+                case "UUID":
+                    metadata += "   \(name) :- {string}\n"
+                    break
                 default:
                     // We just assume that the type is valid because we can't check it
-                    metadata += "   \(name) :- \(type)\n"
+                    metadata += "   \(name) :- {\(type.description)}\n"
                 }
             }
         }
@@ -176,27 +179,32 @@ public struct SystemMacro: MemberMacro {
 
         var runCall = ""
         for (index, parameter) in runFunctionParameters.enumerated() {
-            runCall += "\(parameter.firstName.text): \("iterator.get(index: \(index))")"
-            if index != runFunctionParameters.count - 1 {
-                runCall += ", "
-            }
+            runCall += "var \(parameter.firstName.text + ":" + parameter.type.description) = \("iterator.get(index: \(index))")"
+            runCall += "\n"
         }
+
+        runCall += runFunc.body?.statements.map { $0.description + "\n" }.joined() ?? ""
 
         return [
             DeclSyntax(
 """
-var iterator: SystemIterator
-
 init() {
-    _SystemRegistry.shared._register(name: "\(raw: name)") { [weak self] iter in 
-        guard let self else { fatalError("System \(raw: name) was not initialized")}
+    print("Registering \(raw: name)")
+    let id = _SystemRegistry.shared._register(name: "\(raw: name)", components: [\(raw: runFunctionParameters.map { 
+        guard 
+            let generic = $0.type.as(IdentifierTypeSyntax.self)?.genericArgumentClause?.arguments.first?.argument.description 
+        else {
+            fatalError("System \(name) has invalid run parameters. Parameters should be of type `UnsafeMutableBufferPointer<T>`")
+        }
+
+        return generic + ".self"
+    }.joined(separator: ","))]) { iter in 
         guard let iter else { fatalError("System \(raw: name) was not initialized")}
 
         let iterator = SystemIterator(handle: iter)
-        self.iterator = iterator
-
-        run(\(raw: runCall))
+        \(raw: runCall)
     }
+    print("Registered \(raw: name) with id \\(id)")
 }
 """
             )

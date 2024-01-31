@@ -1,5 +1,6 @@
 using flecs.meta
 
-@brief MeshComponent componentStruct MeshComponent {
-   mesh :- Mesh 
+@brief MeshComponent component
+Struct MeshComponent {
+   mesh :- {UUID }
 }

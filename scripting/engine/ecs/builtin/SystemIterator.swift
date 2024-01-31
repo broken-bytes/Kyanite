@@ -9,7 +9,8 @@ public class SystemIterator {
     }
 
     public func get<T>(index: UInt8) -> UnsafeBufferPointer<T> {
-        guard let buffer = Bridge_Engine_GetComponentsFromIterator(handle, index, MemoryLayout<T>.size) else {
+        // Flecs uses 1-based indexing
+        guard let buffer = Bridge_Engine_GetComponentsFromIterator(handle, index + 1, MemoryLayout<T>.size) else {
             fatalError("Failed to get components from iterator")
         }
 

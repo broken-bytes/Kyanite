@@ -83,7 +83,7 @@ namespace ecs::EntityRegistry {
 	* @brief Registers a system
 	* @param func The function to register
 	*/
-	auto RegisterSystem(std::string name, void (*func)(ecs_iter_t* it)) -> void;
+	auto RegisterSystem(std::string name, std::vector<ecs_entity_t> filter, void (*func)(ecs_iter_t* it)) -> ecs_entity_t;
 
 	/**
 	* @brief Gets all the components of an entity for a given index

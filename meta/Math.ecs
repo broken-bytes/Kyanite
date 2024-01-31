@@ -1,0 +1,14 @@
+using flecs.meta
+
+Struct Vector3 {
+   x :- {f32}
+   y :- {f32}
+   z :- {f32}
+}
+
+Struct Quaternion {
+   w :- {f32}
+   x :- {f32}
+   y :- {f32}
+   z :- {f32}
+}

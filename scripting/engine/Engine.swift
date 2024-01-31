@@ -8,8 +8,12 @@ class Engine {
 
     func start() {
         Bridge_Engine_Init(nil, nil, Mode(0), nil)
+        _ComponentRegistry.shared._register(TransformComponent.self)
+        _ComponentRegistry.shared._register(MeshComponent.self)
         let renderSystem = RenderSystem()
         let entity = Entity(name: "Test")
+        entity.addComponent(TransformComponent.self)
+        entity.addComponent(MeshComponent.self)
         while true {
             var measure = ContinuousClock().measure {
                 // Update all native modules first each frame

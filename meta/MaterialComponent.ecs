@@ -1,5 +1,6 @@
 using flecs.meta
 
-@brief MaterialComponent componentStruct MaterialComponent {
-   material :- String 
+@brief MaterialComponent component
+Struct MaterialComponent {
+   material :- {UUID }
 }

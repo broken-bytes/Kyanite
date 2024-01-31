@@ -76,8 +76,9 @@ uint64_t Bridge_Engine_RegisterComponent(const char* name, size_t size, size_t a
 	return ecs::EntityRegistry::CreateComponent(name, size, alignment);
 }
 
-void Bridge_Engine_RegisterSystem(const char* name, void (*func)(NativePointer)) {
-	ecs::EntityRegistry::RegisterSystem(name, reinterpret_cast<void (*)(ecs_iter_t*)>(func));
+uint64_t Bridge_Engine_RegisterSystem(const char* name, uint64_t* filter, size_t filterLen, void (*func)(NativePointer)) {
+	std::vector<uint64_t> filterVec(filter, filter + filterLen);
+	return ecs::EntityRegistry::RegisterSystem(name, filterVec, reinterpret_cast<void (*)(ecs_iter_t*)>(func));
 }
 
 NativePointer Bridge_Engine_GetComponentsFromIterator(NativePointer iterator, uint8_t index, size_t componentSize) {

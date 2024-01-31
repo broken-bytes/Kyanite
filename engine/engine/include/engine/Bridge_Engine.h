@@ -74,7 +74,7 @@ extern "C" {
 	* @brief Registers a system
 	* @param funcPtr The function pointer to the system. Takes the components and the number of components as arguments
 	*/
-	EXPORTED void Bridge_Engine_RegisterSystem(const char* name, void (*func)(NativePointer));
+	EXPORTED uint64_t Bridge_Engine_RegisterSystem(const char* name, uint64_t* filter, size_t filterLen, void (*func)(NativePointer));
 
 	/**
 	* @brief Gets components for an iterator

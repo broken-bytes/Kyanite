@@ -7,7 +7,7 @@ public class _ComponentRegistry {
 
     internal var components: [Int: UInt64] = [:]
 
-    public func _register<T: Component>(_ component: T) {
+    public func _register<T: Component>(_ component: T.Type) {
         var id = Bridge_Engine_RegisterComponent("\(T.self)", MemoryLayout<T>.size, MemoryLayout<T>.alignment)
         var hasher = Hasher()
         hasher.combine(String(describing: T.self))

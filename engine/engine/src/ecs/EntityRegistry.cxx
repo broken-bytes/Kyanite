@@ -82,14 +82,26 @@ namespace ecs::EntityRegistry {
 		world.progress();
 	}
 
-	auto RegisterSystem(std::string name, void (*func)(ecs_iter_t* it)) -> void {
+	auto RegisterSystem(std::string name, std::vector<ecs_entity_t> filter, void (*func)(ecs_iter_t* it)) -> ecs_entity_t {
 		ecs_system_desc_t desc = {};
 		ecs_entity_desc_t entityDesc = {};
 		entityDesc.name = name.c_str();
 		ecs_entity_t system = ecs_entity_init(world, &entityDesc);
 		desc.entity = system;
 		desc.callback = func;
-		ecs_system_init(world, &desc);
+		for (int x = 0; x < filter.size(); x++) {
+			desc.query.filter.terms[x].field_index = x + 1;
+			desc.query.filter.terms[x].id = filter[x];
+			desc.query.filter.terms[x].oper = EcsAnd;
+		}
+		desc.tick_source = EcsOnUpdate;
+
+		std::cout << "Registering system " << name << "with component filter: " << std::endl;
+		for (auto& component : filter) {
+			std::cout << component << std::endl;
+		}
+		
+		return ecs_system_init(world, &desc);
 	}
 
 	auto GetComponentBuffer(ecs_iter_t* iter, size_t componentSize, uint8_t index) -> void* {
