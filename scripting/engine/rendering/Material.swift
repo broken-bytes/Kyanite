@@ -1,20 +1,20 @@
 import Foundation
 
 public class Material: Object {
-    internal var uuid: String
+    internal var uuid: UUID
     public var name: String
     public var shader: Shader?
     public var properties: [String: Any] = [:]
 
-    required init(name: String, uuid: String) {
+    required init(name: String, uuid: UUID) {
         self.name = name
         self.uuid = uuid
 
-        super.init(handle: AssetManager.shared.loadAsset(type: Material.self, uuid: uuid))
+        super.init(handle: AssetManager.shared.loadAsset(type: Material.self, uuid: uuid.uuidString))
     }
 
     public convenience init() {
-        self.init(name: "", uuid: UUID().uuidString)
+        self.init(name: "", uuid: UUID())
     }
 
     public func load() {

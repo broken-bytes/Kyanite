@@ -2,5 +2,5 @@ using flecs.meta
 
 @brief MaterialComponent component
 Struct MaterialComponent {
-   material :- {UUID }
+   material :- {i64}
 }

@@ -1,5 +1,5 @@
 @Component
-struct TransformComponent {
+public struct TransformComponent {
     var position: Vector3 = .zero
     var rotation: Quaternion = .identity
     var scale: Vector3 = .zero

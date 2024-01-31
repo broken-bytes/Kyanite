@@ -13,7 +13,6 @@ public class _ComponentRegistry {
         hasher.combine(String(describing: T.self))
         let hash = hasher.finalize()
         
-        print("Registered component \(T.self) with id \(id) and hash \(hash)")
         components[hash] = id
     }
 

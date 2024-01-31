@@ -2,7 +2,7 @@
   <img src="https://i.imgur.com/mF8krya.png" />
 </p>
 
-# GameKit
+# Kyanite
 
 The modern game engine written in C++ and Swift where coding is fun 🎉
 
@@ -11,14 +11,17 @@ The modern game engine written in C++ and Swift where coding is fun 🎉
 **The engine is under heavy development and most features are either missing or incomplete. Do not use this engine for any production project**
 
 ## Introduction
-GameKit is a modern lightweight game engine built around Swift. ✨
+Kyanite is a modern lightweight game engine built around Swift. ✨
 
 The primary focus of this project is to bring Swift into the games industry. 🎮
 
-With a heavy focus on code first, leaving behind the usual WYSIWYG approach, GameKit is ideal for any game that mostly deals with procedurally generated levels.
+With a heavy focus on code first, mostly leaving behind the usual WYSIWYG approach, Kyanite is ideal for any game that deals with procedurally generated content.
+
+## Documentation
+The full documentation can be found under `docs`. A NodeJS installation is required to use the documentation locally.
 
 ## Features
-GameKit will be a full-featured game engine on the long run.
+Kyanite will be a full-featured game engine on the long run.
 
 Some of the most important features:
 - 👩🏿‍💻 Scripting: Modern Swift Syntax and custom DSL to simplify many concepts 
@@ -32,7 +35,7 @@ Some of the most important features:
 - 🤏 Small footprint 
 
 ## Requirements
-To use the engine, a Swift toolchain starting at 5.7.2 has to be installed on the Computer.
+To use the engine, a Swift toolchain starting at 5.9.2 has to be installed on the Computer.
 
 Additionally, Visual Studio Code is recommended for writing game code in Swift.
 

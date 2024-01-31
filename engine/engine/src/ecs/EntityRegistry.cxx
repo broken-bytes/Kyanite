@@ -95,12 +95,8 @@ namespace ecs::EntityRegistry {
 			desc.query.filter.terms[x].oper = EcsAnd;
 		}
 
-		for (auto& component : filter) {
-			std::cout << component << std::endl;
-		}
 		
 		auto sysId = ecs_system_init(world, &desc);
-		std::cout << ecs_query_str(ecs_system_get_query(world, sysId)) << std::endl;
 
 		return sysId;
 	}

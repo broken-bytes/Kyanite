@@ -101,8 +101,12 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
                 // - bool
                 // Any other type that uses these only these types is also allowed
 
-                switch type {
+                let fixedType = type.replacingOccurrences(of: " ", with: "")
+                switch fixedType {
                     // Builtin types are always allowed
+                case "Int":
+                    metadata += "   \(name) :- {i64}\n"
+                    break
                 case "Int8":
                     metadata += "   \(name) :- {i8}\n"
                     break
@@ -129,7 +133,7 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
                     break
                 default:
                     // We just assume that the type is valid because we can't check it
-                    metadata += "   \(name) :- {\(type.description)}\n"
+                    metadata += "   \(name) :- {\(fixedType)}\n"
                 }
             }
         }
@@ -160,10 +164,6 @@ public struct SystemMacro: MemberMacro {
         // Get the name of the system
         let name = classDecl.name.text
 
-        classDecl.memberBlock.members.map {
-            print($0.decl.syntaxNodeType)
-        }
-
         // Check the parameters of the run function
         guard 
             let runFunc = classDecl.memberBlock.members.first(
@@ -186,30 +186,29 @@ public struct SystemMacro: MemberMacro {
             runCall += "\n"
         }
 
-        //runCall += runFunc.body?.statements.map { $0.description + "\n" }.joined() ?? ""
         runCall += "\(name).run(\(runFunctionParameters.map { $0.firstName.text + ":" + $0.firstName.text}.joined(separator: ",")))"
 
         return [
             DeclSyntax(
 """
-init() {
-    let id = _SystemRegistry.shared._register(name: "\(raw: name)", components: [\(raw: runFunctionParameters.map { 
-        print($0.type.syntaxNodeType)
-        print($0.debugDescription)
-        guard 
-            let generic = $0.type.as(IdentifierTypeSyntax.self)?.genericArgumentClause?.arguments.first?.argument.description 
-        else {
-            fatalError("System \(name) has invalid run parameters. Parameters should be of type `UnsafeMutableBufferPointer<T>`")
+    init() {
+        _SystemRegistry.shared._register(name: "\(raw: name)", components: [\(raw: runFunctionParameters.map { 
+            print($0.type.syntaxNodeType)
+            print($0.debugDescription)
+            guard 
+                let generic = $0.type.as(IdentifierTypeSyntax.self)?.genericArgumentClause?.arguments.first?.argument.description 
+            else {
+                fatalError("System \(name) has invalid run parameters. Parameters should be of type `UnsafeMutableBufferPointer<T>`")
+            }
+
+            return generic + ".self"
+        }.joined(separator: ","))]) { iter in 
+            guard let iter else { fatalError("System \(raw: name) was not initialized")}
+
+            let iterator = SystemIterator(handle: iter)
+            \(raw: runCall)
         }
-
-        return generic + ".self"
-    }.joined(separator: ","))]) { iter in 
-        guard let iter else { fatalError("System \(raw: name) was not initialized")}
-
-        let iterator = SystemIterator(handle: iter)
-        \(raw: runCall)
     }
-}
 """
             )
         ]

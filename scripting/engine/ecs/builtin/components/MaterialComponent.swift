@@ -1,5 +1,6 @@
 import Foundation
 
-@Component public struct MaterialComponent: Codable {
-    public var material: UUID = UUID()
+@Component 
+public struct MaterialComponent {
+    public var material: Int = UUID().hashValue
 }

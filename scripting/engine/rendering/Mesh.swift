@@ -1,16 +1,16 @@
 import Foundation
 
 public class Mesh: Object {
-    internal var uuid: String
+    internal var uuid: UUID
 
-    required internal init(uuid: String) {
+    required internal init(uuid: UUID) {
         self.uuid = uuid
 
-        super.init(handle: AssetManager.shared.loadAsset(type: Mesh.self, uuid: uuid))
+        super.init(handle: AssetManager.shared.loadAsset(type: Mesh.self, uuid: uuid.uuidString))
     }
 
     public convenience init() {
-        self.init(uuid: UUID().uuidString)
+        self.init(uuid: UUID())
     }
 }
 

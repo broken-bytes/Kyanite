@@ -1,5 +1,6 @@
 import Foundation
 
-@Component public struct MeshComponent {
-    public var mesh: UUID = UUID()
+@Component 
+public struct MeshComponent {
+    public var mesh: Int = UUID().hashValue
 }
