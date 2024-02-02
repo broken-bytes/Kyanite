@@ -14,4 +14,4 @@ target_include_directories(AssetPackages PRIVATE ${CMAKE_SOURCE_DIR}/engine/inpu
 target_include_directories(AssetPackages PRIVATE ${CMAKE_SOURCE_DIR}/engine/math/include)
 target_include_directories(AssetPackages PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/include)
 
-target_link_libraries(AssetPackages PRIVATE Core Audio Rendering cereal::cereal nlohmann_json::nlohmann_json)
+target_link_libraries(AssetPackages PRIVATE Core Audio Rendering Input cereal::cereal nlohmann_json::nlohmann_json)

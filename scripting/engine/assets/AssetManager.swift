@@ -29,6 +29,6 @@ class AssetManager {
     }
 
     func unloadAsset(handle: NativePointer) {
-        Bridge_Engine_DisposeAsset(handle)
+        AssetPackages_DisposeAsset(handle)
     }
 }

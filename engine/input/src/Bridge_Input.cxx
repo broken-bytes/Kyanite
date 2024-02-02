@@ -8,15 +8,15 @@
 #include <stdint.h>
 #include <stddef.h>
 
-void Bridge_Iput_Init() {
+void Input_Init() {
     input::Init();
 }
 
-void Bridge_Input_Poll() {
+void Input_Poll() {
     input::Poll();
 }
 
-uint8_t Bridge_Input_GetKeyboardButtonState(uint32_t buttonId) {
+uint8_t Input_GetKeyboardButtonState(uint32_t buttonId) {
     switch(input::GetKeyboardButtonState(buttonId)) {
         case input::InputState::NONE:
             return 0;
@@ -29,7 +29,7 @@ uint8_t Bridge_Input_GetKeyboardButtonState(uint32_t buttonId) {
     }
 }
 
-uint8_t Bridge_Input_GetMouseButtonState(uint32_t buttonId) {
+uint8_t Input_GetMouseButtonState(uint32_t buttonId) {
     switch(input::GetMouseButtonState(buttonId)) {
         case input::InputState::NONE:
             return 0;
@@ -42,11 +42,11 @@ uint8_t Bridge_Input_GetMouseButtonState(uint32_t buttonId) {
     }
 }
 
-float Bridge_Input_GetMouseAxis(uint8_t axis) {
+float Input_GetMouseAxis(uint8_t axis) {
     return input::GetMouseAxis(axis);
 }
 
-uint8_t Bridge_Input_GetControllerButtonState(uint8_t controllerId, uint8_t buttonId) {
+uint8_t Input_GetControllerButtonState(uint8_t controllerId, uint8_t buttonId) {
     switch(input::GetControllerButtonState(controllerId, buttonId)) {
         case input::InputState::NONE:
             return 0;
@@ -61,7 +61,7 @@ uint8_t Bridge_Input_GetControllerButtonState(uint8_t controllerId, uint8_t butt
     return 0;
 }
 
-float Bridge_Input_GetControllerAxis(uint8_t controllerId, uint8_t axis) {
+float Input_GetControllerAxis(uint8_t controllerId, uint8_t axis) {
     return input::GetControllerAxis(controllerId, axis);
 }
 

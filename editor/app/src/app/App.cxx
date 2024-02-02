@@ -1,9 +1,8 @@
 #include "app/App.hxx"
 #include "app/AppStartScreen.hxx"
 #include "app/AppStartScreenViewModel.hxx"
-#include "editor/EditorScreen.hxx"
-#include "editor/EditorScreenViewModel.hxx"
-#include "project/ProjectService.hxx"
+#include "editor/Editor.hxx"
+#include <editor/core/project/ProjectService.hxx>
 #include <assetpackages/AssetPackages.hxx>
 
 #include <QtWidgets/qapplication.h>
@@ -58,17 +57,13 @@ int main(int argc, char** argv) {
 	// Check if the project file exists. If it does, open it. If not, open the start screen.
 
 	if (projectFile != "") {
-		auto editor = new kyanite::editor::EditorScreen(
-			nullptr,
+		auto editor = new kyanite::editor::Editor(
 			projectFile,
 			createProject,
 			name,
-			std::make_unique<editor::EditorScreenViewModel>(
-				std::make_unique<kyanite::editor::ProjectService>(),
-				std::make_unique<kyanite::editor::AssetDatabase>()
-			)
+			std::make_unique<kyanite::editor::ProjectService>(),
+			std::make_unique<kyanite::editor::AssetDatabase>()
 		);
-		editor->show();
 	}
 	else {
 		auto startScreen = new kyanite::editor::AppStartScreen(nullptr, std::make_unique<editor::AppStartScreenViewModel>());

@@ -5,12 +5,12 @@ public class SystemIterator {
 
     internal init(handle: NativePointer) {
         self.handle = handle
-        self.size = Bridge_Engine_GetIteratorSize(handle)
+        self.size = ECS_GetIteratorSize(handle)
     }
 
     public func get<T>(index: UInt8) -> UnsafeMutableBufferPointer<T> {
         // Flecs uses 1-based indexing
-        guard let buffer = Bridge_Engine_GetComponentsFromIterator(handle, index + 1, MemoryLayout<T>.size) else {
+        guard let buffer = ECS_GetComponentsFromIterator(handle, index + 1, MemoryLayout<T>.size) else {
             fatalError("Failed to get components from iterator")
         }
 

@@ -9,11 +9,11 @@
 
 namespace core = kyanite::engine::core;
 
-void Bridge_Core_Init() {
+void Core_Init() {
 	core::InitCore();
 }
 
-NativePointer Bridge_Core_CreateWindow(
+NativePointer Core_CreateWindow(
 	const char* title,
 	uint32_t* posX,
 	uint32_t* posY,
@@ -26,6 +26,8 @@ NativePointer Bridge_Core_CreateWindow(
 	auto allFlags = flags;
 
 	if(renderBackend == 0) {
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
 		allFlags |= SDL_WINDOW_OPENGL;
 	} else if(renderBackend == 1) {
 		allFlags |= SDL_WINDOW_VULKAN;
@@ -51,21 +53,24 @@ NativePointer Bridge_Core_CreateWindow(
 	return window;
 }
 
-NativePointer Bridge_Core_CreateWindowFromNative(NativePointer nativeWindow) {
-	SDL_Init(SDL_INIT_VIDEO);
+NativePointer Core_CreateWindowFromNative(NativePointer nativeWindow) {
+	SDL_InitSubSystem(SDL_INIT_VIDEO);
 	SDL_Window* sdlWnd = SDL_CreateWindowFrom(nativeWindow);
+	// Enable OpenGL on the window
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
 
 	return reinterpret_cast<NativePointer>(sdlWnd);
 }
 
-void Bridge_Core_DestroyWindow(NativePointer window) {
+void Core_DestroyWindow(NativePointer window) {
 	SDL_DestroyWindow(reinterpret_cast<SDL_Window*>(window));
 }
 
-void Bridge_Core_ShowWindow(NativePointer window) {
+void Core_ShowWindow(NativePointer window) {
 	SDL_ShowWindow(reinterpret_cast<SDL_Window*>(window));
 }
 
-void Bridge_Core_HideWindow(NativePointer window) {
+void Core_HideWindow(NativePointer window) {
 	SDL_HideWindow(reinterpret_cast<SDL_Window*>(window));
 }

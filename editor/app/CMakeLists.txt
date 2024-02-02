@@ -10,9 +10,10 @@ qt_standard_project_setup()
 qt_add_executable(EditorApp ${SRC} ${HEADERS})
 
 target_include_directories(EditorApp PRIVATE include)
-target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/editor/core/include)
 target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/assetpackages/include)
-target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/engine/include)
+target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/editor/core/include)
+target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/audio/include)
+target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/ecs/include)
 target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/shared/include)
 target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/include)
 target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/rendering/include)
@@ -20,7 +21,7 @@ target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/renderin
 target_link_libraries(EditorApp PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent unofficial::sqlite3::sqlite3 assimp::assimp)
 
 # Link all engine libraries
-target_link_libraries(EditorApp PRIVATE EditorCore Engine Core AssetPackages Rendering)
+target_link_libraries(EditorApp PRIVATE EditorCore EntityComponentSystem Audio Core AssetPackages Rendering)
 
 add_custom_command(TARGET EditorApp POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:EditorApp> $<TARGET_RUNTIME_DLLS:EditorApp>

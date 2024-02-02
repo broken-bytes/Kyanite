@@ -24,6 +24,10 @@ namespace kyanite::engine::assetpackages {
 		}
 	}
 
+	auto LoadPackageList(std::string path) -> std::vector<AssetPackage*> {
+		return assetLoader->LoadPackageList(path);
+	}
+
 	auto LoadFileListForPackage(const AssetPackage* package) -> std::map<std::string, std::string> {
 		return assetLoader->LoadFileListForPackage(package);
 	}

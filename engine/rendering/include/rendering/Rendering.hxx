@@ -11,11 +11,11 @@
 #include <vector>
 
 namespace kyanite::engine::rendering {
-	EXPORTED auto Init(NativePointer window) -> void;
-	EXPORTED auto Update() -> void;
-	EXPORTED auto Render() -> void;
-	EXPORTED auto SetClearColor(float r, float g, float b, float a) -> void;
-	EXPORTED auto LoadTexture(std::string_view path) -> Texture;
-	EXPORTED auto LoadShader(std::string_view vertexPath, std::string_view fragmentPath) -> Shader;
-	EXPORTED auto LoadModel(std::string_view path) -> std::vector<Mesh>;
+	auto Init(NativePointer window) -> void;
+	auto Update(float deltaTime) -> void;
+	auto Render() -> void;
+	auto SetClearColor(float r, float g, float b, float a) -> void;
+	auto LoadTexture(std::string_view path) -> Texture;
+	auto LoadShader(std::string_view vertexPath, std::string_view fragmentPath) -> Shader;
+	auto LoadModel(std::string_view path) -> std::vector<Mesh>;
 }

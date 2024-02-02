@@ -18,6 +18,7 @@
         "glad",
         "glm",
         "gtest",
+        "imgui",
         "joltphysics",
         "libjpeg-turbo",
         "libpng",

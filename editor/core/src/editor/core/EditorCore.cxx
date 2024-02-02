@@ -1,4 +1,13 @@
 #include "editor/core/EditorCore.hxx"
+#include <core/Core.hxx>
+
+#include <cereal/cereal.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/archives/json.hpp>
+#include <cereal/types/string.hpp>
+
+#include <sstream>
+#include <vector>
 
 auto DrawReferenceSelector(NativePointer window, std::string label, std::function<void(std::string)> onReferenceSet) -> void {
 

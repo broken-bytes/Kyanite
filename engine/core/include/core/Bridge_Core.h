@@ -11,7 +11,7 @@ extern "C" {
 	 * @brief Initialies the core module
 	 *
 	 */
-	EXPORTED void Bridge_Core_Init();
+	EXPORTED void Core_Init();
 
 	/**
 	 * @brief Creates a new window
@@ -25,7 +25,7 @@ extern "C" {
 	 * @param renderBackend The render backend to use for the window (0 = OpenGL, 1 = Vulkan, 2 = D3D12)
 	 * @return uint64_t* Returns a pointer to the window
 	 */
-	EXPORTED NativePointer Bridge_Core_CreateWindow(
+	EXPORTED NativePointer Core_CreateWindow(
 		const char* title,
 		uint32_t* posX,
 		uint32_t* posY,
@@ -42,28 +42,28 @@ extern "C" {
 	 * @param title The native window
 	 * @return uint64_t* Returns a pointer to the window
 	 */
-	EXPORTED NativePointer Bridge_Core_CreateWindowFromNative(NativePointer nativeWindow);
+	EXPORTED NativePointer Core_CreateWindowFromNative(NativePointer nativeWindow);
 
 	/**
 	 * @brief Destroys an audiosource via its pointer
 	 *
 	 * @param window The window
 	 */
-	EXPORTED void Bridge_Core_DestroyWindow(NativePointer window);
+	EXPORTED void Core_DestroyWindow(NativePointer window);
 
 	/**
 	 * @brief Shows the window
 	 *
 	 * @param window The window to be shown
 	 */
-	EXPORTED void Bridge_Core_ShowWindow(NativePointer window);
+	EXPORTED void Core_ShowWindow(NativePointer window);
 
 	/**
 	 * @brief Hides the window
 	 *
 	 * @param window The window to be hidden
 	 */
-	EXPORTED void Bridge_Core_HideWindow(NativePointer window);
+	EXPORTED void Core_HideWindow(NativePointer window);
 
 #ifdef __cplusplus 
 }

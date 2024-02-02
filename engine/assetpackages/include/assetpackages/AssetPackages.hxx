@@ -21,12 +21,19 @@ namespace kyanite::engine::assetpackages {
 	EXPORTED auto Initialize(std::shared_ptr<IAssetLoader> loader) -> void;
 
 	/**
+		@brief Loads a list of packages from a directory
+		@param path The path to the directory
+		@return The list of packages
+	*/
+	EXPORTED auto LoadPackageList(std::string path) -> std::vector<AssetPackage*>;
+
+	/**
 		@brief Loads a list of files from a directory
 		@param package The package
 		@return The mapping of the files to their UUIDs
 	*/
 	EXPORTED auto LoadFileListForPackage(const AssetPackage* package) -> std::map<std::string, std::string>;
-	
+
 	/**
 		@brief Loads an asset from a file
 		@param path The path to the asset file

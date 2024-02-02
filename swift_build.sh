@@ -1,0 +1,1 @@
+swift run -Xlinker .\build\engine\assetpackages\Debug\AssetPackages.lib -Xlinker .\build\engine\audio\Debug\Audio.lib -Xlinker .\build\engine\core\Debug\Core.lib -Xlinker .\build\engine\ecs\Debug\EntityComponentSystem.lib -Xlinker .\build\engine\input\Debug\Input.lib -Xlinker .\build\engine\rendering\Debug\Rendering.lib 

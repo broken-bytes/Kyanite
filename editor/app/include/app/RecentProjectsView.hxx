@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "project/Project.hxx"
+#include <editor/core/project/Project.hxx>
 
 #include <qwidget.h>
 

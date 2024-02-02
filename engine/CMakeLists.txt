@@ -6,5 +6,5 @@ add_subdirectory(audio)
 add_subdirectory(input)
 add_subdirectory(rendering)
 add_subdirectory(assetpackages)
-add_subdirectory(engine)
+add_subdirectory(ecs)
 

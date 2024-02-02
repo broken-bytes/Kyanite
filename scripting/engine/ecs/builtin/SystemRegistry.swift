@@ -14,7 +14,7 @@ public class _SystemRegistry {
 
         let count = componentIds.count
         let sysId = componentIds.withUnsafeMutableBufferPointer { ptr in 
-            return Bridge_Engine_RegisterSystem(name.cString(using: .utf8), ptr.baseAddress, count, runFunc)
+            return ECS_RegisterSystem(name.cString(using: .utf8), ptr.baseAddress, count, runFunc)
         }
 
         return sysId

@@ -12,7 +12,7 @@ class AssetPackageManager {
         appDir.appendPathComponent(AssetPackageManager.packagePath)
 
         var numPackages: Int = 0
-        let packageHandles = Bridge_Engine_LoadAssetPackages(appDir.absoluteString.cString(using: .utf8), &numPackages)
+        let packageHandles = AssetPackages_LoadAssetPackages(appDir.absoluteString.cString(using: .utf8), &numPackages)
 
         var packages: [AssetPackage] = []
         for x in 0..<numPackages {
