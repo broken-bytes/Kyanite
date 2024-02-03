@@ -18,7 +18,10 @@
         "glad",
         "glm",
         "gtest",
-        "imgui",
+        {
+            "name": "imgui",
+            "features": ["dx12-binding", "vulkan-binding", "opengl3-binding", "sdl2-binding"]
+        },
         "joltphysics",
         "libjpeg-turbo",
         "libpng",

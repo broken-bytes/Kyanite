@@ -5,6 +5,9 @@
 #include <FreeImagePlus.h>
 #include <glad/glad.h>
 #include <SDL.h>
+#include <imgui.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_impl_opengl3.h>
 
 #include <stdexcept>
 #include <memory>
@@ -30,26 +33,50 @@ namespace kyanite::engine::rendering {
 			throw std::runtime_error("Failed to create OpenGL context");
 		}
 
+		SDL_GL_MakeCurrent(sdlWindow, context);
+
 		// Initialize GLAD
 		if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
 			std::cout << "Failed to initialize GLAD" << std::endl;
 			throw std::runtime_error("Failed to initialize GLAD");
 		}
 
-		std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+        // Create ImGui context
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+		ImGui_ImplSDL2_InitForOpenGL(sdlWindow, context);
+		ImGui_ImplOpenGL3_Init("#version 130");
 	}
+
+    auto PreFrame() -> void {
+        // ImGui new frame, resource loading, etc.
+                // Start the ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplSDL2_NewFrame(window);
+		ImGui::NewFrame();
+    }
 
 	auto Update(float deltaTime) -> void {
-
+        // Update the game state of the rendering engine
 	}
 
-	auto Render() -> void {
-		std::cout << "Rendering" << std::endl;
+	auto PostFrame() -> void {		
+        // Render the actual frame
+
+		ImGui::Render();
 		glViewport(0, 0, 800, 600);
 		glClearColor(0.15f, 0.2f, 0.3f, 1.0f);
 		// First, clear the screen
 		glClear(GL_COLOR_BUFFER_BIT);
-		// Then, render the scene
+
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// Finally, swap the buffers
 		SDL_GL_SwapWindow(window);

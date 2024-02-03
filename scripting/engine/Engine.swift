@@ -17,11 +17,12 @@ class Engine {
         while true {
             var measure = ContinuousClock().measure {
                 // Update all native modules first each frame
+                Renderer.shared.preFrame()
                 InputManager.shared.update()
                 ECS_Update(time)
                 // Update the rendering system
                 Renderer.shared.update(with: time)
-                Renderer.shared.render()
+                Renderer.shared.postFrame()
                 // Update the swift internal systems
             }
             // Attoseconds to milliseconds

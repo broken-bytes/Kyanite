@@ -4,11 +4,15 @@ public class Renderer {
     private init() {
     }
 
-    public func render() {
-        Rendering_Render()
+    func preFrame() {
+        Rendering_PreFrame()
     }
 
-    public func update(with deltaTime: Float) {
+    func update(with deltaTime: Float) {
         Rendering_Update(deltaTime)
+    }
+
+    func postFrame() {
+        Rendering_PostFrame()
     }
 }

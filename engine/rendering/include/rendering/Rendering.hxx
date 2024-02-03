@@ -12,8 +12,9 @@
 
 namespace kyanite::engine::rendering {
 	auto Init(NativePointer window) -> void;
+    auto PreFrame() -> void;
 	auto Update(float deltaTime) -> void;
-	auto Render() -> void;
+	auto PostFrame() -> void;
 	auto SetClearColor(float r, float g, float b, float a) -> void;
 	auto LoadTexture(std::string_view path) -> Texture;
 	auto LoadShader(std::string_view vertexPath, std::string_view fragmentPath) -> Shader;

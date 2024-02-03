@@ -14,9 +14,10 @@ find_package(FreeImage CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 target_link_libraries(Rendering PUBLIC Core)
-target_link_libraries(Rendering PRIVATE SDL2::SDL2 spdlog::spdlog glm::glm freeimage::FreeImage freeimage::FreeImagePlus cereal::cereal)
+target_link_libraries(Rendering PRIVATE SDL2::SDL2 spdlog::spdlog glm::glm freeimage::FreeImage freeimage::FreeImagePlus cereal::cereal imgui::imgui)
 
 find_path(ATOMIC_QUEUE_INCLUDE_DIRS "atomic_queue/atomic_queue.h")
 target_include_directories(Rendering PRIVATE ${ATOMIC_QUEUE_INCLUDE_DIRS})
