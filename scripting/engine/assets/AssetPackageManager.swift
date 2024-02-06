@@ -1,4 +1,5 @@
 import Foundation
+import Native
 
 class AssetPackageManager {
     static let shared = AssetPackageManager()
@@ -11,15 +12,6 @@ class AssetPackageManager {
         guard var appDir = URL(string: FileManager.default.currentDirectoryPath) else { fatalError("Failed to get app directory") }
         appDir.appendPathComponent(AssetPackageManager.packagePath)
 
-        var numPackages: Int = 0
-        let packageHandles = AssetPackages_LoadAssetPackages(appDir.absoluteString.cString(using: .utf8), &numPackages)
-
-        var packages: [AssetPackage] = []
-        for x in 0..<numPackages {
-            guard let handle = packageHandles?.advanced(by: x) else { fatalError("Failed to load asset package") }
-            packages.append(AssetPackage(handle: handle))
-        }
-
-        self.packages = packages
+        self.packages = NativeAssetPackages.shared.loadAssetPackages(appDir.absoluteString).map { AssetPackage(native: $0) }
     }
 }

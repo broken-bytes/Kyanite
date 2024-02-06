@@ -1,3 +1,5 @@
+import Native
+
 public class _SystemRegistry {
     static let shared = _SystemRegistry()
 
@@ -5,17 +7,14 @@ public class _SystemRegistry {
 
     internal var systems: [Int: UInt64] = [:]
 
-    public func _register(name: String, components: [any Component.Type], runFunc: (@convention(c) (NativePointer?) -> Void)?) -> UInt64 {
+    public func _register(name: String, components: [any Hashable.Type], runFunc: (@convention(c) (UnsafeMutableRawPointer?) -> Void)?) -> UInt64 {
         var componentIds: [UInt64] = []
         
         for component in components {
             componentIds.append(_ComponentRegistry.shared._get(component))
         }
 
-        let count = componentIds.count
-        let sysId = componentIds.withUnsafeMutableBufferPointer { ptr in 
-            return ECS_RegisterSystem(name.cString(using: .utf8), ptr.baseAddress, count, runFunc)
-        }
+        let sysId = NativeECS.shared.registerSystem(name: name, components: &componentIds, runFunc: runFunc)
 
         return sysId
     }

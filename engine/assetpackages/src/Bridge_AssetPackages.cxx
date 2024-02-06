@@ -19,17 +19,11 @@ void AssetPackages_Initialize(NativePointer loader) {
 	assetpackages::Initialize(smartLoader);
 }
 
-NativePointer AssetPackages_LoadAssetPackages(const char* path, size_t* numPackages) {
+void AssetPackages_LoadAssetPackages(const char* path, NativePointer* buffer, size_t* numPackages) {
 	auto packages = assetpackages::LoadPackageList(path);
 	*numPackages = packages.size();
 
-	assetpackages::AssetPackage** packagesPtr = new assetpackages::AssetPackage*[*numPackages];
-
-	for(size_t x = 0; x < *numPackages; x++) {
-		packagesPtr[x] = packages[x];
-	}
-
-	return reinterpret_cast<NativePointer>(packagesPtr);
+	*buffer = reinterpret_cast<NativePointer>(packagesPtr);
 }
 
 NativePointer AssetPackages_LoadTexture(NativePointer assetPackage, const char* uuid) {

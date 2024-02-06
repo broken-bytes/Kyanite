@@ -1,16 +1,9 @@
 import Foundation
+import Native
 
-public class Mesh: Object {
-    internal var uuid: UUID
-
-    required internal init(uuid: UUID) {
-        self.uuid = uuid
-
-        super.init(handle: AssetManager.shared.loadAsset(type: Mesh.self, uuid: uuid.uuidString))
-    }
-
-    public convenience init() {
-        self.init(uuid: UUID())
+public class Mesh: Asset<NativeMesh> {
+    required override internal init(uuid: String, native: NativeMesh) {
+        super.init(uuid: uuid, native: native)
     }
 }
 

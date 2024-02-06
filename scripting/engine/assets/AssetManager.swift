@@ -2,13 +2,13 @@ class AssetManager {
     static let shared = AssetManager()
 
     // Mapping from uuid to native handle
-    private var assets: [String: NativePointer] = [:]
+    private var assets: [String: AnyAsset] = [:]
 
     private init() {
         
     }
 
-    func loadAsset<T>(type: T.Type, uuid: String) -> NativePointer {
+    func loadAsset<T>(type: T.Type, uuid: String) -> AnyAsset where T: AssetProtocol {
         // Should load asset only once and cache it
 
         // Check if asset is already loaded
@@ -19,16 +19,13 @@ class AssetManager {
         let packages = AssetPackageManager.shared.packages
         for package in packages {
             if package.hasAsset(uuid: uuid) {
-                let handle: NativePointer = package.getAsset(type: type, uuid: uuid)
-                assets[uuid] = handle
-                return handle
+                let handle = package.getAsset(type: type, uuid: uuid)
+                assets[uuid] = handle.eraseToAnyAsset()
+                
+                return handle.eraseToAnyAsset()
             }
         }
 
         fatalError("Asset with uuid \(uuid) not found")
-    }
-
-    func unloadAsset(handle: NativePointer) {
-        AssetPackages_DisposeAsset(handle)
     }
 }

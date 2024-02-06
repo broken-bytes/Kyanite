@@ -1,3 +1,5 @@
+import Native
+
 public class InputManager {
     public static let shared = InputManager()
 
@@ -5,11 +7,13 @@ public class InputManager {
     }
 
     internal func update() {
-        Input_Poll()
+        NativeInput.shared.update()
     }
 
     public func getKeyState(key: KeyboardKey) -> ButtonState {
-        guard let button = ButtonState(rawValue: Input_GetKeyboardButtonState(key.rawValue)) else {
+        let buttonId = NativeInput.shared.getKeyState(key: key.rawValue)
+
+        guard let button = ButtonState(rawValue: buttonId) else {
             fatalError("Invalid button state")
         }
 

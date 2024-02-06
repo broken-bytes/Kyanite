@@ -1,3 +1,5 @@
+@_implementationOnly import Bridge
+
 public class Object {
     internal var handle: NativePointer? = nil
 
@@ -7,7 +9,7 @@ public class Object {
 
     deinit {
         if let handle {
-            AssetManager.shared.unloadAsset(handle: handle)
+            AssetPackages_DisposeAsset(handle)
         }
     }
 }

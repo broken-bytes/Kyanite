@@ -13,6 +13,9 @@
 #include <memory>
 #include <sstream>
 
+#pragma comment(lib, "KyaniteEngine.lib")
+#pragma comment(lib, "KyaniteEditor.lib")
+
 namespace assetpackages = kyanite::engine::assetpackages;
 namespace editor = kyanite::editor;
 

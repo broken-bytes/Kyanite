@@ -1,24 +1,23 @@
 import Foundation
+import Native
 
 public struct Entity {
     private var id: UInt64
 
-    private var components: [UInt64: any Component] = [:]
+    private var components: [UInt64: any Hashable] = [:]
 
     public init(name: String) {
-        self.id = ECS_CreateEntity(name.cString(using: .utf8))
+        self.id = NativeECS.shared.createEntity(name: name)
     }
 
-    public func addComponent<T: Component>(_ component: T.Type) {
+    public func addComponent<T: Hashable>(_ component: T.Type) {
         let componentId = _ComponentRegistry.shared._get(T.self)
-        ECS_AddComponent(self.id, componentId)
-
-        // Convert the component data to a pointer
-        let data = UnsafeMutablePointer<T>.allocate(capacity: 1)
-        data.initialize(to: T())
-        ECS_SetComponent(self.id, componentId, data)
+        NativeECS.shared.addComponent(entity: self.id, componentId: componentId)
     }
 
-    public func setComponent<T: Component>(_ component: T) {
+    public func setComponent<T: Hashable>(_ component: T) {
+        let componentId = _ComponentRegistry.shared._get(T.self)
+
+        NativeECS.shared.setComponent(entity: self.id, componentId: componentId, component: component)
     }
 }

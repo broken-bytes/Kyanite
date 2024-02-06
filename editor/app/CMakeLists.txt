@@ -18,6 +18,8 @@ target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/shared/i
 target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/include)
 target_include_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/engine/rendering/include)
 
+target_link_directories(EditorApp PRIVATE ${CMAKE_SOURCE_DIR}/.build/debug)
+
 target_link_libraries(EditorApp PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent unofficial::sqlite3::sqlite3 assimp::assimp)
 
 # Link all engine libraries

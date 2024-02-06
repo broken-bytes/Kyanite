@@ -8,10 +8,16 @@ let package = Package(
     name: "scripting",
     platforms: [.macOS(.v13), .iOS(.v17), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13)],
     products: [
-        .executable(
+        .library(
             name: "KyaniteEngine",
+            type: .dynamic, 
             targets: ["KyaniteEngine"]
         ),
+        .library(
+            name: "KyaniteEditor", 
+            type: .dynamic,
+            targets: ["KyaniteEditor"]
+        )
     ],
     dependencies: [
         // Depend on the Swift 5.9 release of SwiftSyntax
@@ -29,17 +35,28 @@ let package = Package(
             ],
             path: "scripting/macros"
         ),
-
-        // Library that exposes a macro as part of its API, which is used in client programs.
-        // For now this is an executable target, but it will be a library target in the future. 
-        .executableTarget(
+ 
+        .target(
             name: "KyaniteEngine", 
-            dependencies: ["Macros"],
-            path: "scripting/engine",
-            swiftSettings: [
-                .unsafeFlags(["-import-objc-header", "./scripting/Bridging_Header.h"]),
-                .unsafeFlags(["-I", "./engine/shared/include"]),
-            ]
+            dependencies: ["Macros", "Native"],
+            path: "scripting/engine"
         ),
+
+        .target(
+            name: "KyaniteEditor", 
+            dependencies: ["KyaniteEngine"],
+            path: "scripting/editor"
+        ),
+
+        .target(
+            name: "Bridge",
+            path: "scripting/bridge"
+        ),
+
+        .target(
+            name: "Native",
+            dependencies: ["Bridge"],
+            path: "scripting/native"
+        )
     ]
 )

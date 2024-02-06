@@ -27,7 +27,7 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
     ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
         return [ExtensionDeclSyntax(
             extendedType: type, 
-            memberBlock: MemberBlockSyntax(": Component, Hashable {}"))
+            memberBlock: MemberBlockSyntax(": Hashable {}"))
         ]
     }
 
@@ -205,7 +205,7 @@ public struct SystemMacro: MemberMacro {
         }.joined(separator: ","))]) { iter in 
             guard let iter else { fatalError("System \(raw: name) was not initialized")}
 
-            let iterator = SystemIterator(handle: iter)
+            let iterator = SystemIterator(native: iter)
             \(raw: runCall)
         }
     }

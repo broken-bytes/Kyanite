@@ -16,6 +16,12 @@
 #include <filesystem>
 #include <sstream>
 
+// NOTE: These functions come from the Swift libraries. They are *not* unused 
+extern "C" void kyanitemain();
+extern "C" void kyaniteeditormain();
+
+std::thread engineThread;
+
 namespace kyanite::editor {
 	Editor::Editor(
 		std::string projectPath,
@@ -58,6 +64,9 @@ namespace kyanite::editor {
 	}
 
 	auto Editor::InitializeEngine() -> void {
+		// Start the engine in a separate thread so it does not interfere with the editor
+		engineThread = std::thread([&]() { kyanitemain(); });
+		kyaniteeditormain();
 		_assetDatabase->Load(_service->CachePath());
 	}
 

@@ -1,3 +1,5 @@
+import Native
+
 public class Renderer {
     public static let shared = Renderer()
 
@@ -5,14 +7,14 @@ public class Renderer {
     }
 
     func preFrame() {
-        Rendering_PreFrame()
+        NativeRendering.shared.preFrame()
     }
 
     func update(with deltaTime: Float) {
-        Rendering_Update(deltaTime)
+        NativeRendering.shared.update(with: deltaTime)
     }
 
     func postFrame() {
-        Rendering_PostFrame()
+        NativeRendering.shared.postFrame()
     }
 }
