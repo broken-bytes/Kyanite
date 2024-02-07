@@ -3,10 +3,6 @@
 #include <shared/Exported.hxx>
 #include <shared/NativePointer.hxx>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-
 #ifdef __cplusplus 
 extern "C" {
 #endif
@@ -16,6 +12,12 @@ extern "C" {
 	 *
 	 */
 	EXPORTED void Core_Init();
+
+	/**
+	 * @brief Shuts down the core module
+	 *
+	 */
+	EXPORTED void Core_Shutdown();
 
 	/**
 	 * @brief Creates a new window

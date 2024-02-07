@@ -65,3 +65,7 @@ float Input_GetControllerAxis(uint8_t controllerId, uint8_t axis) {
     return input::GetControllerAxis(controllerId, axis);
 }
 
+void Input_Subscribe(void(*subscription)(Event* event)) {
+	input::SubscribeToInputEvents(subscription);
+}
+

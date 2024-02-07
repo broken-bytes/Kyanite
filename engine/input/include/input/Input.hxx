@@ -1,7 +1,9 @@
 #pragma once
 
 #include "InputEvent.hxx"
+#include <shared/Events.hxx>
 
+#include <functional>
 #include <vector>
 
 namespace input {
@@ -67,4 +69,11 @@ namespace input {
      * @return 
      */
     auto SetControllerEffectBow(uint8_t controllerId, Trigger trigger, uint8_t start, uint8_t end, uint8_t strength, uint8_t snapForce) -> void;
+
+    /**
+    * @brief Subscribe to input events
+    * 
+    * @param callback The callback to be called when an input event is triggered
+    */
+    auto SubscribeToInputEvents(std::function<void(Event*)> callback) -> void;
 }

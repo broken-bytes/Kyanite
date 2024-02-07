@@ -5,7 +5,6 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus 
 extern "C" {
@@ -16,6 +15,12 @@ extern "C" {
  *
  */
 EXPORTED void Rendering_Init(NativePointer window);
+
+/**
+ * @brief Shuts down the rendering system
+ *
+ */
+EXPORTED void Rendering_Shutdown();
 
 /**
  * @brief Sets the clear color of the rendering system

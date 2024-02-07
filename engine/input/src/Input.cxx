@@ -3,6 +3,7 @@
 #include "input/DualsenseTriggerEffectGenerator.hxx"
 
 #include <math/Utils.hxx>
+#include <shared/Events.hxx>
 
 #include <SDL2/SDL.h>
 #include "atomic_queue/atomic_queue.h"
@@ -11,9 +12,11 @@
 #include <array>
 #include <map>
 #include <vector>
+#include <Windows.h>
 
 namespace input {
     bool quit = false;
+    std::vector<std::function<void(Event*)>> inputEventSubscribers;
     // 0 = Last Frame, 1 = Current Frame
     std::array<std::map<uint32_t, InputState>, 2> KeyboardButtonState;
     std::array<std::map<uint32_t, InputState>, 2> MouseButtonState;
@@ -57,15 +60,48 @@ namespace input {
         
         while (SDL_PollEvent(&event)) {
             if(event.type == SDL_QUIT) {
-                exit(0);
+                SystemEvent quitEvent = {};
+                quitEvent.type = SystemEventType::Quit;
+
+                Event* event = new Event();
+                event->type = EventType::System;
+                event->data.system = quitEvent;
+
+                for(auto& subscriber: inputEventSubscribers) {
+					subscriber(event);
+				}
             }
             
             if(event.type == SDL_KEYDOWN) {
                 KeyboardButtonState[1][event.key.keysym.scancode] = InputState::PRESSED;
+
+                KeyEvent keyEvent = {};
+                keyEvent.type = KeyEventType::KeyPressed;
+                keyEvent.scancode = event.key.keysym.scancode;
+
+                Event* event = new Event();
+                event->type = EventType::Key;
+                event->data.key = keyEvent;
+
+                for (auto& subscriber : inputEventSubscribers) {
+                    subscriber(event);
+                }
             }
             
             if(event.type == SDL_KEYUP) {
                 KeyboardButtonState[1][event.key.keysym.scancode] = InputState::RELEASED;
+
+                KeyEvent keyEvent = {};
+                keyEvent.type = KeyEventType::KeyReleased;
+                keyEvent.scancode = event.key.keysym.scancode;
+
+                Event* event = new Event();
+                event->type = EventType::Key;
+                event->data.key = keyEvent;
+
+                for (auto& subscriber : inputEventSubscribers) {
+                    subscriber(event);
+                }
             }
             
             if(event.type == SDL_MOUSEBUTTONDOWN) {
@@ -140,6 +176,10 @@ namespace input {
         data[2] = 0x15;
         input::dualsense::TriggerEffectGenerator::Bow(data, trigger == Trigger::LEFT ? 21 : 10, start, end, strength, snapForce);
         SDL_GameControllerSendEffect(Controllers[controllerId], data.data(), data.size());
+    }
+
+    auto SubscribeToInputEvents(std::function<void(Event*)> callback) -> void {
+        inputEventSubscribers.push_back(callback);
     }
 
     // ----- Helper Methods -----

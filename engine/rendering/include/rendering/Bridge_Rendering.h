@@ -17,6 +17,12 @@ extern "C" {
 EXPORTED void Rendering_Init(NativePointer window);
 
 /**
+ * @brief Shuts down the rendering system
+ *
+ */
+EXPORTED void Rendering_Shutdown();
+
+/**
  * @brief Sets the clear color of the rendering system
  * @param r The red component of the color
  * @param g The green component of the color

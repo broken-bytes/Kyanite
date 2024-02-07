@@ -11,7 +11,8 @@
 #include <vector>
 
 namespace kyanite::engine::core {
-    EXPORTED auto InitCore() -> void;
+    EXPORTED auto Init() -> void;
+    EXPORTED auto Shutdown() -> void;
     EXPORTED auto LoadFileToBuffer(std::string_view path) -> std::vector<uint8_t>;
     EXPORTED auto SaveBufferToFile(std::string_view path, std::vector<uint8_t>& buffer) -> void;
     EXPORTED auto CreateDirectory(std::string_view path) -> void;

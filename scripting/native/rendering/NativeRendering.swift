@@ -5,6 +5,10 @@ public class NativeRendering {
 
     private init() {}
 
+    deinit {
+        Rendering_Shutdown()
+    }
+
     public func start(window: NativeWindow) {
         Rendering_Init(window.handle)
     }

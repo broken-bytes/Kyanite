@@ -10,7 +10,11 @@
 namespace core = kyanite::engine::core;
 
 void Core_Init() {
-	core::InitCore();
+	core::Init();
+}
+
+void Core_Shutdown() {
+	core::Shutdown();
 }
 
 NativePointer Core_CreateWindow(

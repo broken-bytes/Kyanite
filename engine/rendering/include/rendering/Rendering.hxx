@@ -12,6 +12,7 @@
 
 namespace kyanite::engine::rendering {
 	auto Init(NativePointer window) -> void;
+	auto Shutdown() -> void;
     auto PreFrame() -> void;
 	auto Update(float deltaTime) -> void;
 	auto PostFrame() -> void;

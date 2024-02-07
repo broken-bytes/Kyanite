@@ -10,10 +10,14 @@ public class NativeCore {
         Core_Init()
     }
 
+    deinit {
+        Core_Shutdown()
+    }
+
     public func createWindow(
         _ name: String, 
-        posX: UnsafeMutablePointer<UInt32>, 
-        posY: UnsafeMutablePointer<UInt32>, 
+        posX: UnsafeMutablePointer<UInt32>?, 
+        posY: UnsafeMutablePointer<UInt32>?, 
         width: UInt32, 
         height: UInt32,
         flags: UInt32,

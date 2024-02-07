@@ -16,8 +16,12 @@
 #include <cassert>
 
 namespace kyanite::engine::core {
-	auto InitCore() -> void {
+	auto Init() -> void {
 		SDL_Init(SDL_INIT_EVENTS);
+	}
+
+	auto Shutdown() -> void {
+		SDL_Quit();
 	}
 
 	auto LoadFileToBuffer(std::string_view path) -> std::vector<uint8_t> {

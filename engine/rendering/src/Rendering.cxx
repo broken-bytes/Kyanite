@@ -55,6 +55,14 @@ namespace kyanite::engine::rendering {
 		ImGui_ImplOpenGL3_Init("#version 130");
 	}
 
+	auto Shutdown() -> void {
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplSDL2_Shutdown();
+		ImGui::DestroyContext();
+		SDL_GL_DeleteContext(context);
+		SDL_QuitSubSystem(SDL_INIT_VIDEO);
+	}
+
     auto PreFrame() -> void {
         // ImGui new frame, resource loading, etc.
                 // Start the ImGui frame

@@ -6,6 +6,7 @@
 
 #include "shared/Exported.hxx"
 #include "shared/NativePointer.hxx"
+#include "shared/Events.hxx"
 
 #include "Bridge_Core.h"
 #include "Bridge_ECS.h"

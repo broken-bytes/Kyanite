@@ -23,7 +23,12 @@ void AssetPackages_LoadAssetPackages(const char* path, NativePointer* buffer, si
 	auto packages = assetpackages::LoadPackageList(path);
 	*numPackages = packages.size();
 
-	*buffer = reinterpret_cast<NativePointer>(packagesPtr);
+	auto packageBuffer = new NativePointer[*numPackages];
+	for (size_t i = 0; i < *numPackages; i++) {
+		packageBuffer[i] = reinterpret_cast<NativePointer>(&packages[i]);
+	}
+
+	*buffer = packageBuffer;
 }
 
 NativePointer AssetPackages_LoadTexture(NativePointer assetPackage, const char* uuid) {

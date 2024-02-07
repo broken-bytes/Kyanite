@@ -9,6 +9,10 @@ void Rendering_Init(NativePointer window) {
 	rendering::Init(window);
 }
 
+void Rendering_Shutdown() {
+	rendering::Shutdown();
+}
+
 void Rendering_PreFrame() {
 	rendering::PreFrame();
 }

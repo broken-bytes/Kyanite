@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <shared/Events.hxx>
 #include <shared/Exported.hxx>
 
 #include <stdint.h>
@@ -58,6 +59,13 @@ extern "C" {
 	 *
 	 */
 	EXPORTED float Input_GetControllerAxis(uint8_t controllerId, uint8_t axis);
+
+	/**
+	* @brief Subscribes to the input system events
+	* @param subscription The function to be called when an event is triggered
+	*
+	*/
+	EXPORTED void Input_Subscribe(void(*subscription)(Event* event));
 
 #ifdef __cplusplus 
 }
