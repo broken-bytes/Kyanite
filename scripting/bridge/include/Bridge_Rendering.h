@@ -153,6 +153,20 @@ EXPORTED void Rendering_DrawImage(uint64_t textureId, uint32_t width, uint32_t h
 // Draw a drag and drop target in imgui with the given label and target
 EXPORTED void Rendering_DrawDragAndDropTarget(const char* label, void* target);
 
+/**
+* @brief Creates a shader
+* @param shader The shader code to use
+* @param shaderType The type of the shader. 0 for vertex, 1 for fragment
+* @return The id of the shader
+*/
+EXPORTED uint64_t Rendering_CreateShader(const char* shader, uint8_t shaderType);
+
+/**
+* @brief Destroys a shader
+* @param shaderId The id of the shader to destroy
+*/
+EXPORTED void Rendering_DestroyShader(uint64_t shaderId);
+
 #ifdef __cplusplus 
 }
 #endif

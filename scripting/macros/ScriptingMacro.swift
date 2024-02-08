@@ -4,19 +4,6 @@ import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import Foundation
 
-public struct StringifyMacro: ExpressionMacro {
-    public static func expansion(
-        of node: some FreestandingMacroExpansionSyntax,
-        in context: some MacroExpansionContext
-    ) -> ExprSyntax {
-        guard let argument = node.argumentList.first?.expression else {
-            fatalError("compiler bug: the macro does not have any arguments")
-        }
-
-        return "(\(argument), \(literal: argument.description))"
-    }
-}
-
 public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro {
     public static func expansion(
         of node: SwiftSyntax.AttributeSyntax, 
@@ -193,8 +180,6 @@ public struct SystemMacro: MemberMacro {
 """
     init() {
         _SystemRegistry.shared._register(name: "\(raw: name)", components: [\(raw: runFunctionParameters.map { 
-            print($0.type.syntaxNodeType)
-            print($0.debugDescription)
             guard 
                 let generic = $0.type.as(IdentifierTypeSyntax.self)?.genericArgumentClause?.arguments.first?.argument.description 
             else {

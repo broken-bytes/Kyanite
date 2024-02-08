@@ -8,6 +8,14 @@
 
 
 namespace kyanite::engine::rendering {
+    enum class ShaderType {
+		VERTEX,
+		FRAGMENT,
+		GEOMETRY,
+		TESS_CONTROL,
+		TESS_EVALUATION,
+		COMPUTE
+	};
 	struct Shader {
         std::string name;
 

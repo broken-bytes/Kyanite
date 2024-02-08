@@ -1,13 +1,8 @@
 import Foundation
 import Native
-import WinSDK
 
 @System class TestSystem {
     public static func run(transform: UnsafeMutableBufferPointer<TransformComponent>) {
-        OutputDebugStringA("TestSystem running\n")
-        transform.map { 
-            OutputDebugStringA("Position: \($0.position.x)\n")
-        }
         for x in 0..<transform.count {
             transform[x].position.x += InputManager.shared.getKeyState(key: .keycodeA) == .held ? 1 : 0
         }
@@ -19,7 +14,7 @@ class Engine {
     private var window: NativeWindow? = nil
     var testSystem: TestSystem
     
-    init() {
+    init(isDebug: Bool = false) {
         // Initialize all subsystems
         // Initialize the core
         NativeCore.shared.start()
@@ -36,7 +31,7 @@ class Engine {
         )
         NativeAudio.shared.start()
         NativeInput.shared.start()
-        NativeECS.shared.start()
+        NativeECS.shared.start(debug: isDebug)
         guard let window = window else {
             fatalError("Failed to create window")
         }
@@ -62,7 +57,7 @@ class Engine {
                     entity.addComponent(TransformComponent.self)
                     var transform = TransformComponent()
                     transform.position = Vector3(x: 0, y: 0, z: 0)
-                    entity.setComponent(transform)
+                    entity.setComponent(&transform)
                 }
             }
             // Attoseconds to milliseconds

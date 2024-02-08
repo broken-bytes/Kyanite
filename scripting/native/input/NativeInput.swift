@@ -1,8 +1,8 @@
 @_implementationOnly import Bridge
-import WinSDK
+import Foundation
 
 fileprivate var keyEvents: [KeyEvent] = []
-
+fileprivate var mutex: NSLock = NSLock()
 public class NativeInput {
     public static let shared = NativeInput()
     private var keyStates: [UInt32: UInt8] = [:]
@@ -12,6 +12,8 @@ public class NativeInput {
         Input_Subscribe { event in 
             guard let event = event?.pointee else { return }
             // Handle the event
+            mutex.lock()
+            defer { mutex.unlock() }
             switch event.type {
                 case Key:
                     let keyboardEvent = event.data.key
@@ -30,6 +32,8 @@ public class NativeInput {
 
     public func update() {
         Input_Poll()
+        mutex.lock()
+        defer { mutex.unlock() }
         // First, set all keys that were released the last frame to none
         for (key, state) in keyStates {
             if state == 3 {

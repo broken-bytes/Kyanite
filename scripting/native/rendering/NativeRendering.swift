@@ -36,4 +36,12 @@ public class NativeRendering {
     public func endWindow() {
         Rendering_EndWindow()
     }
+
+    public func loadShader(code: String, type: NativeShaderType) -> UInt64 {
+        Rendering_CreateShader(code.cString(using: .utf8), type.rawValue)
+    }
+
+    public func unloadShader(handle: UInt64) {
+        Rendering_DestroyShader(handle)
+    }
 }

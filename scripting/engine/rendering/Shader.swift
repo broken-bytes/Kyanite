@@ -1,8 +1,17 @@
 import Foundation
 import Native
 
-public class Shader: Asset<NativeShader> {
-    required override internal init(uuid: String, native: NativeShader) {
-        super.init(uuid: uuid, native: native)
+public class Shader {
+    internal let uuid: String
+    internal let handle : UInt64
+
+
+    init(uuid: String, handle : UInt64) {
+        self.uuid = uuid
+        self.handle = handle
+    }
+
+    deinit {
+        NativeRendering.shared.unloadShader(handle: handle)
     }
 }

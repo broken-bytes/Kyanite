@@ -1,5 +1,6 @@
 #include "rendering/Rendering.hxx"
 #include "rendering/Device.hxx"
+#include "rendering/opengl/GLDevice.hxx"
 #include "core/Core.hxx"
 
 #include <FreeImagePlus.h>
@@ -11,6 +12,7 @@
 
 #include <stdexcept>
 #include <memory>
+#include <rendering/renderdoc_app.h>
 
 namespace core = kyanite::engine::core;
 
@@ -24,7 +26,14 @@ namespace kyanite::engine::rendering {
 		SDL_InitSubSystem(SDL_INIT_VIDEO);
 		auto sdlWindow = reinterpret_cast<SDL_Window*>(window);
 		kyanite::engine::rendering::window = sdlWindow;
-
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+		SDL_GL_SetSwapInterval(0);
 		// Create an OpenGL context
 		context = SDL_GL_CreateContext(sdlWindow);
 		if (!context) {
@@ -53,6 +62,20 @@ namespace kyanite::engine::rendering {
 		ImGui::StyleColorsDark();
 		ImGui_ImplSDL2_InitForOpenGL(sdlWindow, context);
 		ImGui_ImplOpenGL3_Init("#version 130");
+
+		RENDERDOC_API_1_1_2* rdoc_api = NULL;
+
+		// At init, on windows
+		if (HMODULE mod = GetModuleHandleA("renderdoc.dll"))
+		{
+			pRENDERDOC_GetAPI RENDERDOC_GetAPI =
+				(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
+			int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&rdoc_api);
+			assert(ret == 1);
+		}
+
+		// Create a device
+		device = std::make_shared<opengl::GlDevice>();
 	}
 
 	auto Shutdown() -> void {
@@ -106,8 +129,12 @@ namespace kyanite::engine::rendering {
 		return Texture();
 	}
 
-	auto LoadShader(std::string_view vertexPath, std::string_view fragmentPath) -> Shader {
-		return Shader();
+	auto LoadShader(std::string code, ShaderType type) -> uint64_t {
+		return device->CompileShader(code, type);
+	}
+
+	auto UnloadShader(uint64_t shader) -> void {
+		device->DestroyShader(shader);
 	}
 
 	auto LoadModel(std::string_view path) -> std::vector<Mesh> {

@@ -17,6 +17,7 @@
 #include <flecs/addons/rest.h>
 
 #include <memory>
+#include <Windows.h>
 
 namespace ecs::EntityRegistry {
 	flecs::world world;
@@ -98,6 +99,8 @@ namespace ecs::EntityRegistry {
 	}
 
 	auto GetComponentBuffer(ecs_iter_t* iter, uint8_t index, size_t componentSize) -> void* {
-		return ecs_field_w_size(iter, componentSize, index);
+		auto ptr = ecs_field_w_size(iter, componentSize, index);
+		OutputDebugStringA("Component buffer received");
+		return ptr;
 	}
 }

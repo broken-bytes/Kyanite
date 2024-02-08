@@ -1,14 +1,15 @@
 import Native
+import WinSDK
 
 public class SystemIterator {
-    internal var native: NativeIterator
-    public var size: Int { return native.size() }
+    internal var native: UnsafeMutableRawPointer
+    public var size: Int { NativeECS.shared.sizeOfIterator(iterator: native) }
 
     internal init(native: UnsafeMutableRawPointer) {
-        self.native = native.load(as: NativeIterator.self)
+        self.native = native
     }
 
     public func get<T>(index: UInt8) -> UnsafeMutableBufferPointer<T> {
-        return native.get(index: index)
+        return NativeECS.shared.get(iterator: native, index: index)
     }
 }

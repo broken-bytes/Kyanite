@@ -4,6 +4,7 @@
 #include "CommandListType.hxx"
 #include "CommandQueue.hxx"
 #include "Fence.hxx"
+#include "Shader.hxx"
 
 #include <memory>
 
@@ -27,5 +28,9 @@ namespace kyanite::engine::rendering {
 		// Creation of resources
 		virtual auto CreateBuffer(uint64_t size) -> std::shared_ptr<Buffer> = 0;
 		virtual auto CreateRenderTarget() -> std::shared_ptr<RenderTarget> = 0;
+		virtual auto CompileShader(const std::string& shaderSource, ShaderType type) -> uint64_t = 0;
+
+		// Deleting resources
+		virtual auto DestroyShader(uint64_t shaderHandle) -> void = 0;
 	};
 }

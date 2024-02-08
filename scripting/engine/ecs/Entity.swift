@@ -15,9 +15,9 @@ public struct Entity {
         NativeECS.shared.addComponent(entity: self.id, componentId: componentId)
     }
 
-    public func setComponent<T: Hashable>(_ component: T) {
-        let componentId = _ComponentRegistry.shared._get(T.self)
+    public func setComponent<T: Hashable>(_ component: inout T) {
+        var componentId = _ComponentRegistry.shared._get(T.self)
 
-        NativeECS.shared.setComponent(entity: self.id, componentId: componentId, component: component)
+        NativeECS.shared.setComponent(entity: self.id, componentId: componentId, component: &component)
     }
 }

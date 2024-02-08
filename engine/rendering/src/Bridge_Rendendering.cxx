@@ -1,5 +1,6 @@
 #include "rendering/Bridge_Rendering.h"
 #include "rendering/Rendering.hxx"
+#include "rendering/Shader.hxx"
 
 #include <imgui.h>
 
@@ -76,3 +77,10 @@ void Rendering_DrawDragAndDropTarget(const char* label, void* target) {
 	ImGui::Text("Drag and drop a texture here");
 }
 
+uint64_t Rendering_CreateShader(const char* shader, uint8_t shaderType) {
+	rendering::LoadShader(shader, rendering::ShaderType(shaderType));
+}
+
+void Rendering_DestroyShader(uint64_t shaderId) {
+	rendering::UnloadShader(shaderId);
+}

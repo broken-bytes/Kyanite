@@ -17,7 +17,7 @@
 #include <sstream>
 
 // NOTE: These functions come from the Swift libraries. They are *not* unused 
-extern "C" void kyanitemain();
+extern "C" void kyanitemain(bool);
 extern "C" void kyaniteeditormain();
 
 std::thread engineThread;
@@ -65,7 +65,7 @@ namespace kyanite::editor {
 
 	auto Editor::InitializeEngine() -> void {
 		// Start the engine in a separate thread so it does not interfere with the editor
-		engineThread = std::thread([&]() { kyanitemain(); });
+		engineThread = std::thread([&]() { kyanitemain(true); });
 		kyaniteeditormain();
 		_assetDatabase->Load(_service->CachePath());
 	}

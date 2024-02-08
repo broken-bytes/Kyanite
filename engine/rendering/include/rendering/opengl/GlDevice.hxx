@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Device.hxx"
+#include "../Shader.hxx"
 
 namespace kyanite::engine::rendering::opengl {
 	class GlDevice : public Device {
@@ -18,5 +19,9 @@ namespace kyanite::engine::rendering::opengl {
         // Creation of resources
         virtual auto CreateBuffer(uint64_t size) -> std::shared_ptr<Buffer> override;
         virtual auto CreateRenderTarget() -> std::shared_ptr<RenderTarget> override;
+        virtual auto CompileShader(const std::string& shaderSource, ShaderType type) -> uint64_t override;
+
+        //Delete resources
+        virtual auto DestroyShader(uint64_t shaderHandle) -> void override;
 	};
 }
