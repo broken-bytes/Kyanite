@@ -19,5 +19,6 @@ namespace kyanite::engine::rendering {
 	auto SetClearColor(float r, float g, float b, float a) -> void;
 	auto LoadTexture(std::string_view path) -> Texture;
 	auto LoadShader(std::string code, ShaderType type) -> uint64_t;
+	auto UnloadShader(uint64_t shader) -> void;
 	auto LoadModel(std::string_view path) -> std::vector<Mesh>;
 }

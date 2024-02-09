@@ -78,7 +78,7 @@ void Rendering_DrawDragAndDropTarget(const char* label, void* target) {
 }
 
 uint64_t Rendering_CreateShader(const char* shader, uint8_t shaderType) {
-	rendering::LoadShader(shader, rendering::ShaderType(shaderType));
+	return rendering::LoadShader(shader, rendering::ShaderType(shaderType));
 }
 
 void Rendering_DestroyShader(uint64_t shaderId) {

@@ -153,6 +153,60 @@ EXPORTED void Rendering_DrawImage(uint64_t textureId, uint32_t width, uint32_t h
 // Draw a drag and drop target in imgui with the given label and target
 EXPORTED void Rendering_DrawDragAndDropTarget(const char* label, void* target);
 
+
+// Graphics pipeline functions
+
+/**
+* @brief Creates a vertex buffer
+* @param vertices The vertices to use
+* @param length The length of the buffer in count of vertices
+* @return The id of the vertex buffer
+*/
+EXPORTED uint64_t Rendering_CreateVertexBuffer(NativePointer vertices, size_t length);
+
+/**
+* @brief Updates a vertex buffer
+* @param vertexBufferId The id of the vertex buffer to update
+* @param vertices The new vertices to use
+*/
+EXPORTED void Rendering_UpdateVertexBuffer(uint64_t vertexBufferId, NativePointer vertices, size_t length);
+
+/**
+* @brief Frees a vertex buffer
+* @param vertexBufferId The id of the vertex buffer to free
+*/
+EXPORTED void Rendering_FreeVertexBuffer(uint64_t vertexBufferId);
+
+/**
+* @brief Loads the vertex buffer into cpu memory
+* @param vertexBufferId The id of the vertex buffer to load
+* @param vertices The pointer to the cpu memory
+* @param length The length of the buffer in count of vertices
+*/
+EXPORTED void Rendering_LoadVertexBuffer(uint64_t vertexBufferId, NativePointer* vertices, size_t* length);
+
+/**
+* @brief Creates an index buffer
+* @param indices The indices to use
+* @param length The length of the buffer in count of indices
+* @return The id of the index buffer
+*/
+EXPORTED uint64_t Rendering_CreateIndexBuffer(NativePointer indices, size_t length);
+
+/**
+* @brief Updates an index buffer
+* @param indexBufferId The id of the index buffer to update
+* @param indices The new indices to use
+*/
+EXPORTED void Rendering_UpdateIndexBuffer(uint64_t indexBufferId, NativePointer indices);
+
+/**
+* @brief Frees an index buffer
+* @param indexBufferId The id of the index buffer to free
+*/
+EXPORTED void Rendering_FreeIndexBuffer(uint64_t indexBufferId);
+
+
 /**
 * @brief Creates a shader
 * @param shader The shader code to use

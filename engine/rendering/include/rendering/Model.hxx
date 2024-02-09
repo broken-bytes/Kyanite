@@ -13,6 +13,8 @@ namespace kyanite::engine::rendering {
 	struct ModelData {
 		std::vector<MeshData> meshes;
 
+		ModelData() = default;
+
 		ModelData(std::vector<MeshData>& meshes) {
 			std::move(meshes.begin(), meshes.end(), std::back_inserter(this->meshes));
 		}

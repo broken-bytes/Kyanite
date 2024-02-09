@@ -12,10 +12,6 @@ public class Material: Asset<NativeMaterial> {
         super.init(uuid: uuid, native: native)
     }
 
-    public func load() {
-
-    }
-
     public func setFloat(name: String, value: Float) {
         properties[name] = value
     }

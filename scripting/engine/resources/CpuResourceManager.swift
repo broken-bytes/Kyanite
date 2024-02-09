@@ -9,24 +9,32 @@ internal class WeakBox<T: AnyObject> {
 }
 
 /// The resources manager is responsible for loading and managing resources such as textures, sounds, and fonts.
+/// It also keeps track of all the resources that are currently in use.
 public class ResourceManager {
     public static let shared = ResourceManager()
 
     internal var references: [String:AnyObject] = [:]
 
     private init() {
-        Thread.detachNewThread {
-            while true {
-                // Occasionally clean up all dead weak references
-                Thread.sleep(forTimeInterval: 0.1)
-                self.references = self.references.filter {
-                    if let value = $0.value as? WeakBox<AnyObject> {
-                        return value.value != nil
-                    }
-                    return true
+
+    }
+
+    public func loadResource<T: AnyObject>(with uuid: String) -> T? {
+        // Load the resource from all available asset packages and track it afterwards
+        for (_, value) in references {
+            if let asset = value as? WeakBox<T> {
+                if asset.value != nil {
+                    return asset.value!
+                } else {
+                    references.removeValue(forKey: uuid)
+                    return nil
                 }
+            } else {
+                return value as? T
             }
         }
+
+        return nil
     }
 
     internal func track<T: AnyObject>(_ object: T, retain: Bool = true) {

@@ -5,7 +5,6 @@ public class Shader {
     internal let uuid: String
     internal let handle : UInt64
 
-
     init(uuid: String, handle : UInt64) {
         self.uuid = uuid
         self.handle = handle
