@@ -17,20 +17,13 @@ namespace kyanite::engine::rendering {
             _commandList = _device->CreateCommandList(_type);
         }
 
-        auto Deinit() -> void {
-            delete _commandList;
-        }
-
         virtual ~Context() = default;
 
     protected:
-        auto GetCommandList() -> const CommandList* const {
-            return _commandList;
-        }
+        std::shared_ptr<CommandList> _commandList;
 
     private:
         CommandListType _type;
-        CommandList* _commandList;
         std::shared_ptr<Device> _device;
     };
 }

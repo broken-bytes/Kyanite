@@ -3,6 +3,8 @@
 #include "rendering/opengl/GlCommandQueue.hxx"
 #include "rendering/opengl/GlFence.hxx"
 #include "rendering/Shader.hxx"
+#include "rendering/opengl/GlIndexBuffer.hxx"
+#include "rendering/opengl/GlVertexBuffer.hxx"
 
 #include <glad/glad.h>
 #include <GL/gl.h>
@@ -74,6 +76,22 @@ namespace kyanite::engine::rendering::opengl {
 		}
 
 		return shaderId;
+	}
+
+	auto GlDevice::CreateVertexBuffer(const void* data, uint64_t size) -> std::shared_ptr<VertexBuffer> {
+		auto buffer = std::make_shared<GlVertexBuffer>();
+	}
+
+	auto GlDevice::UpdateVertexBuffer(std::shared_ptr<VertexBuffer> buffer, const void* data, uint64_t size) -> void {
+
+	}
+
+	auto GlDevice::CreateIndexBuffer(std::vector<uint32_t> indices) -> std::shared_ptr<IndexBuffer> {
+	
+	}
+
+	auto GlDevice::UpdateIndexBuffer(std::shared_ptr<IndexBuffer> buffer, std::vector<uint32_t> indices) -> void {
+
 	}
 
 	auto GlDevice::DestroyShader(uint64_t shaderHandle) -> void {

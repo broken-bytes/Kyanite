@@ -206,7 +206,6 @@ EXPORTED void Rendering_UpdateIndexBuffer(uint64_t indexBufferId, NativePointer 
 */
 EXPORTED void Rendering_FreeIndexBuffer(uint64_t indexBufferId);
 
-
 /**
 * @brief Creates a shader
 * @param shader The shader code to use

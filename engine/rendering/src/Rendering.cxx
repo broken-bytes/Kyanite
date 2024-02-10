@@ -1,6 +1,8 @@
 #include "rendering/Rendering.hxx"
 #include "rendering/Device.hxx"
 #include "rendering/opengl/GLDevice.hxx"
+#include "rendering/GraphicsContext.hxx"
+#include "rendering/VertexBuffer.hxx"
 #include "core/Core.hxx"
 
 #include <FreeImagePlus.h>
@@ -11,6 +13,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <stdexcept>
+#include <map>
 #include <memory>
 #include <rendering/renderdoc_app.h>
 
@@ -20,6 +23,9 @@ namespace kyanite::engine::rendering {
 	std::shared_ptr<Device> device = nullptr;
 	SDL_Window* window = nullptr;
 	SDL_GLContext context = nullptr;
+	std::map<uint64_t, std::shared_ptr<VertexBuffer>> vertexBuffers = {};
+	std::map<uint64_t, std::shared_ptr<IndexBuffer>> indexBuffers = {};
+	std::unique_ptr<GraphicsContext> graphicsContext = nullptr;
 
 	auto Init(NativePointer window) -> void {
 		FreeImage_Initialise();
@@ -76,6 +82,8 @@ namespace kyanite::engine::rendering {
 
 		// Create a device
 		device = std::make_shared<opengl::GlDevice>();
+
+		graphicsContext = GraphicsContext::Create(device);
 	}
 
 	auto Shutdown() -> void {
@@ -139,5 +147,38 @@ namespace kyanite::engine::rendering {
 
 	auto LoadModel(std::string_view path) -> std::vector<Mesh> {
 		return std::vector<Mesh>();
+	}
+
+	auto CreateVertexBuffer(const void* data, size_t size) -> uint64_t {
+		auto buffer = device->CreateVertexBuffer(data, size);
+		auto id = buffer->Id();
+
+		vertexBuffers[id] = buffer;
+		
+		return id;
+	}
+
+	auto CreateIndexBuffer(std::vector<uint32_t> indices) -> uint64_t {
+		auto buffer = device->CreateIndexBuffer(indices);
+		auto id = buffer->Id();
+
+		indexBuffers[id] = buffer;
+
+		return id;
+	}
+
+	auto UpdateVertexBuffer(uint64_t buffer, const void* data, size_t size) -> void {
+
+	}
+
+	auto UpdateIndexBuffer(uint64_t buffer, const void* data, size_t size) -> void {
+
+	}
+
+	auto DrawIndexed(uint64_t vertexBuffer, uint64_t indexBuffer, uint64_t material) -> void {
+		auto vb = vertexBuffers[vertexBuffer];
+		auto ib = indexBuffers[indexBuffer];
+
+		graphicsContext->DrawIndexed(vb, ib, material);
 	}
 }

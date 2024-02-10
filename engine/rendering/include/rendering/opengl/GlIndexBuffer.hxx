@@ -13,7 +13,7 @@ namespace kyanite::engine::rendering::opengl {
 		GlIndexBuffer(const std::vector<uint32_t>& data);
 		~GlIndexBuffer();
 
-		auto Id() const -> GLuint { return _id; }
+		auto Id() const -> uint64_t { return _id; }
 
 	private:
 		GLuint _id;

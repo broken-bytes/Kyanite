@@ -12,7 +12,7 @@ namespace kyanite::engine::rendering::opengl {
 		GlVertexBuffer(const void* data, size_t size);
 		~GlVertexBuffer();
 
-		auto Id() const -> GLuint { return _id; }
+		auto Id() const -> uint64_t { return _id; }
 
 	private:
 		GLuint _id;
