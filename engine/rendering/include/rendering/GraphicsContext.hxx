@@ -6,6 +6,7 @@
 #include "IndexBuffer.hxx"
 #include "VertexBuffer.hxx"
 #include "PrimitiveTopology.hxx"
+
 #include <memory>
 
 namespace kyanite::engine::rendering {
@@ -13,7 +14,7 @@ namespace kyanite::engine::rendering {
 
     class GraphicsContext: public Context {
     public:
-        GraphicsContext(const std::shared_ptr<Device> device) : Context(CommandListType::Graphics, device) { }
+        GraphicsContext(const std::shared_ptr<Device>& device) : Context(CommandListType::Graphics, device) { }
         virtual ~GraphicsContext() = default;
         virtual auto ClearRenderTarget() -> void;
         virtual auto SetRenderTarget(std::shared_ptr<RenderTarget> target) -> void;
@@ -23,9 +24,5 @@ namespace kyanite::engine::rendering {
         virtual auto SetVertexBuffer(uint8_t index, std::shared_ptr<VertexBuffer>& buffer) -> void;
         virtual auto SetIndexBuffer(std::shared_ptr<IndexBuffer>& buffer) -> void;
         virtual auto DrawIndexed(uint32_t indexCount, uint32_t startIndexLocation, int32_t baseVertexLocation) -> void;
-
-        static auto Create(const std::shared_ptr<Device> device) -> std::unique_ptr<GraphicsContext> {
-            return std::make_unique<GraphicsContext>(device);
-        }
     };
 }

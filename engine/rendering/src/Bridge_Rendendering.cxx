@@ -79,7 +79,7 @@ void Rendering_DrawDragAndDropTarget(const char* label, void* target) {
 
 // Graphics pipeline functions
 uint64_t Rendering_CreateVertexBuffer(NativePointer vertices, size_t length) {
-
+	return rendering::CreateVertexBuffer(vertices, length);
 }
 
 void Rendering_UpdateVertexBuffer(uint64_t vertexBufferId, NativePointer vertices, size_t length) {
@@ -95,11 +95,13 @@ void Rendering_LoadVertexBuffer(uint64_t vertexBufferId, NativePointer* vertices
 }
 
 uint64_t Rendering_CreateIndexBuffer(NativePointer indices, size_t length) {
-
+	// TODO: Implement
+	return rendering::CreateIndexBuffer(reinterpret_cast<uint32_t*>(indices), length);
 }
 
 void Rendering_UpdateIndexBuffer(uint64_t indexBufferId, NativePointer indices) {
-
+	// TODO: Implement
+	return;
 }
 
 /**

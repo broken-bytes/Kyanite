@@ -6,6 +6,8 @@
 #include "../PrimitiveTopology.hxx"
 #include "../VertexBuffer.hxx"
 
+#include <glad/glad.h>
+
 #include <functional>
 #include <vector>
 

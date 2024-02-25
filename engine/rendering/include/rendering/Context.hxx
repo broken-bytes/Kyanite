@@ -2,21 +2,15 @@
 
 #include "CommandList.hxx"
 #include "CommandListType.hxx"
-#include "Device.hxx"
 
 #include <memory>
 
 namespace kyanite::engine::rendering {
+    // Forward declaration
+    class Device;
     class Context {
     public:
-        explicit Context(CommandListType type, std::shared_ptr<Device> device) : _type(type), _device(device) {
-
-        }
-
-        auto Init() -> void {
-            _commandList = _device->CreateCommandList(_type);
-        }
-
+        explicit Context(CommandListType type, const std::shared_ptr<Device>& device);
         virtual ~Context() = default;
 
     protected:

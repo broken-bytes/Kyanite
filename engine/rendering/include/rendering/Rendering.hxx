@@ -23,7 +23,7 @@ namespace kyanite::engine::rendering {
 	auto LoadShader(std::string code, ShaderType type) -> uint64_t;
 	auto LoadModel(std::string_view path) -> std::vector<Mesh>;
 	auto CreateVertexBuffer(const void* data, size_t size) -> uint64_t;
-	auto CreateIndexBuffer(std::vector<uint32_t> indices) -> uint64_t;
+	auto CreateIndexBuffer(const uint32_t* indices, size_t len) -> uint64_t;
 	auto UpdateVertexBuffer(uint64_t buffer, const void* data, size_t size) -> void;
 	auto UpdateIndexBuffer(uint64_t buffer, const void* data, size_t size) -> void;
 

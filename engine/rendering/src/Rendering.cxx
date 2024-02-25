@@ -2,15 +2,15 @@
 #include "rendering/Device.hxx"
 #include "rendering/opengl/GLDevice.hxx"
 #include "rendering/GraphicsContext.hxx"
+#include "rendering/ImGuiContext.hxx"
 #include "rendering/VertexBuffer.hxx"
+#include "rendering/DeviceFactory.hxx"
 #include "core/Core.hxx"
 
 #include <FreeImagePlus.h>
 #include <glad/glad.h>
 #include <SDL.h>
 #include <imgui.h>
-#include <imgui_impl_sdl2.h>
-#include <imgui_impl_opengl3.h>
 
 #include <stdexcept>
 #include <map>
@@ -22,52 +22,19 @@ namespace core = kyanite::engine::core;
 namespace kyanite::engine::rendering {
 	std::shared_ptr<Device> device = nullptr;
 	SDL_Window* window = nullptr;
-	SDL_GLContext context = nullptr;
+
 	std::map<uint64_t, std::shared_ptr<VertexBuffer>> vertexBuffers = {};
 	std::map<uint64_t, std::shared_ptr<IndexBuffer>> indexBuffers = {};
+
 	std::unique_ptr<GraphicsContext> graphicsContext = nullptr;
+	std::unique_ptr<ImGuiContext> imguiContext = nullptr;
+	std::unique_ptr<Swapchain> swapchain = nullptr;
 
 	auto Init(NativePointer window) -> void {
 		FreeImage_Initialise();
 		SDL_InitSubSystem(SDL_INIT_VIDEO);
 		auto sdlWindow = reinterpret_cast<SDL_Window*>(window);
 		kyanite::engine::rendering::window = sdlWindow;
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-		SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-		SDL_GL_SetSwapInterval(0);
-		// Create an OpenGL context
-		context = SDL_GL_CreateContext(sdlWindow);
-		if (!context) {
-			auto error = SDL_GetError();
-			std::cout << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
-			throw std::runtime_error("Failed to create OpenGL context");
-		}
-
-		SDL_GL_MakeCurrent(sdlWindow, context);
-
-		// Initialize GLAD
-		if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-			std::cout << "Failed to initialize GLAD" << std::endl;
-			throw std::runtime_error("Failed to initialize GLAD");
-		}
-
-		// Setup Dear ImGui context
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-        // Create ImGui context
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-		ImGui_ImplSDL2_InitForOpenGL(sdlWindow, context);
-		ImGui_ImplOpenGL3_Init("#version 130");
 
 		RENDERDOC_API_1_1_2* rdoc_api = NULL;
 
@@ -81,25 +48,25 @@ namespace kyanite::engine::rendering {
 		}
 
 		// Create a device
-		device = std::make_shared<opengl::GlDevice>();
+		device = DeviceFactory::CreateDevice(RenderBackendType::OpenGL, sdlWindow);
 
-		graphicsContext = GraphicsContext::Create(device);
+		graphicsContext = device->CreateGraphicsContext();
+		imguiContext = device->CreateImGuiContext();
+		swapchain = device->CreateSwapchain();
 	}
 
 	auto Shutdown() -> void {
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplSDL2_Shutdown();
-		ImGui::DestroyContext();
-		SDL_GL_DeleteContext(context);
+		// Cleanup
+		device = nullptr;
 		SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	}
 
     auto PreFrame() -> void {
         // ImGui new frame, resource loading, etc.
-                // Start the ImGui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplSDL2_NewFrame(window);
-		ImGui::NewFrame();
+        // Start the ImGui frame
+		imguiContext->Begin();
+
+		// Upload all the resources before rendering
     }
 
 	auto Update(float deltaTime) -> void {
@@ -109,16 +76,16 @@ namespace kyanite::engine::rendering {
 	auto PostFrame() -> void {		
         // Render the actual frame
 
-		ImGui::Render();
+		imguiContext->End();
 		glViewport(0, 0, 800, 600);
 		glClearColor(0.15f, 0.2f, 0.3f, 1.0f);
 		// First, clear the screen
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		imguiContext->Draw();
 
 		// Finally, swap the buffers
-		SDL_GL_SwapWindow(window);
+		swapchain->Swap();
 	}
 
 	auto LoadTexture(std::string_view path) -> Texture {
@@ -158,8 +125,8 @@ namespace kyanite::engine::rendering {
 		return id;
 	}
 
-	auto CreateIndexBuffer(std::vector<uint32_t> indices) -> uint64_t {
-		auto buffer = device->CreateIndexBuffer(indices);
+	auto CreateIndexBuffer(const uint32_t* indices, size_t len) -> uint64_t {
+		auto buffer = device->CreateIndexBuffer(indices, len);
 		auto id = buffer->Id();
 
 		indexBuffers[id] = buffer;
@@ -179,6 +146,6 @@ namespace kyanite::engine::rendering {
 		auto vb = vertexBuffers[vertexBuffer];
 		auto ib = indexBuffers[indexBuffer];
 
-		graphicsContext->DrawIndexed(vb, ib, material);
+		//graphicsContext->DrawIndexed(ib->, 0, 0);
 	}
 }
