@@ -1,11 +1,14 @@
 #include "rendering/opengl/GlDevice.hxx"
 #include "rendering/opengl/GlCommandList.hxx"
 #include "rendering/opengl/GlCommandQueue.hxx"
+#include "rendering/opengl/GlCommandAllocator.hxx"
 #include "rendering/opengl/GlFence.hxx"
 #include "rendering/Shader.hxx"
 #include "rendering/opengl/GlIndexBuffer.hxx"
 #include "rendering/opengl/GlVertexBuffer.hxx"
+#include "rendering/opengl/GlMaterial.hxx"
 #include "rendering/opengl/GlSwapchain.hxx"
+#include "rendering/opengl/GlShader.hxx"
 #include "rendering/RenderBackendType.hxx"
 #include "rendering/GraphicsContext.hxx"
 #include "rendering/ImGuiContext.hxx"
@@ -45,6 +48,11 @@ namespace kyanite::engine::rendering::opengl {
 
 		_window = window;
 		_glContext = context;
+
+		_graphicsQueue = CreateCommandQueue(CommandListType::Graphics);
+		_computeQueue = CreateCommandQueue(CommandListType::Compute);
+		_copyQueue = CreateCommandQueue(CommandListType::Copy);
+		_directQueue = CreateCommandQueue(CommandListType::Transfer);
 	}
 
 	GlDevice::~GlDevice() {
@@ -56,15 +64,16 @@ namespace kyanite::engine::rendering::opengl {
 	}
 
 	auto GlDevice::CreateGraphicsContext() -> std::unique_ptr<GraphicsContext> {
-		return std::make_unique<GraphicsContext>(this->shared_from_this());
+		return std::make_unique<GraphicsContext>(this->shared_from_this(), _graphicsQueue);
 	}
 
 	auto GlDevice::CreateImGuiContext() -> std::unique_ptr<ImGuiContext> {
 		return std::make_unique<ImGuiContext>(
-			this->shared_from_this(), 
-			_window, 
-			_glContext, 
-			RenderBackendType::OpenGL
+			this->shared_from_this(),
+			_window,
+			_glContext,
+			RenderBackendType::OpenGL,
+			_graphicsQueue
 		);
 	}
 
@@ -74,6 +83,10 @@ namespace kyanite::engine::rendering::opengl {
 
 	auto GlDevice::CreateCommandQueue(CommandListType type) -> std::shared_ptr<CommandQueue> {
 		return std::make_shared<GlCommandQueue>(type);
+	}
+
+	auto GlDevice::CreateCommandAllocator() -> std::shared_ptr<CommandAllocator> {
+		return std::make_shared<GlCommandAllocator>();
 	}
 
 	auto GlDevice::CreateFence() -> std::shared_ptr<Fence> {
@@ -92,7 +105,32 @@ namespace kyanite::engine::rendering::opengl {
 		return nullptr;
 	}
 
-	auto GlDevice::CompileShader(const std::string& shaderSource, ShaderType type) -> uint64_t {
+	auto GlDevice::CreateMaterial(
+		std::map<ShaderType, std::shared_ptr<Shader>> shaders,
+		std::map<std::string, uint64_t> textures,
+		std::map<std::string, float> floats,
+		std::map<std::string, uint32_t> ints,
+		std::map<std::string, bool> bools,
+		std::map<std::string, std::array<float, 2>> vec2s,
+		std::map<std::string, std::array<float, 3>> vec3s,
+		std::map<std::string, std::array<float, 4>> vec4s
+	) -> std::shared_ptr<Material> {
+		return std::make_shared<GlMaterial>(
+			shaders,
+			textures,
+			floats,
+			ints,
+			bools,
+			vec2s,
+			vec3s,
+			vec4s
+		);
+	}
+
+	auto GlDevice::CompileShader(
+		const std::string& shaderSource, 
+		ShaderType type
+	)->std::shared_ptr<Shader> {
 		uint64_t shaderTypeId = 0;
 		switch (type) {
 		case ShaderType::VERTEX:
@@ -119,30 +157,40 @@ namespace kyanite::engine::rendering::opengl {
 			int32_t iErrorLength;
 			glGetShaderInfoLog(shaderId, 1024, &iErrorLength, p_cInfoLog);
 			glDeleteShader(shaderId);
-			
+
 			throw std::runtime_error("Error compiling shader: " + std::string(p_cInfoLog));
 		}
 
-		return shaderId;
+		return std::make_shared<GlShader>(shaderId, type);
 	}
 
-	auto GlDevice::CreateVertexBuffer(const void* data, uint64_t size) -> std::shared_ptr<VertexBuffer> {
-		auto buffer = std::make_shared<GlVertexBuffer>();
+	auto GlDevice::CreateVertexBuffer(
+		const void* data, 
+		uint64_t size
+	) -> std::shared_ptr<VertexBuffer> {
+		return std::make_shared<GlVertexBuffer>(data, size);
+	}
+
+	auto GlDevice::UpdateVertexBuffer(
+		std::shared_ptr<VertexBuffer> buffer, 
+		const void* data, uint64_t size
+	) -> void {
+
+	}
+
+	auto GlDevice::CreateIndexBuffer(
+		const uint32_t* indices, 
+		size_t len
+	) -> std::shared_ptr<IndexBuffer> {
+		auto buffer = std::make_shared<GlIndexBuffer>(indices, len);
 
 		return buffer;
 	}
 
-	auto GlDevice::UpdateVertexBuffer(std::shared_ptr<VertexBuffer> buffer, const void* data, uint64_t size) -> void {
-
-	}
-
-	auto GlDevice::CreateIndexBuffer(const uint32_t* indices, size_t len) -> std::shared_ptr<IndexBuffer> {
-		auto buffer = std::make_shared<GlIndexBuffer>();
-
-		return buffer;
-	}
-
-	auto GlDevice::UpdateIndexBuffer(std::shared_ptr<IndexBuffer> buffer, std::vector<uint32_t> indices) -> void {
+	auto GlDevice::UpdateIndexBuffer(
+		std::shared_ptr<IndexBuffer> buffer, 
+		std::vector<uint32_t> indices
+	) -> void {
 
 	}
 

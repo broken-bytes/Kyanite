@@ -42,9 +42,9 @@ namespace kyanite::engine::assetpackages {
 	} 
 
 	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> audio::AudioClip;
-	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::Material;
+	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::MaterialData;
 	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::ModelData;
-	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::Shader;
+	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::ShaderData;
 	template auto LoadAssetFromPackage(const AssetPackage* package, std::string uuid) -> rendering::Texture;
 
 	template <typename T>
@@ -69,9 +69,9 @@ namespace kyanite::engine::assetpackages {
 	}
 
 	template auto AddToAssetPackage(AssetPackage* package, std::string path, audio::AudioClip data) -> void;
-	template auto AddToAssetPackage(AssetPackage* package, std::string path, rendering::Material data) -> void;
+	template auto AddToAssetPackage(AssetPackage* package, std::string path, rendering::MaterialData data) -> void;
 	template auto AddToAssetPackage(AssetPackage* package, std::string path, rendering::ModelData data) -> void;
-	template auto AddToAssetPackage(AssetPackage* package, std::string path, rendering::Shader data) -> void;
+	template auto AddToAssetPackage(AssetPackage* package, std::string path, rendering::ShaderData data) -> void;
 	template auto AddToAssetPackage(AssetPackage* package, std::string path, rendering::Texture data) -> void;
 
 	template<typename T>

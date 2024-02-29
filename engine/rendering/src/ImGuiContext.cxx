@@ -8,21 +8,21 @@ namespace kyanite::engine::rendering {
 		const std::shared_ptr<Device>& device,
 		SDL_Window* window,
 		SDL_GLContext context,
-		RenderBackendType backend
-	) : _window(window), Context(CommandListType::Graphics, device) {
-		// Setup Dear ImGui context
-		ImGui_ImplSDL2_InitForOpenGL(window, context);
-		ImGui_ImplOpenGL3_Init("#version 130");
-
-		IMGUI_CHECKVERSION();
+		RenderBackendType backend,
+		std::shared_ptr<CommandQueue> queue
+	) : _window(window), Context(CommandListType::Graphics, device, queue) {
+		// Create ImGui context
 		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-		// Create ImGui context
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
+
+		ImGui_ImplSDL2_InitForOpenGL(window, context);
+		ImGui_ImplOpenGL3_Init("#version 130");
 		
 		_backend = backend;
 	}
@@ -39,11 +39,8 @@ namespace kyanite::engine::rendering {
 		ImGui::DestroyContext();
 	}
 
-	auto ImGuiContext::End() -> void {
+	auto ImGuiContext::Finish() -> void {
 		ImGui::Render();
-	}
-
-	auto ImGuiContext::Draw() -> void {
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 }

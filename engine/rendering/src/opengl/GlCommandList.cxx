@@ -3,6 +3,7 @@
 #include "rendering/VertexBuffer.hxx"
 #include "rendering/opengl/GlCommandList.hxx"
 #include "rendering/opengl/GlIndexBuffer.hxx"
+#include "rendering/opengl/GlMaterial.hxx"
 #include "rendering/opengl/GlVertexBuffer.hxx"
 
 #include "glad/glad.h"
@@ -28,7 +29,7 @@ namespace kyanite::engine::rendering::opengl {
 		// NOTE: This is a NOP for OpenGL
 	}
 
-	auto GlCommandList::Reset(CommandAllocator& allocator) -> void {
+	auto GlCommandList::Reset(std::shared_ptr<CommandAllocator>& allocator) -> void {
 		_commands.clear();
 	}
 
@@ -79,19 +80,31 @@ namespace kyanite::engine::rendering::opengl {
 		});
 	}
 
-	auto GlCommandList::BindVertexBuffer(VertexBuffer& vertexBuffer) -> void {
+	auto GlCommandList::SetMaterial(std::shared_ptr<Material>& material) -> void {
+		_commands.push_back([this, material]() {
+			auto glMaterial = std::static_pointer_cast<GlMaterial>(material);
+			glBindVertexArray(glMaterial->vaoId);
+			glUseProgram(glMaterial->programId);
+		});
+
+	}
+
+	auto GlCommandList::BindVertexBuffer(std::shared_ptr<VertexBuffer>& vertexBuffer) -> void {
 		_commands.push_back([this, &vertexBuffer]() {
-			glBindBuffer(GL_ARRAY_BUFFER, reinterpret_cast<GlVertexBuffer&>(vertexBuffer).Id());
+			vertexBuffer->Bind();
 		});
 	}
 
-	auto GlCommandList::BindIndexBuffer(IndexBuffer& indexBuffer) -> void {
+	auto GlCommandList::BindIndexBuffer(std::shared_ptr <IndexBuffer>& indexBuffer) -> void {
 		_commands.push_back([this, &indexBuffer]() {
-			glBindBuffer(GL_ARRAY_BUFFER, reinterpret_cast<GlIndexBuffer&>(indexBuffer).Id());
+			indexBuffer->Bind();
 		});
 	}
 
 	auto GlCommandList::DrawIndexed(uint32_t numIndices, uint32_t startIndex, uint32_t startVertex) -> void {
-
+		//glDrawBuffers(1, &_primitiveTopology);
+		_commands.push_back([this, numIndices, startIndex, startVertex]() {
+			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+		});
 	}
 }

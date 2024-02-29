@@ -18,7 +18,7 @@ namespace kyanite::engine::rendering {
 		virtual ~CommandList() = default;
 		virtual auto Begin() -> void = 0;
 		virtual auto Close() -> void = 0;
-		virtual auto Reset(CommandAllocator& allocator) -> void = 0;
+		virtual auto Reset(std::shared_ptr<CommandAllocator>&) -> void = 0;
 		virtual auto ClearRenderTarget(glm::vec4 color) -> void = 0;
 		virtual auto SetViewport(
 			uint32_t x, 
@@ -30,8 +30,9 @@ namespace kyanite::engine::rendering {
 		) -> void = 0;
 		virtual auto SetScissorRect(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom) -> void = 0;
 		virtual auto SetPrimitiveTopology(PrimitiveTopology topology) -> void = 0;
-		virtual auto BindVertexBuffer(VertexBuffer& vertexBuffer) -> void = 0;
-		virtual auto BindIndexBuffer(IndexBuffer& indexBuffer) -> void = 0;
+		virtual auto SetMaterial(std::shared_ptr<Material>& material) -> void = 0;
+		virtual auto BindVertexBuffer(std::shared_ptr<VertexBuffer>& vertexBuffer) -> void = 0;
+		virtual auto BindIndexBuffer(std::shared_ptr<IndexBuffer>& vertexBuffer) -> void = 0;
 		virtual auto DrawIndexed(uint32_t numIndices, uint32_t startIndex, uint32_t startVertex) -> void = 0;
 
 		auto Type() const -> CommandListType { return _type; }

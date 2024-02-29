@@ -16,18 +16,34 @@ namespace kyanite::engine::rendering {
 		TESS_EVALUATION,
 		COMPUTE
 	};
-	struct Shader {
+    struct ShaderData {
         std::string name;
+        std::string source;
+        ShaderType type;
 
-        Shader() = default;
-        Shader(const std::string name) : name(name) {}
+        ShaderData() = default;
+        ShaderData(
+            const std::string name, 
+            const std::string source, 
+            ShaderType type
+        ) : name(name), source(source), type(type) {}
 
     private:
         friend class cereal::access;
 
         template <class Archive>
         void serialize(Archive& Data) {
-            Data(name);
+            Data(name, source);
         }
+    };
+
+	class Shader {
+    public:
+        std::string name;
+        ShaderType type;
+        uint64_t id;
+
+        Shader() = default;
+        Shader(const std::string name, ShaderType type, uint64_t id) : name(name), type(type), id(id) {}
 	};
 }

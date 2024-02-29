@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 
 namespace kyanite::engine::rendering::opengl {
-	GlVertexBuffer::GlVertexBuffer(const void* data, size_t size) {
+	GlVertexBuffer::GlVertexBuffer(const void* data, size_t size) : VertexBuffer(size) {
 		_id = 0;
 		glGenBuffers(1, &_id);
 		glBindBuffer(GL_ARRAY_BUFFER, _id);

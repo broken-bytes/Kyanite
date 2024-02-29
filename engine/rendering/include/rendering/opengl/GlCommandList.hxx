@@ -22,7 +22,7 @@ namespace kyanite::engine::rendering::opengl {
 		~GlCommandList();
 		virtual auto Begin() -> void override;
 		virtual auto Close() -> void override;
-		virtual auto Reset(CommandAllocator& allocator) -> void override;
+		virtual auto Reset(std::shared_ptr<CommandAllocator>&) -> void override;
 		virtual auto ClearRenderTarget(glm::vec4 color) -> void override;
 		virtual auto SetViewport(
 			uint32_t x, 
@@ -34,8 +34,9 @@ namespace kyanite::engine::rendering::opengl {
 		) -> void override;
 		virtual auto SetScissorRect(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom) -> void override;
 		virtual auto SetPrimitiveTopology(PrimitiveTopology topology) -> void override;
-		virtual auto BindVertexBuffer(VertexBuffer& vertexBuffer) -> void override;
-		virtual auto BindIndexBuffer(IndexBuffer& indexBuffer) -> void override;
+		virtual auto SetMaterial(std::shared_ptr<Material>& material) -> void override;
+		virtual auto BindVertexBuffer(std::shared_ptr<VertexBuffer>& vertexBuffer) -> void override;
+		virtual auto BindIndexBuffer(std::shared_ptr<IndexBuffer>& indexBuffer) -> void override;
 		virtual auto DrawIndexed(uint32_t numIndices, uint32_t startIndex, uint32_t startVertex) -> void override;
 
 	private:

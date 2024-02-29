@@ -10,7 +10,7 @@
 namespace kyanite::engine::rendering::opengl {
 	class GlIndexBuffer : public IndexBuffer {
 	public:
-		GlIndexBuffer(const std::vector<uint32_t>& data = {});
+		GlIndexBuffer(const uint32_t* indices, size_t len);
 		~GlIndexBuffer();
 
 		auto Bind() const -> void override {

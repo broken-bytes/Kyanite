@@ -8,7 +8,7 @@ namespace kyanite::engine::rendering::opengl {
 		GlCommandQueue(CommandListType type);
 		~GlCommandQueue() = default;
 
-		virtual auto Execute(const std::vector<CommandList>& commandLists) -> void override;
+		virtual auto Execute(const std::vector<std::shared_ptr<CommandList>>&) -> void override;
 		virtual auto Signal(Fence& fence, uint64_t value) -> void override;
 	};
 }

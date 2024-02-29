@@ -7,9 +7,9 @@ namespace kyanite::engine::rendering::opengl {
 
 	}
 
-	auto GlCommandQueue::Execute(const std::vector<CommandList>& commandLists) -> void {
+	auto GlCommandQueue::Execute(const std::vector<std::shared_ptr<CommandList>>& commandLists) -> void {
 		for(auto& commandList : commandLists) {
-			for(auto& command : reinterpret_cast<const GlCommandList*>(&commandList)->_commands) {
+			for(auto& command : std::static_pointer_cast<GlCommandList>(commandList)->_commands) {
 				command();
 			}
 		}

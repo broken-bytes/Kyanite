@@ -14,12 +14,12 @@ namespace kyanite::engine::rendering {
 			const std::shared_ptr<Device>& device,
 			SDL_Window* window,
 			SDL_GLContext context,
-			RenderBackendType backend
+			RenderBackendType backend,
+			std::shared_ptr<CommandQueue> queue
 		);
 		~ImGuiContext();
-		auto Begin() -> void;
-		auto End() -> void;
-		auto Draw() -> void;
+		auto Begin() -> void override;
+		auto Finish() -> void override;
 
 	private:
 		SDL_Window* _window;

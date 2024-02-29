@@ -1,6 +1,14 @@
 #include "rendering/GraphicsContext.hxx"
 
 namespace kyanite::engine::rendering {
+    auto GraphicsContext::Begin() -> void {
+		_commandList->Reset(_commandAllocator);
+	}
+
+    auto GraphicsContext::Finish() -> void {
+        _commandQueue->Execute({ _commandList });
+    }
+
     auto GraphicsContext::ClearRenderTarget() -> void {
         _commandList->ClearRenderTarget({ 0.2f, 0.1f, 0.1f, 1.f });
     }
@@ -22,14 +30,18 @@ namespace kyanite::engine::rendering {
     }
 
     auto GraphicsContext::SetVertexBuffer(uint8_t index, std::shared_ptr<VertexBuffer>& buffer) -> void {
-
+        _commandList->BindVertexBuffer(buffer);
     }
 
     auto GraphicsContext::SetIndexBuffer(std::shared_ptr<IndexBuffer>& buffer) -> void {
+        _commandList->BindIndexBuffer(buffer);
+    }
 
+    auto GraphicsContext::SetMaterial(std::shared_ptr<Material>& material) -> void {
+        _commandList->SetMaterial(material);
     }
 
     auto GraphicsContext::DrawIndexed(uint32_t indexCount, uint32_t startIndexLocation, int32_t baseVertexLocation) -> void {
-
+        _commandList->DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
     }
 }
