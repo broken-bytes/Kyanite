@@ -4,6 +4,8 @@
 #include "editor/Editor.hxx"
 #include <editor/core/project/ProjectService.hxx>
 #include <assetpackages/AssetPackages.hxx>
+#include <logger/Logger.hxx>
+#include <logger/ConsoleLogger.hxx>
 
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qmainwindow.h>
@@ -56,6 +58,11 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
+
+	// Set the logger
+	auto logger = std::make_shared<kyanite::engine::logging::ConsoleLogger>();
+	kyanite::engine::logging::logger::SetLogger(std::move(logger));
+
 
 	// Check if the project file exists. If it does, open it. If not, open the start screen.
 

@@ -20,7 +20,7 @@
         "gtest",
         {
             "name": "imgui",
-            "features": ["dx12-binding", "vulkan-binding", "opengl3-binding", "sdl2-binding"]
+            "features": ["dx12-binding", "vulkan-binding", "opengl3-binding", "sdl2-binding", "docking-experimental"]
         },
         "joltphysics",
         "libjpeg-turbo",

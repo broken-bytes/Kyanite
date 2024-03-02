@@ -17,10 +17,12 @@
 #include <flecs/addons/rest.h>
 
 #include <memory>
+#include <mutex>
 #include <Windows.h>
 
 namespace ecs::EntityRegistry {
 	flecs::world world;
+	std::mutex worldLock;
 	
 	auto Init(bool debugServer) -> void {
 
@@ -38,14 +40,17 @@ namespace ecs::EntityRegistry {
 	}
 
 	auto GetRegistry() -> ecs_world_t* {
+		std::scoped_lock lock { worldLock };
 		return world;
 	}
 
 	auto CreateEntity(std::string name) -> ecs_entity_t {
+		std::scoped_lock lock { worldLock };
 		return world.entity(name.c_str());
 	}
 
 	auto DestroyEntity(ecs_entity_t entity) -> void {
+		std::scoped_lock lock{ worldLock };
 		world.entity(entity).destruct();
 	}
 
@@ -58,24 +63,31 @@ namespace ecs::EntityRegistry {
 
 		ecs_entity_desc_t entityDesc = {};
 		entityDesc.name = name.c_str();
+
+		std::scoped_lock lock{ worldLock };
+
 		desc.entity = ecs_entity_init(world, &entityDesc);
 		
 		return ecs_component_init(world, &desc);
 	}
 
 	auto AddComponent(ecs_entity_t entity, ecs_entity_t component) -> void {
+		std::scoped_lock lock{ worldLock };
 		ecs_add_id(world, entity, component);
 	}
 
 	auto SetComponent(ecs_entity_t entity, ecs_entity_t component, void* data) -> void {
+		std::scoped_lock lock{ worldLock };
 		world.entity(entity).set_ptr(component, data);
 	}
 
 	auto RemoveComponent(ecs_entity_t entity, ecs_entity_t component) -> void {
+		std::scoped_lock lock{ worldLock };
 		ecs_remove_id(world, entity, component);
 	}
 
 	auto Update(float delta) -> void {
+		std::scoped_lock lock{ worldLock };
 		world.progress();
 	}
 
@@ -83,6 +95,8 @@ namespace ecs::EntityRegistry {
 		ecs_system_desc_t desc = {};
 		ecs_entity_desc_t entityDesc = {};
 		entityDesc.name = name.c_str();
+
+		std::scoped_lock lock{ worldLock };
 		entityDesc.add[0] = ecs_pair(EcsDependsOn, EcsOnUpdate);
 		ecs_entity_t system = ecs_entity_init(world, &entityDesc);
 		desc.entity = system;
@@ -92,7 +106,6 @@ namespace ecs::EntityRegistry {
 			desc.query.filter.terms[x].oper = EcsAnd;
 		}
 
-		
 		auto sysId = ecs_system_init(world, &desc);
 
 		return sysId;
@@ -100,7 +113,7 @@ namespace ecs::EntityRegistry {
 
 	auto GetComponentBuffer(ecs_iter_t* iter, uint8_t index, size_t componentSize) -> void* {
 		auto ptr = ecs_field_w_size(iter, componentSize, index);
-		OutputDebugStringA("Component buffer received");
+
 		return ptr;
 	}
 }

@@ -5,11 +5,11 @@
 #include <fstream>
 #include <string_view>
 
-namespace kyanite::engine::core {
-	class FileLogger : public ILogger {
+namespace kyanite::engine::logging {
+	class ConsoleLogger : public ILogger {
 	public:
-		FileLogger(std::string_view path);
-		~FileLogger() override;
+		ConsoleLogger();
+		~ConsoleLogger() override;
 		auto Info(std::string_view data) -> void override;
 		auto Warn(std::string_view data) -> void override;
 		auto Error(std::string_view data) -> void override;
@@ -17,8 +17,6 @@ namespace kyanite::engine::core {
 		auto SetLogLevel(LogLevel level) -> void override;
 
 	private:
-		std::string _path;
-		std::ofstream _file;
 		LogLevel _level;
 	};
 }

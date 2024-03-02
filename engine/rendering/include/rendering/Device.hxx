@@ -9,13 +9,16 @@
 #include "IndexBuffer.hxx"
 #include "VertexBuffer.hxx"
 
+#include <imgui.h>
+
 #include <memory>
 
 namespace kyanite::engine::rendering {
 	class Buffer;
 	class RenderTarget;
 	class GraphicsContext;
-	class ImGuiContext;
+	class ImmediateGuiContext;
+	class UploadContext;
 
 	class Device {
 
@@ -26,7 +29,9 @@ namespace kyanite::engine::rendering {
 
 		// Creation work submission and synchronization
 		virtual auto CreateGraphicsContext() -> std::unique_ptr<GraphicsContext> = 0;
-		virtual auto CreateImGuiContext() -> std::unique_ptr<ImGuiContext> = 0;
+		virtual auto CreateImGuiContext(ImGuiContext* context) -> 
+			std::unique_ptr<ImmediateGuiContext> = 0;
+		virtual auto CreateUploadContext() -> std::unique_ptr<UploadContext> = 0;
 		virtual auto CreateCommandList(CommandListType type) -> std::shared_ptr<CommandList> = 0;
 		virtual auto CreateCommandQueue(CommandListType type) -> std::shared_ptr <CommandQueue> = 0;
 		virtual auto CreateCommandAllocator() -> std::shared_ptr<CommandAllocator> = 0;

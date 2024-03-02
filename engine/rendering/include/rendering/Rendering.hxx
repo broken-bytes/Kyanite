@@ -7,12 +7,14 @@
 #include <shared/Exported.hxx>
 #include <shared/NativePointer.hxx>
 
+#include <imgui.h>
+
 #include <string>
 #include <vector>
 
 namespace kyanite::engine::rendering {
 	// Lifecycle
-	auto Init(NativePointer window) -> void;
+	auto Init(NativePointer window, ImGuiContext* imGuiContext) -> void;
 	auto Shutdown() -> void;
     auto PreFrame() -> void;
 	auto Update(float deltaTime) -> void;

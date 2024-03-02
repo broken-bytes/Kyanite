@@ -8,7 +8,7 @@ enum class LogLevel {
 	Error
 };
 
-namespace kyanite::engine::core {
+namespace kyanite::engine::logging {
 	class ILogger {
 	public:
 		virtual ~ILogger() = default;

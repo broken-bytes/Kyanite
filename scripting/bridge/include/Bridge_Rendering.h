@@ -14,7 +14,7 @@ extern "C" {
  * @brief Inits the rendering system
  *
  */
-EXPORTED void Rendering_Init(NativePointer window);
+EXPORTED void Rendering_Init(NativePointer window, NativePointer imGuiContext);
 
 /**
  * @brief Shuts down the rendering system
@@ -159,7 +159,7 @@ EXPORTED void Rendering_DrawDragAndDropTarget(const char* label, void* target);
 /**
 * @brief Creates a vertex buffer
 * @param vertices The vertices to use
-
+* @param length The length of the buffer in count of vertices
 * @return The id of the vertex buffer
 */
 EXPORTED uint64_t Rendering_CreateVertexBuffer(NativePointer vertices, size_t length);
@@ -188,6 +188,7 @@ EXPORTED void Rendering_LoadVertexBuffer(uint64_t vertexBufferId, NativePointer*
 /**
 * @brief Creates an index buffer
 * @param indices The indices to use
+* @param length The length of the buffer in count of indices
 * @return The id of the index buffer
 */
 EXPORTED uint64_t Rendering_CreateIndexBuffer(NativePointer indices, size_t length);
@@ -204,7 +205,6 @@ EXPORTED void Rendering_UpdateIndexBuffer(uint64_t indexBufferId, NativePointer 
 * @param indexBufferId The id of the index buffer to free
 */
 EXPORTED void Rendering_FreeIndexBuffer(uint64_t indexBufferId);
-
 
 /**
 * @brief Creates a shader

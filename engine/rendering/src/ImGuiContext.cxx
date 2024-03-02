@@ -1,46 +1,60 @@
 #include "rendering/ImGuiContext.hxx"
+#include <logger/Logger.hxx>
 
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui.h>
+#include <imgui_internal.h>
 
 namespace kyanite::engine::rendering {
-	ImGuiContext::ImGuiContext(
+	ImmediateGuiContext::ImmediateGuiContext(
 		const std::shared_ptr<Device>& device,
 		SDL_Window* window,
 		SDL_GLContext context,
 		RenderBackendType backend,
-		std::shared_ptr<CommandQueue> queue
+		std::shared_ptr<CommandQueue> queue,
+		ImGuiContext* imGuiContext
 	) : _window(window), Context(CommandListType::Graphics, device, queue) {
-		// Create ImGui context
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-		// Setup Dear ImGui context
-		IMGUI_CHECKVERSION();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-
+		ImGui::SetCurrentContext(imGuiContext);
 		ImGui_ImplSDL2_InitForOpenGL(window, context);
 		ImGui_ImplOpenGL3_Init("#version 130");
-		
+
 		_backend = backend;
 	}
 
-	auto ImGuiContext::Begin() -> void {
+	auto ImmediateGuiContext::Begin() -> void {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL2_NewFrame(_window);
 		ImGui::NewFrame();
+		ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+		ImGuiWindowFlags window_flags = 0;
+
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
 	}
 
-	ImGuiContext::~ImGuiContext() {
+	ImmediateGuiContext::~ImmediateGuiContext() {
 		ImGui_ImplSDL2_Shutdown();
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui::DestroyContext();
 	}
 
-	auto ImGuiContext::Finish() -> void {
+	auto ImmediateGuiContext::Finish() -> void {
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+			SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+		}
+
+		//SDL_GL_SwapWindow(_window);
+
+		logging::logger::Info("ImGui Context: Finish");
 	}
 }

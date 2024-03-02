@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <vector>
 
-namespace input::dualsense {
+namespace kyanite::engine::input::dualsense {
     /// <remarks>
     /// Actual effect uint8_t values sent to the controller. More complex effects may be build through the combination of these
     /// values and specific paramaters.

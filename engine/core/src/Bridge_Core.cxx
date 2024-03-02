@@ -73,3 +73,11 @@ void Core_ShowWindow(NativePointer window) {
 void Core_HideWindow(NativePointer window) {
 	SDL_HideWindow(reinterpret_cast<SDL_Window*>(window));
 }
+
+NativePointer Core_CreateImGuiContext() {
+	return core::CreateImGuiContext();
+}
+
+NativePointer Core_GetImGuiContext() {
+	return core::GetImGuiContext();
+}

@@ -7,8 +7,8 @@ public class NativeInput {
     public static let shared = NativeInput()
     private var keyStates: [UInt32: UInt8] = [:]
 
-    public func start() {
-        Input_Init()
+    public func start(imGui: UnsafeMutableRawPointer) {
+        Input_Init(imGui)
         Input_Subscribe { event in 
             guard let event = event?.pointee else { return }
             // Handle the event

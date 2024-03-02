@@ -71,6 +71,18 @@ extern "C" {
 	 */
 	EXPORTED void Core_HideWindow(NativePointer window);
 
+	/**
+	 * @brief Creates an ImGui context
+	 * @return NativePointer Returns a pointer to the context
+	 */
+	EXPORTED NativePointer Core_CreateImGuiContext();
+
+	/**
+	 * @brief Getst he current ImGui context
+	 * @return NativePointer Returns a pointer to the context
+	 */
+	EXPORTED NativePointer Core_GetImGuiContext();
+
 #ifdef __cplusplus 
 }
 #endif

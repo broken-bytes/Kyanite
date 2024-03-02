@@ -1,10 +1,11 @@
-#include "core/Logger.hxx"
+#include "logger/Logger.hxx"
+#include "logger/ILogger.hxx"
 
-namespace kyanite::engine::core::logger {
+namespace kyanite::engine::logging::logger {
 	std::shared_ptr<ILogger> logger;
 	
 	auto SetLogger(std::shared_ptr<ILogger> logger) -> void {
-		kyanite::engine::core::logger::logger = logger;
+		kyanite::engine::logging::logger::logger = logger;
 	}
 
 	auto Info(std::string_view message) -> void {

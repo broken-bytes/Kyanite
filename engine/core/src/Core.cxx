@@ -1,5 +1,4 @@
 #include "core/Core.hxx"
-#include "core/ILogger.hxx"
 #include "core/VendorSerializers/GlmSerializers.hxx"
 
 #include <SDL2/SDL.h>
@@ -7,6 +6,7 @@
 #include <sodium.h>
 #include <zip.h>
 #include <stduuid/uuid.h>
+#include <imgui.h>
 
 #include <filesystem>
 #include <fstream>
@@ -112,28 +112,28 @@ namespace kyanite::engine::core {
 		return stat.valid & ZIP_STAT_SIZE;
 	}
 
-    auto SaveBufferToArchive(std::string path, std::string name, std::string& buffer) -> void {
-        zip_t* archive;
-        int err;
+	auto SaveBufferToArchive(std::string path, std::string name, std::string& buffer) -> void {
+		zip_t* archive;
+		int err;
 
-        if ((archive = zip_open(path.c_str(), ZIP_CREATE, &err)) == nullptr) {
-            zip_error_t error;
-            zip_error_init_with_code(&error, err);
-            zip_error_fini(&error);
+		if ((archive = zip_open(path.c_str(), ZIP_CREATE, &err)) == nullptr) {
+			zip_error_t error;
+			zip_error_init_with_code(&error, err);
+			zip_error_fini(&error);
 
-            return;
-        }
+			return;
+		}
 
-        zip_source_t* s = nullptr;
-        if ((s = zip_source_buffer(archive, buffer.data(), buffer.size(), 0)) == NULL ||
-            zip_file_add(archive, name.c_str(), s, ZIP_FL_OVERWRITE | ZIP_FL_ENC_UTF_8) < 0) {
-            zip_source_free(s);
-        }
+		zip_source_t* s = nullptr;
+		if ((s = zip_source_buffer(archive, buffer.data(), buffer.size(), 0)) == NULL ||
+			zip_file_add(archive, name.c_str(), s, ZIP_FL_OVERWRITE | ZIP_FL_ENC_UTF_8) < 0) {
+			zip_source_free(s);
+		}
 
-        zip_close(archive);
-    }
+		zip_close(archive);
+	}
 
-    auto LoadFileFromArchive(std::string path, std::string name) -> std::vector<uint8_t> {
+	auto LoadFileFromArchive(std::string path, std::string name) -> std::vector<uint8_t> {
 		zip_t* archive;
 		int err;
 
@@ -151,7 +151,7 @@ namespace kyanite::engine::core {
 		zip_close(archive);
 
 		return LoadFileFromArchive(path, name, 0, stat.size);
-    }
+	}
 
 	auto LoadFileFromArchive(std::string path, std::string name, size_t start, size_t count) -> std::vector<uint8_t> {
 		zip_t* archive;
@@ -200,5 +200,67 @@ namespace kyanite::engine::core {
 		assert(id.variant() == uuids::uuid_variant::rfc);
 
 		return uuids::to_string(id);
+	}
+
+	auto CreateImGuiContext() -> ImGuiContext* {
+		// Create ImGui context
+		auto context = ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 16.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.1f, 0.5f));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(100.0f, 100.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.5f, 0.5f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_GrabRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 0.0f);
+		// Now set the colors to be darker
+		auto& style = ImGui::GetStyle();
+		auto& colors = style.Colors;
+		colors[ImGuiCol_WindowBg] = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+		colors[ImGuiCol_Border] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+		colors[ImGuiCol_FrameBg] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+		colors[ImGuiCol_FrameBgActive] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
+		colors[ImGuiCol_TitleBg] = ImVec4(0.3f, 0.2f, 0.3f, 1.0f);
+		colors[ImGuiCol_TitleBgActive] = ImVec4(0.4f, 0.3f, 0.4f, 1.0f);
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+		colors[ImGuiCol_ScrollbarBg] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+		colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
+		colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+		colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
+		colors[ImGuiCol_CheckMark] = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
+		colors[ImGuiCol_SliderGrab] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
+		colors[ImGuiCol_SliderGrabActive] = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
+		colors[ImGuiCol_Button] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+		colors[ImGuiCol_ButtonHovered] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+		colors[ImGuiCol_ButtonActive] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
+		colors[ImGuiCol_Header] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+
+		auto ttfPath = std::filesystem::current_path() / "assets/fonts/RobotoCondensed-VariableFont_wght.ttf";
+		ImGui::GetIO().Fonts->AddFontFromFileTTF(
+			ttfPath.string().c_str(),
+			20.0f,
+			nullptr,
+			ImGui::GetIO().Fonts->GetGlyphRangesDefault()
+		);
+
+		ImGui::GetIO().ConfigFlags |=
+			ImGuiConfigFlags_ViewportsEnable |
+			ImGuiConfigFlags_DockingEnable;
+
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
+
+		return context;
+	}
+
+	auto GetImGuiContext() -> ImGuiContext* {
+		return ImGui::GetCurrentContext();
 	}
 }

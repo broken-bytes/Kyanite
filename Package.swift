@@ -44,7 +44,7 @@ let package = Package(
 
         .target(
             name: "KyaniteEditor", 
-            dependencies: ["KyaniteEngine"],
+            dependencies: ["KyaniteEngine", "EditorNative", "Native"],
             path: "scripting/editor"
         ),
 
@@ -57,6 +57,12 @@ let package = Package(
             name: "Native",
             dependencies: ["Bridge"],
             path: "scripting/native"
+        ),
+
+        .target(
+            name: "EditorNative",
+            dependencies: ["Bridge"],
+            path: "scripting/editornative"
         )
     ]
 )

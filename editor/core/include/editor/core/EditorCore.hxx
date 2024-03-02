@@ -4,45 +4,30 @@
 #include <shared/Exported.hxx>
 #include <shared/NativePointer.hxx>
 
+#include <imgui.h>
+
 #include <filesystem>
 #include <functional>
 #include <string>
 
 namespace kyanite::editor::core {
 	/**
-	* @brief Saves the metadata to a file
-	* @param path The path to save the metadata to
-	* @param metadata The metadata to save
+	* @brief Initializes the editor core module
 	*/
-	EXPORTED auto SaveMetadata(std::string path, std::string metadata) -> void;
+	EXPORTED auto Init(ImGuiContext* context) -> void;
 
-	template<typename T>
-	EXPORTED auto LoadMetadata(std::string path) -> T;
+	/**
+	* @brief Begin a window
+	* @param title The title of the window
+	* @param open A pointer to a boolean that indicates if the window is open
+	* @param flags The flags to use
+	*/
+	EXPORTED auto BeginWindow(std::string title, bool* open, int flags) -> void;
 
-	auto LoadProject(const std::string& path) -> Project;
-	auto CreateProject(const std::string& path, std::string& name) -> Project;
-	auto InitializeEngine() -> void;
-	auto SetupEditorEnvironment() -> void;
-
-	template<typename T>
-	auto SaveMeta(std::string name, std::filesystem::path path, T& meta) -> void;
-
-	template<typename T>
-	auto LoadMeta(std::filesystem::path path) -> T;
-
-	template<typename T>
-	auto SaveBlob(std::string uuid, T& blob) -> void;
-
-	auto SaveModelMeta(std::string name, std::filesystem::directory_entry path) -> std::string;
-	auto SaveModelData(std::string uuid, std::vector<uint8_t>& data) -> void;
-
-	auto CompareLastAssetDatabase() -> void;
-	auto HandleFileAdded(std::filesystem::directory_entry file) -> void;
-	auto HandleFileModified(std::filesystem::directory_entry file) -> void;
-	auto HandleFileRemoved(std::filesystem::path path) -> void;
-
-	auto HandleMetaData(std::filesystem::directory_entry file) -> void;
-	auto HandleData(std::filesystem::directory_entry file) -> void;
+	/**
+	* @brief End a window
+	*/
+	EXPORTED auto EndWindow() -> void;
 
 	/**
 	* @brief Draws a reference selector
@@ -72,4 +57,9 @@ namespace kyanite::editor::core {
 	* @param window The window to clear
 	*/
 	EXPORTED auto Clear(NativePointer window) -> void;
+
+	/**
+	* @brief Draws the editor default docking
+	*/
+	EXPORTED auto DrawDefaultImGuiDocking() -> void;
 }

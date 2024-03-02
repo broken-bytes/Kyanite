@@ -1,7 +1,7 @@
 import Native
 
 public class _SystemRegistry {
-    static let shared = _SystemRegistry()
+    public static let shared = _SystemRegistry()
 
     private init() {}
 

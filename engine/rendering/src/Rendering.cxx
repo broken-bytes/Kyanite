@@ -3,6 +3,7 @@
 #include "rendering/opengl/GLDevice.hxx"
 #include "rendering/GraphicsContext.hxx"
 #include "rendering/ImGuiContext.hxx"
+#include "rendering/UploadContext.hxx"
 #include "rendering/VertexBuffer.hxx"
 #include "rendering/DeviceFactory.hxx"
 #include "core/Core.hxx"
@@ -32,7 +33,8 @@ namespace kyanite::engine::rendering {
 	std::map<uint32_t, std::shared_ptr<Mesh>> meshes = {};
 
 	std::unique_ptr<GraphicsContext> graphicsContext = nullptr;
-	std::unique_ptr<ImGuiContext> imguiContext = nullptr;
+	std::unique_ptr<ImmediateGuiContext> imguiContext = nullptr;
+	std::unique_ptr<UploadContext> uploadContext = nullptr;
 	std::unique_ptr<Swapchain> swapchain = nullptr;
 
 	std::shared_ptr<Material> testMaterial = nullptr;
@@ -44,7 +46,7 @@ namespace kyanite::engine::rendering {
 		0.0f, 0.5f, 0.0f
 	};
 
-	auto Init(NativePointer window) -> void {
+	auto Init(NativePointer window, ImGuiContext* context) -> void {
 		FreeImage_Initialise();
 		SDL_InitSubSystem(SDL_INIT_VIDEO);
 		auto sdlWindow = reinterpret_cast<SDL_Window*>(window);
@@ -65,7 +67,8 @@ namespace kyanite::engine::rendering {
 		device = DeviceFactory::CreateDevice(RenderBackendType::OpenGL, sdlWindow);
 
 		graphicsContext = device->CreateGraphicsContext();
-		imguiContext = device->CreateImGuiContext();
+		imguiContext = device->CreateImGuiContext(context);
+		uploadContext = device->CreateUploadContext();
 		swapchain = device->CreateSwapchain();
 
 		vertexBuffer = device->CreateVertexBuffer(vertices.data(), vertices.size() * sizeof(float));
@@ -120,8 +123,9 @@ void main() {
 	auto PreFrame() -> void {
 		// ImGui new frame, resource loading, etc.
 		// Start the ImGui frame
-		imguiContext->Begin();
 		graphicsContext->Begin();
+		imguiContext->Begin();
+		uploadContext->Begin();
 		graphicsContext->ClearRenderTarget();
 		graphicsContext->SetViewport(0, 0, 800, 600, 0.0, 1.0);
 		graphicsContext->SetScissorRect(0, 0, 800, 600);
@@ -130,11 +134,13 @@ void main() {
 	}
 
 	auto Update(float deltaTime) -> void {
+		vertices[0] = -0.5f + sin(deltaTime);
+		uploadContext->UpdateVertexBuffer(vertexBuffer, vertices.data(), vertices.size() * sizeof(float));
+		uploadContext->Finish();
 		graphicsContext->SetVertexBuffer(0, vertexBuffer);
 		graphicsContext->SetIndexBuffer(indexBuffer);
 		graphicsContext->SetMaterial(testMaterial);
 		graphicsContext->DrawIndexed(indexBuffer->Size(), 0, 0);
-
 		// Update the game state of the rendering engine
 	}
 

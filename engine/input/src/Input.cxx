@@ -1,20 +1,22 @@
 #include "input/Input.hxx"
 #include "input/InputEvent.hxx"
 #include "input/DualsenseTriggerEffectGenerator.hxx"
-
+#include "input/ImGuiInputHandler.hxx"
 #include <math/Utils.hxx>
 #include <shared/Events.hxx>
 
 #include <SDL2/SDL.h>
 #include "atomic_queue/atomic_queue.h"
+#include <imgui.h>
 
 #include <iostream>
 #include <array>
 #include <map>
 #include <vector>
 #include <Windows.h>
+#include <imgui_impl_sdl2.h>
 
-namespace input {
+namespace kyanite::engine::input {
     bool quit = false;
     std::vector<std::function<void(Event*)>> inputEventSubscribers;
     // 0 = Last Frame, 1 = Current Frame
@@ -26,6 +28,7 @@ namespace input {
 
     std::map<uint8_t, SDL_GameController*> Controllers = {};
     std::map<uint8_t, std::array<std::map<uint32_t, InputState>, 2>> ControllerButtonState = {};
+    std::unique_ptr<ImGuiInputHandler> imguiInputHandler;
     
     void ProcessInputs();
     void ProcessInputFor(std::array<std::map<uint32_t, InputState>, 2>& map);
@@ -33,9 +36,14 @@ namespace input {
     void ProcessControllerInput();
     void ProcessMouseInput();
     
-    auto Init() -> void {
+    auto Init(ImGuiContext* context) -> void {
         SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC );
         SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+        ImGui::SetCurrentContext(context);
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        imguiInputHandler = std::make_unique<ImGuiInputHandler>();
     }
 
     auto Poll() -> void {
@@ -59,6 +67,8 @@ namespace input {
         MouseAxisState[1] = {};
         
         while (SDL_PollEvent(&event)) {
+            ImGui_ImplSDL2_ProcessEvent(&event);
+
             if(event.type == SDL_QUIT) {
                 SystemEvent quitEvent = {};
                 quitEvent.type = SystemEventType::Quit;

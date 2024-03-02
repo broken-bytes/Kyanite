@@ -39,7 +39,9 @@ namespace kyanite::editor {
 				for (const auto& file : currentEntries) {
 					if (std::find(_files.begin(), _files.end(), file) == _files.end()) {
 						// File has been added
-						FileAdded(file);
+						QMetaObject::invokeMethod(this, [this, file]() {
+							FileAdded(file);
+							});
 					}
 					else {
 						// File does exist, check if it has been modified
@@ -47,22 +49,27 @@ namespace kyanite::editor {
 							std::filesystem::last_write_time(file) !=
 							std::filesystem::last_write_time(*std::find(_files.begin(), _files.end(), file))
 							) {
-							FileModified(file);
+							QMetaObject::invokeMethod(this, [this, &file]() {
+								FileModified(file);
+								});
 						}
 					}
 				}
 
 				// Now we need to check if any files have been removed
 				for (const auto& file : _files) {
-					if (std::find(currentEntries.begin(), currentEntries.end(), file) == currentEntries.end()) {
-						// File has been removed
-						FileDeleted(file);
-					}
+					auto currentEntry = std::find(currentEntries.begin(), currentEntries.end(), file);
+					
+					if (currentEntry == currentEntries.end()) {
+						QMetaObject::invokeMethod(this, [this, &currentEntry, file]() {
+							FileDeleted(file);
+						});
+					};
 				}
 
 				_files = currentEntries;
 			}
-		});
+			});
 	}
 
 	auto FileWatchdog::Stop() -> void {

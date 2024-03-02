@@ -10,32 +10,33 @@ import Native
 }
 
 class Engine {
-    private var time: Float = 0 
     private var window: NativeWindow? = nil
     var testSystem: TestSystem
+    var time: Float = 0
     
     init(isDebug: Bool = false) {
         // Initialize all subsystems
         // Initialize the core
         NativeCore.shared.start()
+        var imGui = NativeCore.shared.createImGuiContext()
         // Initialize the window
         window = NativeCore.shared.createWindow(
             "Game", 
             posX: nil, 
             posY: nil, 
-            width: 800, 
-            height: 600, 
+            width: 1920, 
+            height: 1080, 
             flags: 0, 
             backend: 0, 
             silent: false
         )
         NativeAudio.shared.start()
-        NativeInput.shared.start()
+        NativeInput.shared.start(imGui: imGui)
         NativeECS.shared.start(debug: isDebug)
         guard let window = window else {
             fatalError("Failed to create window")
         }
-        NativeRendering.shared.start(window: window)
+        NativeRendering.shared.start(window: window, imGui: imGui)
         _ComponentRegistry.shared._register(TransformComponent.self)
         testSystem = TestSystem()
     }
@@ -51,7 +52,7 @@ class Engine {
                 Renderer.shared.update(with: time)
                 Renderer.shared.postFrame()
 
-                // Debugging: Spawm a new entity when D is pressed
+                // Debugging: Spawn a new entity when D is pressed
                 if InputManager.shared.getKeyState(key: .keycodeD) == .pressed {
                     let entity = Entity(name: UUID().uuidString)
                     entity.addComponent(TransformComponent.self)

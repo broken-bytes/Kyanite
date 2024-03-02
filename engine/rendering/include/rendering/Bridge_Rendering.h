@@ -14,7 +14,7 @@ extern "C" {
  * @brief Inits the rendering system
  *
  */
-EXPORTED void Rendering_Init(NativePointer window);
+EXPORTED void Rendering_Init(NativePointer window, NativePointer imGuiContext);
 
 /**
  * @brief Shuts down the rendering system

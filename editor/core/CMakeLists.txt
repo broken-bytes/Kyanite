@@ -4,6 +4,7 @@ FILE(GLOB_RECURSE SRC "src/*.c*")
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Concurrent)
 find_package(unofficial-sqlite3 REQUIRED)
 find_package(assimp CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 add_library(EditorCore SHARED ${SRC} ${HEADERS})
 
@@ -13,13 +14,14 @@ target_include_directories(EditorCore PRIVATE ${CMAKE_SOURCE_DIR}/engine/assetpa
 target_include_directories(EditorCore PRIVATE ${CMAKE_SOURCE_DIR}/engine/audio/include)
 target_include_directories(EditorCore PRIVATE ${CMAKE_SOURCE_DIR}/engine/ecs/include)
 target_include_directories(EditorCore PRIVATE ${CMAKE_SOURCE_DIR}/engine/shared/include)
+target_include_directories(EditorCore PRIVATE ${CMAKE_SOURCE_DIR}/engine/logger/include)
 target_include_directories(EditorCore PRIVATE ${CMAKE_SOURCE_DIR}/engine/core/include)
 target_include_directories(EditorCore PRIVATE ${CMAKE_SOURCE_DIR}/engine/rendering/include)
 
-target_link_libraries(EditorCore PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent unofficial::sqlite3::sqlite3 assimp::assimp)
+target_link_libraries(EditorCore PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent unofficial::sqlite3::sqlite3 assimp::assimp imgui::imgui)
 
 # Link all engine libraries
-target_link_libraries(EditorCore PRIVATE EntityComponentSystem Audio Core AssetPackages Rendering)
+target_link_libraries(EditorCore PRIVATE Logger EntityComponentSystem Audio Core AssetPackages Rendering)
 
 add_custom_command(TARGET EditorCore POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:EditorCore> $<TARGET_RUNTIME_DLLS:EditorCore>

@@ -3,6 +3,7 @@
 
 #include <shared/Events.hxx>
 #include <shared/Exported.hxx>
+#include <shared/NativePointer.hxx>
 
 #include <stdint.h>
 #include <stddef.h>
@@ -15,7 +16,7 @@ extern "C" {
 	 * @brief Inits the input system
 	 *
 	 */
-	EXPORTED void Input_Init();
+	EXPORTED void Input_Init(NativePointer imGuiContext);
 
 	/**
 	 * @brief Polls from the input system

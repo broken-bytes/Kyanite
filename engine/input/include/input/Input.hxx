@@ -3,10 +3,12 @@
 #include "InputEvent.hxx"
 #include <shared/Events.hxx>
 
+#include <imgui.h>
+
 #include <functional>
 #include <vector>
 
-namespace input {
+namespace kyanite::engine::input {
     struct InputEvent;
 
     enum class Trigger {
@@ -14,7 +16,7 @@ namespace input {
         RIGHT
     };
 
-    auto Init() -> void;
+    auto Init(ImGuiContext* context) -> void;
     auto Poll() -> void;
 
     /**

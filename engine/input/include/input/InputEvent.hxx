@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace input {
+namespace kyanite::engine::input {
     enum class InputState : uint8_t {
         NONE = 0,
         PRESSED = 1,

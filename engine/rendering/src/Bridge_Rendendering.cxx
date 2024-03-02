@@ -3,11 +3,12 @@
 #include "rendering/Shader.hxx"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 namespace rendering = kyanite::engine::rendering;
 
-void Rendering_Init(NativePointer window) {
-	rendering::Init(window);
+void Rendering_Init(NativePointer window, NativePointer imGuiContext) {
+	rendering::Init(window, reinterpret_cast<ImGuiContext*>(imGuiContext));
 }
 
 void Rendering_Shutdown() {

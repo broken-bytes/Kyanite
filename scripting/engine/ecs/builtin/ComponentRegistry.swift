@@ -2,7 +2,7 @@ import Foundation
 import Native
 
 public class _ComponentRegistry {
-    static let shared = _ComponentRegistry()
+    public static let shared = _ComponentRegistry()
 
     private init() {}
 

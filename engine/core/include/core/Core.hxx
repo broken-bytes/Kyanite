@@ -1,7 +1,8 @@
 #pragma once
 
 #include <shared/Exported.hxx>
-#include <core/ILogger.hxx>
+
+#include <imgui.h>
 
 #include <cstdint>
 #include <filesystem>
@@ -27,4 +28,6 @@ namespace kyanite::engine::core {
     EXPORTED auto LoadFileFromArchive(std::string path, std::string name) -> std::vector<uint8_t>;
     EXPORTED auto LoadFileFromArchive(std::string path, std::string name, size_t start, size_t count) -> std::vector<uint8_t>;
     EXPORTED auto CreateUUID() -> std::string;
+    EXPORTED auto CreateImGuiContext() -> ImGuiContext*;
+    EXPORTED auto GetImGuiContext() -> ImGuiContext*;
 }

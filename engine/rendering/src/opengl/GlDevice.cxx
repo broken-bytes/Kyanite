@@ -12,6 +12,7 @@
 #include "rendering/RenderBackendType.hxx"
 #include "rendering/GraphicsContext.hxx"
 #include "rendering/ImGuiContext.hxx"
+#include "rendering/UploadContext.hxx"
 
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
@@ -67,14 +68,19 @@ namespace kyanite::engine::rendering::opengl {
 		return std::make_unique<GraphicsContext>(this->shared_from_this(), _graphicsQueue);
 	}
 
-	auto GlDevice::CreateImGuiContext() -> std::unique_ptr<ImGuiContext> {
-		return std::make_unique<ImGuiContext>(
+	auto GlDevice::CreateImGuiContext(ImGuiContext* context) -> std::unique_ptr<ImmediateGuiContext> {
+		return std::make_unique<ImmediateGuiContext>(
 			this->shared_from_this(),
 			_window,
 			_glContext,
 			RenderBackendType::OpenGL,
-			_graphicsQueue
+			_graphicsQueue,
+			context
 		);
+	}
+
+	auto GlDevice::CreateUploadContext() -> std::unique_ptr<UploadContext> {
+		return std::make_unique<UploadContext>(this->shared_from_this(), _copyQueue);
 	}
 
 	auto GlDevice::CreateCommandList(CommandListType type) -> std::shared_ptr<CommandList> {

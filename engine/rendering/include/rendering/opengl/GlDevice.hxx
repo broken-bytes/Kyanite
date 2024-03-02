@@ -16,7 +16,9 @@ namespace kyanite::engine::rendering::opengl {
 
 		// Creation work submission and synchronization
 		virtual auto CreateGraphicsContext() -> std::unique_ptr<GraphicsContext> override;
-		virtual auto CreateImGuiContext() -> std::unique_ptr<ImGuiContext> override;
+		virtual auto CreateImGuiContext(ImGuiContext* context) -> 
+			std::unique_ptr<ImmediateGuiContext> override;
+		virtual auto CreateUploadContext() -> std::unique_ptr<UploadContext> override;
 		virtual auto CreateCommandList(CommandListType type) -> std::shared_ptr<CommandList> override;
 		virtual auto CreateCommandQueue(CommandListType type) -> std::shared_ptr<CommandQueue> override;
 		virtual auto CreateCommandAllocator() -> std::shared_ptr<CommandAllocator> override;

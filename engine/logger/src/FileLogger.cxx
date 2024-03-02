@@ -1,5 +1,5 @@
-#include "core/FileLogger.hxx"
-#include "core/ILogger.hxx"
+#include "logger/FileLogger.hxx"
+#include "logger/ILogger.hxx"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/types/string.hpp>
@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <ctime>
 
-namespace kyanite::engine::core {
+namespace kyanite::engine::logging {
 	FileLogger::FileLogger(std::string_view path) {
 		_path = path;
 		_file = std::ofstream(_path.data(), std::ios::out | std::ios::app);

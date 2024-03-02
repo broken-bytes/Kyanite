@@ -8,16 +8,17 @@
 #include <imgui.h>
 
 namespace kyanite::engine::rendering {
-	class ImGuiContext : public Context {
+	class ImmediateGuiContext : public Context {
 	public:
-		ImGuiContext(
+		ImmediateGuiContext(
 			const std::shared_ptr<Device>& device,
 			SDL_Window* window,
 			SDL_GLContext context,
 			RenderBackendType backend,
-			std::shared_ptr<CommandQueue> queue
+			std::shared_ptr<CommandQueue> queue,
+			ImGuiContext* imGuiContext
 		);
-		~ImGuiContext();
+		~ImmediateGuiContext();
 		auto Begin() -> void override;
 		auto Finish() -> void override;
 

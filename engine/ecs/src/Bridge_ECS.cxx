@@ -49,12 +49,6 @@ uint64_t ECS_RegisterSystem(const char* name, uint64_t* filter, size_t filterLen
 
 NativePointer ECS_GetComponentsFromIterator(NativePointer iterator, uint8_t index, size_t componentSize) {
 	auto iter = reinterpret_cast<ecs_iter_t*>(iterator);
-	// Print the iterator, index and component size
-	OutputDebugStringA(std::to_string(reinterpret_cast<int64_t>(iter)).c_str());
-	OutputDebugStringA("\n");
-	OutputDebugStringA(std::to_string(index).c_str());
-	OutputDebugStringA("\n");
-	OutputDebugStringA(std::to_string(componentSize).c_str());
 
 	return ecs::EntityRegistry::GetComponentBuffer(iter, index, componentSize);
 }

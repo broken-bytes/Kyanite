@@ -1,5 +1,6 @@
 #include "editor/core/assets/AssetDatabase.hxx"
 #include <core/Core.hxx>
+#include <logger/Logger.hxx>
 
 #include <sqlite3.h>
 

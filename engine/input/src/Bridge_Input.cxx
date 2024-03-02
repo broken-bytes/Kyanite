@@ -4,12 +4,15 @@
 #include "input/Input.hxx"
 
 #include <shared/Exported.hxx>
+#include <imgui.h>
 
 #include <stdint.h>
 #include <stddef.h>
 
-void Input_Init() {
-    input::Init();
+namespace input = kyanite::engine::input;
+
+void Input_Init(NativePointer imGuiContext) {
+    kyanite::engine::input::Init(reinterpret_cast<ImGuiContext*>(imGuiContext));
 }
 
 void Input_Poll() {

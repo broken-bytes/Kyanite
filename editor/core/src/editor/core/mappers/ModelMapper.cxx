@@ -2,7 +2,7 @@
 #include "editor/core/meta/ModelMeta.hxx"
 #include "editor/core/loaders/FbxLoader.hxx"
 
-#include <core/Logger.hxx>
+#include <logger/Logger.hxx>
 #include <rendering/Mesh.hxx>
 #include <rendering/Vertex.hxx>
 
@@ -15,5 +15,10 @@ auto kyanite::editor::mappers::ModelMapper::MapFbx(
 ) -> std::vector<kyanite::engine::rendering::MeshData> {
 	auto loader = kyanite::editor::loaders::FbxLoader();
 
-	return loader.LoadFromBuffer(data);
+	try {
+		return loader.LoadFromBuffer(data);
+	} catch (const std::exception& e) {
+		kyanite::engine::logging::logger::Error(e.what());
+		return {};
+	}
 }

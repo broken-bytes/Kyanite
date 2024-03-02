@@ -9,8 +9,8 @@ public class NativeRendering {
         Rendering_Shutdown()
     }
 
-    public func start(window: NativeWindow) {
-        Rendering_Init(window.handle)
+    public func start(window: NativeWindow, imGui: UnsafeMutableRawPointer) {
+        Rendering_Init(window.handle, imGui)
     }
 
     public func preFrame() {

@@ -1,4 +1,5 @@
 #include "rendering/GraphicsContext.hxx"
+#include <logger/Logger.hxx>
 
 namespace kyanite::engine::rendering {
     auto GraphicsContext::Begin() -> void {
@@ -7,6 +8,7 @@ namespace kyanite::engine::rendering {
 
     auto GraphicsContext::Finish() -> void {
         _commandQueue->Execute({ _commandList });
+        logging::logger::Info("Graphics Context: Finish");
     }
 
     auto GraphicsContext::ClearRenderTarget() -> void {

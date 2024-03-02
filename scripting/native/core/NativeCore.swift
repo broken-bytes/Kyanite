@@ -37,4 +37,12 @@ public class NativeCore {
             )
         )
     }
+
+    public func createImGuiContext() -> UnsafeMutableRawPointer {
+        return Core_CreateImGuiContext()
+    }
+
+    public func getImGuiContext() -> UnsafeMutableRawPointer {
+        return Core_GetImGuiContext()
+    }
 }

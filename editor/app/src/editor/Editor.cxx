@@ -5,6 +5,7 @@
 #include <rendering/Material.hxx>
 #include <rendering/Model.hxx>
 #include <rendering/Texture.hxx>
+#include <logger/Logger.hxx>
 
 #include <cereal/cereal.hpp>
 #include <cereal/archives/json.hpp>
@@ -21,6 +22,7 @@ extern "C" void kyanitemain(bool);
 extern "C" void kyaniteeditormain();
 
 std::thread engineThread;
+std::thread editorThread;
 
 namespace kyanite::editor {
 	Editor::Editor(
@@ -32,7 +34,7 @@ namespace kyanite::editor {
 	) : _projectPath(projectPath), _service(std::move(service)), _assetDatabase(std::move(assetDatabase)) {
 
 		Project project = {};
-		if(createNewProject) {
+		if (createNewProject) {
 			project = CreateProject(_projectPath, projectName);
 		}
 		else {
@@ -65,9 +67,24 @@ namespace kyanite::editor {
 
 	auto Editor::InitializeEngine() -> void {
 		// Start the engine in a separate thread so it does not interfere with the editor
-		engineThread = std::thread([&]() { kyanitemain(true); });
+		engineThread = std::thread([this]() {
+			kyanitemain(true);
+		});
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		kyaniteeditormain();
-		_assetDatabase->Load(_service->CachePath());
+
+		try {
+			_assetDatabase->Load(_service->CachePath());
+		}
+		catch (std::exception& e) {
+			kyanite::engine::logging::logger::Error(
+				"Failed to load asset database: " + std::string(e.what())
+			);
+
+			// If the asset database fails to load, we stop execution
+			// This is because the engine relies on the asset database to function
+			throw std::runtime_error("Failed to start editor");
+		}
 	}
 
 	template auto Editor::SaveMeta<meta::ModelMeta>(
@@ -121,6 +138,8 @@ namespace kyanite::editor {
 			archive(data);
 		}
 
+		kyanite::engine::logging::logger::Info("Saving blob: " + uuid);
+
 		// Move string file data to buffer
 		std::vector<uint8_t> buffer;
 		buffer.resize(ss.str().size());
@@ -128,6 +147,8 @@ namespace kyanite::editor {
 		std::memcpy(buffer.data(), str.c_str(), str.size());
 		auto blobPath = (_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob";
 		kyanite::engine::core::SaveBufferToFile(blobPath, buffer);
+
+		kyanite::engine::logging::logger::Info("Saved blob: " + uuid);
 	}
 
 	auto Editor::SaveModelMeta(std::string name, std::filesystem::directory_entry file) -> std::string {
@@ -165,15 +186,54 @@ namespace kyanite::editor {
 	}
 
 	auto Editor::OnFileAdded(std::filesystem::directory_entry file) -> void {
-		HandleFileAdded(file);
+		// Do the work asynchronously so the UI doesn't freeze
+		QFutureWatcher<void> watcher;
+
+		auto dialog = ShowAssetProcessingDialog();
+		QObject::connect(&watcher, &QFutureWatcher<void>::finished, [&]() {
+			dialog->close();
+			});
+		watcher.connect(&watcher, &QFutureWatcher<void>::finished, dialog, &QProgressDialog::close);
+
+		watcher.setFuture(QtConcurrent::run([&]() {
+			HandleFileAdded(file);
+			}));
+
+		dialog->exec();
 	}
 
 	auto Editor::OnFileModified(std::filesystem::directory_entry file) -> void {
-		HandleFileModified(file);
+		// Do the work asynchronously so the UI doesn't freeze
+		QFutureWatcher<void> watcher;
+
+		auto dialog = ShowAssetProcessingDialog();
+		QObject::connect(&watcher, &QFutureWatcher<void>::finished, [&]() {
+			dialog->close();
+			});
+		watcher.connect(&watcher, &QFutureWatcher<void>::finished, dialog, &QProgressDialog::close);
+
+		watcher.setFuture(QtConcurrent::run([&]() {
+			HandleFileModified(file);
+			}));
+
+		dialog->exec();
 	}
 
 	auto Editor::OnFileRemoved(std::filesystem::path path) -> void {
-		HandleFileRemoved(path);
+		// Do the work asynchronously so the UI doesn't freeze
+		QFutureWatcher<void> watcher;
+
+		auto dialog = ShowAssetProcessingDialog();
+		QObject::connect(&watcher, &QFutureWatcher<void>::finished, [&]() {
+			dialog->close();
+			});
+		watcher.connect(&watcher, &QFutureWatcher<void>::finished, dialog, &QProgressDialog::close);
+
+		watcher.setFuture(QtConcurrent::run([&]() {
+			HandleFileRemoved(path);
+			}));
+
+		dialog->exec();
 	}
 
 	auto Editor::CompareLastAssetDatabase() -> void {
@@ -213,28 +273,16 @@ namespace kyanite::editor {
 			return;
 		}
 
-		// Do the work asynchronously so the UI doesn't freeze
-		QFutureWatcher<void> watcher;
+		// We have a file, check if it's a valid asset type
+		auto extension = file.path().extension().string();
+		auto name = file.path().stem().string();
 
-		auto dialog = ShowAssetProcessingDialog();
-		QObject::connect(&watcher, &QFutureWatcher<void>::finished, [&]() {
-			dialog->close();
-			});
-		watcher.connect(&watcher, &QFutureWatcher<void>::finished, dialog, &QProgressDialog::close);
-		watcher.setFuture(QtConcurrent::run([&]() {
-			// We have a file, check if it's a valid asset type
-			auto extension = file.path().extension().string();
-			auto name = file.path().stem().string();
+		auto buffer = engine::core::LoadFileToBuffer(file.path().string());
 
-			auto buffer = engine::core::LoadFileToBuffer(file.path().string());
-
-			if (extension == ".fbx") {
-				auto uuid = SaveModelMeta(name, file);
-				SaveModelData(uuid, buffer);
-			}
-			}));
-
-		dialog->exec();
+		if (extension == ".fbx") {
+			auto uuid = SaveModelMeta(name, file);
+			SaveModelData(uuid, buffer);
+		}
 	}
 
 	auto Editor::HandleFileModified(std::filesystem::directory_entry file) -> void {
@@ -249,88 +297,64 @@ namespace kyanite::editor {
 			return;
 		}
 
+		// First we need to get the uuid from the meta file
+		auto metaPath = file.path().string() + ".meta";
+		std::string uuid = "";
 
-		// Do the work asynchronously so the UI doesn't freeze
-		QFutureWatcher<void> watcher;
+		auto metaBuffer = engine::core::LoadFileToBuffer(metaPath);
 
-		auto dialog = ShowAssetProcessingDialog();
-		QObject::connect(&watcher, &QFutureWatcher<void>::finished, [&]() {
-			dialog->close();
-			});
+		if (file.path().extension() == ".fbx") {
+			auto meta = LoadMeta<meta::ModelMeta>(metaPath);
+			uuid = meta.uuid;
+		}
 
-		watcher.connect(&watcher, &QFutureWatcher<void>::finished, dialog, &QProgressDialog::close);
-		watcher.setFuture(QtConcurrent::run([&]() {
-			// First we need to get the uuid from the meta file
-			auto metaPath = file.path().string() + ".meta";
-			std::string uuid = "";
+		// Update the asset database
+		auto writeTime = std::filesystem::last_write_time(file.path());
+		_assetDatabase->UpdateAsset(uuid, writeTime);
 
-			auto metaBuffer = engine::core::LoadFileToBuffer(metaPath);
+		// Update the blob 
+		engine::core::RemoveFile(
+			(_service->BlobsPath() / uuid.substr(0, 2) / uuid)
+			.string() + ".blob"
+		);
 
-			if (file.path().extension() == ".fbx") {
-				auto meta = LoadMeta<meta::ModelMeta>(metaPath);
-				uuid = meta.uuid;
-			}
-
-			// Update the asset database
-			auto writeTime = std::filesystem::last_write_time(file.path());
-			_assetDatabase->UpdateAsset(uuid, writeTime);
-
-			// Update the blob 
-			engine::core::RemoveFile((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob");
-
-			auto buffer = engine::core::LoadFileToBuffer(file.path().string());
-			SaveModelData(uuid, buffer);
-			}));
-
-		dialog->exec();
+		auto buffer = engine::core::LoadFileToBuffer(file.path().string());
+		SaveModelData(uuid, buffer);
 	}
 
 	auto Editor::HandleFileRemoved(std::filesystem::path file) -> void {
-		// Do the work asynchronously so the UI doesn't freeze
-		QFutureWatcher<void> watcher;
-
-		auto dialog = ShowAssetProcessingDialog();
-		QObject::connect(&watcher, &QFutureWatcher<void>::finished, [&]() {
-			dialog->close();
-			});
-
-		watcher.connect(&watcher, &QFutureWatcher<void>::finished, dialog, &QProgressDialog::close);
-		watcher.setFuture(QtConcurrent::run([&]() {
-
-			// Meta data was removed, just reimport the asset
-			if (file.extension() == ".meta") {
-				// Delete the asset via its path since we don't have the uuid anymore
-				// Get the uuid from the asset database
-				auto filePath = file.parent_path() / file.stem();
-				auto uuid = _assetDatabase->GetUuidForPath(filePath.string());
-				// Now we need to remove the asset from the asset database
-				_assetDatabase->RemoveAsset(uuid);
-				// Now we need to remove the blob
-				if (engine::core::CheckIfFileExists((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob")) {
-					engine::core::RemoveFile((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob");
-				}
-
-				// Reimport the asset if it exists
-				if (engine::core::CheckIfFileExists((file.parent_path() / file.stem()).string())) {
-					HandleFileAdded(std::filesystem::directory_entry((file.parent_path() / file.stem()).string()));
-				}
-			}
-			else {
-				std::string uuid = _assetDatabase->GetUuidForPath(file.string());
-				// Remove the asset from the asset database
-				_assetDatabase->RemoveAsset(uuid);
-				// Also remove the blob
+		// Meta data was removed, just reimport the asset
+		if (file.extension() == ".meta") {
+			// Delete the asset via its path since we don't have the uuid anymore
+			// Get the uuid from the asset database
+			auto filePath = file.parent_path() / file.stem();
+			auto uuid = _assetDatabase->GetUuidForPath(filePath.string());
+			// Now we need to remove the asset from the asset database
+			_assetDatabase->RemoveAsset(uuid);
+			// Now we need to remove the blob
+			if (engine::core::CheckIfFileExists((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob")
+			) {
 				engine::core::RemoveFile((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob");
-
-				// Also remove the meta file if it exists
-				auto metaPath = file.string() + ".meta";
-				if (engine::core::CheckIfFileExists(metaPath)) {
-					engine::core::RemoveFile(metaPath);
-				}
 			}
-			}));
 
-		dialog->exec();
+			// Reimport the asset if it exists
+			if (engine::core::CheckIfFileExists((file.parent_path() / file.stem()).string())) {
+				HandleFileAdded(std::filesystem::directory_entry((file.parent_path() / file.stem()).string()));
+			}
+		}
+		else {
+			std::string uuid = _assetDatabase->GetUuidForPath(file.string());
+			// Remove the asset from the asset database
+			_assetDatabase->RemoveAsset(uuid);
+			// Also remove the blob
+			engine::core::RemoveFile((_service->BlobsPath() / uuid.substr(0, 2) / uuid).string() + ".blob");
+
+			// Also remove the meta file if it exists
+			auto metaPath = file.string() + ".meta";
+			if (engine::core::CheckIfFileExists(metaPath)) {
+				engine::core::RemoveFile(metaPath);
+			}
+		}
 	}
 
 	auto Editor::HandleMetaData(std::filesystem::directory_entry file) -> void {

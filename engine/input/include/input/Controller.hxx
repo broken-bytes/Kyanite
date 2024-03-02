@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL.h>
 
-namespace input {
+namespace kyanite::engine::input {
     class Controller {
         public:
         Controller(SDL_GameController* controller);
