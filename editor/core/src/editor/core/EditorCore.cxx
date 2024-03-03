@@ -93,6 +93,7 @@ namespace kyanite::editor::core {
 			ImGui::DockBuilderDockWindow("Hierarchy", dockLeft);
 			ImGui::DockBuilderDockWindow("Inspector", dockRight);
 			ImGui::DockBuilderDockWindow("Content Browser", dockDown);
+			ImGui::DockBuilderDockWindow("Debug Console", dockDown);
 
 			ImGui::DockBuilderFinish(dockId);
 		}

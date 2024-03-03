@@ -1,17 +1,8 @@
 import Foundation
 import Native
 
-@System class TestSystem {
-    public static func run(transform: UnsafeMutableBufferPointer<TransformComponent>) {
-        for x in 0..<transform.count {
-            transform[x].position.x += InputManager.shared.getKeyState(key: .keycodeA) == .held ? 1 : 0
-        }
-    }
-}
-
 class Engine {
     private var window: NativeWindow? = nil
-    var testSystem: TestSystem
     var time: Float = 0
     
     init(isDebug: Bool = false) {
@@ -38,7 +29,6 @@ class Engine {
         }
         NativeRendering.shared.start(window: window, imGui: imGui)
         _ComponentRegistry.shared._register(TransformComponent.self)
-        testSystem = TestSystem()
     }
 
     func start() {
@@ -46,15 +36,14 @@ class Engine {
             var measure = ContinuousClock().measure {
                 // Update all native modules first each frame
                 Renderer.shared.preFrame()
-                InputManager.shared.update()
+                Input.shared.update()
                 NativeECS.shared.update(deltaTime: time)
                 // Update the rendering system
                 Renderer.shared.update(with: time)
                 Renderer.shared.postFrame()
 
-                // Debugging: Spawn a new entity when D is pressed
-                if InputManager.shared.getKeyState(key: .keycodeD) == .pressed {
-                    let entity = Entity(name: UUID().uuidString)
+                Input.shared.when(.keycodeW, is: .pressed) {
+                    let entity = Entity(name: "Entity - \(UUID().uuidString)")
                     entity.addComponent(TransformComponent.self)
                     var transform = TransformComponent()
                     transform.position = Vector3(x: 0, y: 0, z: 0)

@@ -8,7 +8,6 @@ namespace kyanite::engine::rendering {
 
     auto GraphicsContext::Finish() -> void {
         _commandQueue->Execute({ _commandList });
-        logging::logger::Info("Graphics Context: Finish");
     }
 
     auto GraphicsContext::ClearRenderTarget() -> void {

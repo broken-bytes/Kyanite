@@ -52,9 +52,5 @@ namespace kyanite::engine::rendering {
 			ImGui::RenderPlatformWindowsDefault();
 			SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
 		}
-
-		//SDL_GL_SwapWindow(_window);
-
-		logging::logger::Info("ImGui Context: Finish");
 	}
 }
