@@ -19,10 +19,11 @@ namespace kyanite::editor::core {
 	/**
 	* @brief Begin a window
 	* @param title The title of the window
-	* @param open A pointer to a boolean that indicates if the window is open
 	* @param flags The flags to use
+	* @param id The id of the window. Needed for the callback
+	* @param callback The callback to call when the window is closed
 	*/
-	EXPORTED auto BeginWindow(std::string title, bool* open, int flags) -> void;
+	EXPORTED auto BeginWindow(std::string title, int flags, int64_t id, void(*callback)(int64_t)) -> void;
 
 	/**
 	* @brief End a window
@@ -43,14 +44,14 @@ namespace kyanite::editor::core {
 	* @param label The label to display
 	* @param action The callback to call when the button is pressed
 	*/
-	EXPORTED auto DrawButton(NativePointer window, std::string label, std::function<void()> action) -> void;
+	EXPORTED auto Button(std::string label) -> bool;
 
 	/**
 	* @brief Draws a label
 	* @param window The window to draw the label in
 	* @param label The label to display
 	*/
-	EXPORTED auto DrawLabel(NativePointer window, std::string label) -> void;
+	EXPORTED auto Label(std::string label) -> void;
 
 	/**
 	* @brief Clears the window

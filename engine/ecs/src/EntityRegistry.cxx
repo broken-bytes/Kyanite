@@ -17,15 +17,16 @@
 #include <flecs/addons/rest.h>
 
 #include <memory>
+#include <shared_mutex>
 #include <mutex>
 #include <Windows.h>
 
 namespace ecs::EntityRegistry {
 	flecs::world world;
-	std::mutex worldLock;
+	std::mutex writeLock;
+	std::shared_mutex readLock;
 	
 	auto Init(bool debugServer) -> void {
-
 		// If we are in debug mode, we want to start the debug server and load all component metadata
 		if (debugServer) {
 			world.set<flecs::Rest>({ });
@@ -40,17 +41,26 @@ namespace ecs::EntityRegistry {
 	}
 
 	auto GetRegistry() -> ecs_world_t* {
-		std::scoped_lock lock { worldLock };
+		std::shared_lock<std::shared_mutex> lock { readLock };
 		return world;
 	}
 
 	auto CreateEntity(std::string name) -> ecs_entity_t {
-		std::scoped_lock lock { worldLock };
-		return world.entity(name.c_str());
+		std::scoped_lock lock { writeLock };
+		
+		return world.entity(name.c_str()).id();
+	}
+
+	auto SetParent(ecs_entity_t entity, ecs_entity_t parent) -> void {
+		std::scoped_lock lock { writeLock };
+		// Remove the current parent
+		world.entity(entity).remove(flecs::ChildOf);
+		// Add the new parent
+		world.entity(entity).add(flecs::ChildOf, parent);
 	}
 
 	auto DestroyEntity(ecs_entity_t entity) -> void {
-		std::scoped_lock lock{ worldLock };
+		std::scoped_lock lock{ writeLock };
 		world.entity(entity).destruct();
 	}
 
@@ -64,7 +74,7 @@ namespace ecs::EntityRegistry {
 		ecs_entity_desc_t entityDesc = {};
 		entityDesc.name = name.c_str();
 
-		std::scoped_lock lock{ worldLock };
+		std::scoped_lock lock { writeLock };
 
 		desc.entity = ecs_entity_init(world, &entityDesc);
 		
@@ -72,22 +82,27 @@ namespace ecs::EntityRegistry {
 	}
 
 	auto AddComponent(ecs_entity_t entity, ecs_entity_t component) -> void {
-		std::scoped_lock lock{ worldLock };
+		std::scoped_lock lock { writeLock };
 		ecs_add_id(world, entity, component);
 	}
 
 	auto SetComponent(ecs_entity_t entity, ecs_entity_t component, void* data) -> void {
-		std::scoped_lock lock{ worldLock };
+		std::scoped_lock lock { writeLock };
 		world.entity(entity).set_ptr(component, data);
 	}
 
 	auto RemoveComponent(ecs_entity_t entity, ecs_entity_t component) -> void {
-		std::scoped_lock lock{ worldLock };
+		std::scoped_lock lock { writeLock };
 		ecs_remove_id(world, entity, component);
 	}
 
+	auto GetComponent(ecs_entity_t entity, ecs_entity_t component) -> const void* {
+		std::shared_lock<std::shared_mutex> lock { readLock };
+		return world.entity(entity).get(component);
+	}
+
 	auto Update(float delta) -> void {
-		std::scoped_lock lock{ worldLock };
+		std::scoped_lock lock { writeLock };
 		world.progress();
 	}
 
@@ -96,7 +111,7 @@ namespace ecs::EntityRegistry {
 		ecs_entity_desc_t entityDesc = {};
 		entityDesc.name = name.c_str();
 
-		std::scoped_lock lock{ worldLock };
+		std::scoped_lock lock { writeLock };
 		entityDesc.add[0] = ecs_pair(EcsDependsOn, EcsOnUpdate);
 		ecs_entity_t system = ecs_entity_init(world, &entityDesc);
 		desc.entity = system;

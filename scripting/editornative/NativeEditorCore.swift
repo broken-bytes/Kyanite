@@ -14,12 +14,20 @@ public class EditorNativeCore {
         // TODO: Implement EditorCore_Shutdown
     }
 
-    public func beginWindow(title: String, open: inout Bool, flags: Int32) {
-        return EditorCore_BeginWindow(title.cString(using: .utf8), &open, flags)
+    public func beginWindow(title: String, flags: Int32, id: Int64, onClose: @convention(c) (Int64) -> Void) {
+        EditorCore_BeginWindow(title, flags, id, onClose)
     }
 
     public func endWindow() {
         return EditorCore_EndWindow()
+    }
+
+    public func button(_ label: String) -> Bool {
+        return EditorCore_Button(label.cString(using: .utf8))
+    }
+
+    public func label(_ text: String) {
+        return EditorCore_Label(text.cString(using: .utf8))
     }
 
     public func drawDefaultImGuiDockspace() {

@@ -25,18 +25,6 @@ public class NativeRendering {
         Rendering_PostFrame()
     }
 
-    public func drawText(_ text: String) {
-        Rendering_DrawText(text)
-    }
-
-    public func startWindow(_ name: String, open: inout Bool) {
-        Rendering_StartWindow(name.cString(using: .utf8), &open)
-    }
-
-    public func endWindow() {
-        Rendering_EndWindow()
-    }
-
     public func loadShader(code: String, type: NativeShaderType) -> UInt64 {
         Rendering_CreateShader(code.cString(using: .utf8), type.rawValue)
     }

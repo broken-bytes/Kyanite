@@ -32,6 +32,7 @@ class Engine {
     }
 
     func start() {
+        EngineEnvironment.shared.configure()
         while true {
             var measure = ContinuousClock().measure {
                 // Update all native modules first each frame

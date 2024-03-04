@@ -69,16 +69,18 @@ namespace kyanite::engine::input {
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
 
-            if(event.type == SDL_QUIT) {
-                SystemEvent quitEvent = {};
-                quitEvent.type = SystemEventType::Quit;
+            if(event.type == SDL_WINDOWEVENT) {
+                if(event.window.event == SDL_WINDOWEVENT_CLOSE) {
+					SystemEvent quitEvent = {};
+					quitEvent.type = SystemEventType::Quit;
 
-                Event* event = new Event();
-                event->type = EventType::System;
-                event->data.system = quitEvent;
+					Event* event = new Event();
+					event->type = EventType::System;
+					event->data.system = quitEvent;
 
-                for(auto& subscriber: inputEventSubscribers) {
-					subscriber(event);
+					for(auto& subscriber: inputEventSubscribers) {
+						subscriber(event);
+					}
 				}
             }
             

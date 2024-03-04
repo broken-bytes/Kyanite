@@ -1,3 +1,3 @@
 public protocol Event: Sendable {
-    var type: EventType { get }
+    var type: Any.Type { get }
 }

@@ -1,5 +1,5 @@
 public struct KeyEvent: Event {
-    public var type: EventType = .input
+    public var type: Any.Type { KeyEvent.self }
     public var key: KeyboardKey
     public var mods: Int
     public var state: ButtonState

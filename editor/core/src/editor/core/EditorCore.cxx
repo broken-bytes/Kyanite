@@ -17,24 +17,29 @@ namespace kyanite::editor::core {
 		ImGui::SetCurrentContext(context);
 	}
 
-	auto BeginWindow(std::string title, bool* open, int flags) -> void {
-		Rendering_StartWindow(title.c_str(), open);
+	auto BeginWindow(std::string title, int flags, int64_t id, void (*callback)(int64_t)) -> void {
+		bool isOpen = true;
+		ImGui::Begin(title.c_str(), &isOpen);
+
+		if(!isOpen) {
+			callback(id);
+		}
 	}
 
 	auto EndWindow() -> void {
-		Rendering_EndWindow();
+		ImGui::End();
 	}
 
 	auto DrawReferenceSelector(NativePointer window, std::string label, std::function<void(std::string)> onReferenceSet) -> void {
 
 	}
 
-	auto DrawButton(NativePointer window, std::string label, std::function<void()> action) -> void {
-
+	auto Button(std::string label) -> bool {
+		return ImGui::Button(label.c_str());
 	}
 
-	auto DrawLabel(NativePointer window, std::string label) -> void {
-
+	auto Label(std::string label) -> void {
+		ImGui::Text(label.c_str());
 	}
 
 	auto Clear(NativePointer window) -> void {
@@ -50,9 +55,7 @@ namespace kyanite::editor::core {
 			ImGuiWindowFlags_NoCollapse |
 			ImGuiWindowFlags_NoTitleBar |
 			ImGuiWindowFlags_NoBackground |
-			ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus |
-			ImGuiWindowFlags_NoNav
+			ImGuiWindowFlags_NoBringToFrontOnFocus
 		);
 		ImGuiID dockId = ImGui::GetID("MyDockSpace");
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;

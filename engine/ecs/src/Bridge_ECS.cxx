@@ -22,6 +22,10 @@ uint64_t ECS_CreateEntity(const char* name) {
 	return ecs::EntityRegistry::CreateEntity(name);
 }
 
+void ECS_SetParent(uint64_t entity, uint64_t parent) {
+	ecs::EntityRegistry::SetParent(entity, parent);
+}
+
 void ECS_DestroyEntity(uint64_t entity) {
 	ecs::EntityRegistry::DestroyEntity(entity);
 }
@@ -36,6 +40,13 @@ void ECS_SetComponent(uint64_t entity, uint64_t component, void* data) {
 
 void ECS_RemoveComponent(uint64_t entity, uint64_t component) {
 
+}
+
+NativePointer ECS_GetComponent(uint64_t entity, uint64_t component) {
+	auto data = ecs::EntityRegistry::GetComponent(entity, component);
+	const auto native = reinterpret_cast<const NativePointer*>(data);
+
+	return const_cast<NativePointer*>(native);
 }
 
 uint64_t ECS_RegisterComponent(const char* name, size_t size, size_t alignment) {

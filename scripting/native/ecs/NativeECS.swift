@@ -18,6 +18,10 @@ public class NativeECS {
         return ECS_CreateEntity(name.cString(using: .utf8))
     }
 
+    public func setParent(child: UInt64, parent: UInt64) {
+        ECS_SetParent(child, parent)
+    }
+
     public func addComponent(entity: UInt64, componentId: UInt64) {
         ECS_AddComponent(entity, componentId)
     }
@@ -32,6 +36,14 @@ public class NativeECS {
 
     public func registerSystem(name: String, components: inout [UInt64], runFunc: (@convention(c) (UnsafeMutableRawPointer?) -> Void)?) -> UInt64 {
         return ECS_RegisterSystem(name.cString(using: .utf8), &components, components.count, runFunc)
+    }
+
+    public func getComponent<T: Hashable>(entity: UInt64, componentId: UInt64) -> UnsafeMutablePointer<T>? {
+        guard let component = ECS_GetComponent(entity, componentId) else {
+            return nil
+        }
+
+        return component.assumingMemoryBound(to: T.self)
     }
 
     public func sizeOfIterator(iterator: UnsafeMutableRawPointer) -> Int {

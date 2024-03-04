@@ -37,6 +37,13 @@ namespace ecs::EntityRegistry {
 	auto CreateEntity(std::string name) -> ecs_entity_t;
 
 	/**
+	* @brief Sets the parent of an entity
+	* @param entity The entity to set the parent of
+	* @param parent The parent to set
+	*/
+	auto SetParent(ecs_entity_t entity, ecs_entity_t parent) -> void;
+
+	/**
 	* @brief Destroys an entity
 	* @param entity The entity to destroy
 	*/
@@ -70,6 +77,14 @@ namespace ecs::EntityRegistry {
 	* @param entity The entity to remove the component from
 	*/
 	auto RemoveComponent(ecs_entity_t entity, ecs_entity_t component) -> void;
+
+	/**
+	* @brief Gets a component from an entity
+	* @param entity The entity to get the component from
+	* @param component The component to get
+	* @return The component
+	*/
+	auto GetComponent(ecs_entity_t entity, ecs_entity_t component) -> const void*;
 
 	/**
 	* @brief Advances the ecs world by delta time

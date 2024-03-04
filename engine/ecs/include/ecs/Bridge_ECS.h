@@ -27,6 +27,13 @@ extern "C" {
 	EXPORTED uint64_t ECS_CreateEntity(const char* name);
 
 	/**
+	* @brief Sets the parent of an entity
+	* @param entity The entity to set the parent of
+	* @param parent The parent to set
+	*/
+	EXPORTED void ECS_SetParent(uint64_t entity, uint64_t parent);
+
+	/**
 	 * @brief Destroys an entity
 	 *
 	 * @param entity The entity to destroy
@@ -54,6 +61,14 @@ extern "C" {
 	* @param component The component to remove
 	*/
 	EXPORTED void ECS_RemoveComponent(uint64_t entity, uint64_t component);
+
+	/**
+	* @brief Gets a component from an entity
+	* @param entity The entity to get the component from
+	* @param component The component to get
+	* @return The component
+	*/
+	EXPORTED NativePointer ECS_GetComponent(uint64_t entity, uint64_t component);
 
 	/**
 	* @brief Registers a component type
