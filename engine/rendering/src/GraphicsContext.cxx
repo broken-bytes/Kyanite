@@ -1,6 +1,7 @@
 #include "rendering/GraphicsContext.hxx"
 #include <logger/Logger.hxx>
 
+
 namespace kyanite::engine::rendering {
     auto GraphicsContext::Begin() -> void {
 		_commandList->Reset(_commandAllocator);

@@ -1,11 +1,11 @@
 import Foundation
 import Native
 
-class Engine {
+public class Engine {
     private var window: NativeWindow? = nil
     var time: Float = 0
     
-    init(isDebug: Bool = false) {
+    public init(isDebug: Bool = false) {
         // Initialize all subsystems
         // Initialize the core
         NativeCore.shared.start()
@@ -31,7 +31,7 @@ class Engine {
         _ComponentRegistry.shared._register(TransformComponent.self)
     }
 
-    func start() {
+    public func start() {
         EngineEnvironment.shared.configure()
         while true {
             var measure = ContinuousClock().measure {

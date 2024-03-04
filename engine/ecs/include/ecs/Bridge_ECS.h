@@ -71,6 +71,15 @@ extern "C" {
 	EXPORTED NativePointer ECS_GetComponent(uint64_t entity, uint64_t component);
 
 	/**
+	* @brief Gets a component from an entity
+	* @param entity The entity to get the component from
+	* @param len The length of the components
+	* @return Pointer to the list of componentIds
+	* @note Caller is responsible for freeing the memory
+	*/
+	EXPORTED uint64_t* ECS_GetAllComponents(uint64_t entity, size_t* len);
+
+	/**
 	* @brief Registers a component type
 	* @param size The size of the component type
 	* @param alignment The alignment of the component type
@@ -99,6 +108,34 @@ extern "C" {
 	* @return The number of components
 	*/
 	EXPORTED size_t ECS_GetIteratorSize(NativePointer iterator);
+
+	/**
+	* Get entity by name
+	* @param name The name of the entity
+	* @param entity The entity if found, otherwise null
+	*/
+	EXPORTED uint64_t ECS_GetEntityByName(const char* name);
+
+	/**
+	* @brief Gets the name of an entity
+	* @param entity The entity to get the name of
+	* @return The name of the entity
+	*/
+	EXPORTED const char* ECS_GetEntityName(uint64_t entity);
+
+	/**
+	* @brief Gets the parent of an entity
+	* @param entity The entity to get the parent of
+	* @return The parent of the entity or 0 if it has no parent
+	*/
+	EXPORTED uint64_t ECS_GetParent(uint64_t entity);
+
+	/**
+	* @brief Gets the name of an entity
+	* @param entity The entity to get the childs of
+	* @param callback The callback to call for each child
+	*/
+	EXPORTED void ECS_ForEachChild(uint64_t parent, void (*callback)(const char* name, uint64_t id));
 #ifdef __cplusplus 
 }
 #endif

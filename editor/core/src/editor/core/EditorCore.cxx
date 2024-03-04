@@ -34,8 +34,8 @@ namespace kyanite::editor::core {
 
 	}
 
-	auto Button(std::string label) -> bool {
-		return ImGui::Button(label.c_str());
+	auto Button(std::string_view label) -> bool {
+		return ImGui::Button(label.data());
 	}
 
 	auto Label(std::string label) -> void {

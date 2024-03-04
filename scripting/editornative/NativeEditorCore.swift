@@ -23,11 +23,11 @@ public class EditorNativeCore {
     }
 
     public func button(_ label: String) -> Bool {
-        return EditorCore_Button(label.cString(using: .utf8))
+        return EditorCore_Button(label)
     }
 
     public func label(_ text: String) {
-        return EditorCore_Label(text.cString(using: .utf8))
+        return EditorCore_Label(text)
     }
 
     public func drawDefaultImGuiDockspace() {

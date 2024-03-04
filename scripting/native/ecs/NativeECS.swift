@@ -22,6 +22,14 @@ public class NativeECS {
         ECS_SetParent(child, parent)
     }
 
+    public func parent(of entity: UInt64) -> UInt64? {
+        let parentId = ECS_GetParent(entity)
+
+        OutputDebugStringA("Parent: \(parentId)\n")
+        
+        return parentId == 0 ? nil : parentId
+    }
+
     public func addComponent(entity: UInt64, componentId: UInt64) {
         ECS_AddComponent(entity, componentId)
     }
@@ -46,6 +54,15 @@ public class NativeECS {
         return component.assumingMemoryBound(to: T.self)
     }
 
+    public func getAllComponents(entity: UInt64) -> [UInt64] {
+        var numComponents: Int = 0
+        let components = ECS_GetAllComponents(entity, &numComponents)
+
+        let array = Array(UnsafeBufferPointer(start: components, count: numComponents))
+
+        return array
+    }
+
     public func sizeOfIterator(iterator: UnsafeMutableRawPointer) -> Int {
         return ECS_GetIteratorSize(iterator)
     }
@@ -61,5 +78,19 @@ public class NativeECS {
             start: buffer.assumingMemoryBound(to: T.self),
             count: sizeOfIterator(iterator: iterator)
         )
+    }
+
+    public func name(of entity: UInt64) -> String? {
+        guard let name = ECS_GetEntityName(entity) else {
+            return nil
+        }
+        
+        return String(cString: name)
+    }
+
+    public func find(by name: String) -> UInt64? {
+        let id = ECS_GetEntityByName(name)
+        
+        return id == 0 ? nil : id
     }
 }

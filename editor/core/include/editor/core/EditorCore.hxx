@@ -44,7 +44,7 @@ namespace kyanite::editor::core {
 	* @param label The label to display
 	* @param action The callback to call when the button is pressed
 	*/
-	EXPORTED auto Button(std::string label) -> bool;
+	EXPORTED auto Button(std::string_view label) -> bool;
 
 	/**
 	* @brief Draws a label

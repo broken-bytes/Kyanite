@@ -3,7 +3,7 @@
 
 #include <map>
 #include <memory>
-#include <Windows.h>
+#include <stdexcept>
 
 // Store all the component types in a map of int -> uint64_t
 // The int is the hash value coming from swift and the uint64_t is the component ID
@@ -49,6 +49,17 @@ NativePointer ECS_GetComponent(uint64_t entity, uint64_t component) {
 	return const_cast<NativePointer*>(native);
 }
 
+uint64_t* ECS_GetAllComponents(uint64_t entity, size_t* len) {
+	auto components = ecs::EntityRegistry::GetEntityComponents(entity);
+	*len = components.size();
+
+	// Copy the vector to a new array and return it
+	auto componentIds = new uint64_t[components.size()];
+	std::copy(components.begin(), components.end(), componentIds);
+
+	return componentIds;
+}
+
 uint64_t ECS_RegisterComponent(const char* name, size_t size, size_t alignment) {
 	return ecs::EntityRegistry::CreateComponent(name, size, alignment);
 }
@@ -66,4 +77,20 @@ NativePointer ECS_GetComponentsFromIterator(NativePointer iterator, uint8_t inde
 
 size_t ECS_GetIteratorSize(NativePointer iterator) {
 	return reinterpret_cast<ecs_iter_t*>(iterator)->count;
+}
+
+uint64_t ECS_GetEntityByName(const char* name) {
+	return ecs::EntityRegistry::GetEntityByName(name);
+}
+
+const char* ECS_GetEntityName(uint64_t entity) {
+	return ecs::EntityRegistry::GetEntityName(entity);
+}
+
+uint64_t ECS_GetParent(uint64_t entity) {
+	return ecs::EntityRegistry::GetParent(entity);
+}
+
+void ECS_ForEachChild(uint64_t parent, void (*callback)(const char* name, uint64_t id)) {
+	ecs::EntityRegistry::ForEachChild(parent, callback);
 }

@@ -66,12 +66,8 @@ namespace kyanite::editor {
 	}
 
 	auto Editor::InitializeEngine() -> void {
-		// Start the engine in a separate thread so it does not interfere with the editor
-		engineThread = std::thread([this]() {
-			kyanitemain(true);
-		});
-		std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 		kyaniteeditormain();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 		try {
 			_assetDatabase->Load(_service->CachePath());

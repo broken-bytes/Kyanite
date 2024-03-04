@@ -11,10 +11,7 @@ public class EditorWindow {
 
     internal init() {
         open = true
-        OutputDebugStringA("EditorWindow creating\n")
         entity = Entity(name: "Window \(title)", parent: EditorEnvironment.shared.editorParent)
-        OutputDebugStringA("EditorWindow created\n")
-
         entity?.addComponent(WindowComponent.self)
         show()
     }

@@ -20,6 +20,7 @@
 #include <shared_mutex>
 #include <mutex>
 #include <Windows.h>
+#include <vector>
 
 namespace ecs::EntityRegistry {
 	flecs::world world;
@@ -55,8 +56,10 @@ namespace ecs::EntityRegistry {
 		std::scoped_lock lock { writeLock };
 		// Remove the current parent
 		world.entity(entity).remove(flecs::ChildOf);
-		// Add the new parent
+		// Make entity a child of the new parent
 		world.entity(entity).add(flecs::ChildOf, parent);
+		// Now make parent the parent of entity
+		world.entity(parent).add(flecs::Parent, entity);
 	}
 
 	auto DestroyEntity(ecs_entity_t entity) -> void {
@@ -101,6 +104,16 @@ namespace ecs::EntityRegistry {
 		return world.entity(entity).get(component);
 	}
 
+	auto GetEntityComponents(ecs_entity_t entity) -> std::vector<ecs_entity_t> {
+		std::shared_lock<std::shared_mutex> lock { readLock };
+		std::vector<ecs_entity_t> components;
+		world.entity(entity).each([&components](flecs::id& e) {
+			components.push_back(e);
+		});
+
+		return components;
+	}
+
 	auto Update(float delta) -> void {
 		std::scoped_lock lock { writeLock };
 		world.progress();
@@ -130,5 +143,36 @@ namespace ecs::EntityRegistry {
 		auto ptr = ecs_field_w_size(iter, componentSize, index);
 
 		return ptr;
+	}
+
+	auto GetEntityByName(std::string_view name) -> uint64_t {
+		std::shared_lock<std::shared_mutex> lock { readLock };
+		auto entity = world.lookup(name.data());
+		if (entity) {
+			return entity.id();
+		}
+
+		return 0;
+	}
+
+	auto GetEntityName(ecs_entity_t entity) -> const char* {
+		std::shared_lock<std::shared_mutex> lock { readLock };
+
+		return world.entity(entity).name();
+	}
+
+	auto GetParent(ecs_entity_t entity) -> ecs_entity_t {
+		std::shared_lock<std::shared_mutex> lock { readLock };
+		
+		return world.entity(entity).parent();
+	}
+
+	auto ForEachChild(ecs_entity_t parent, void (*callback)(const char* name, ecs_entity_t id)) -> void {
+		std::shared_lock<std::shared_mutex> lock { readLock };
+
+		world.entity(parent).children([&callback](flecs::entity child) {
+			callback(child.name(), child.id());
+		});
+
 	}
 }
