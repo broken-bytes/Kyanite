@@ -62,13 +62,13 @@ public class NativeECS {
         return component
     }
 
-    public func getAllComponents(entity: UInt64) -> [UInt64] {
-        var ids: [UInt64] = []
-        ECS_GetAllComponents(entity) { (id, typeId) in
-            OutputDebugStringA("Component: \(id) Type id: \(typeId)\n")
-        }
-
-        return ids
+    public func getAllComponents(
+        entity: UInt64, 
+        index: UInt64, 
+        typeId: inout UInt64,
+        data: UnsafeMutablePointer<UnsafeRawPointer?>
+    ) {
+        ECS_GetAllComponents(entity, index, &typeId, data)
     }
 
     public func sizeOfIterator(iterator: UnsafeMutableRawPointer) -> Int {

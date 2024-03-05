@@ -73,11 +73,15 @@ extern "C" {
 	/**
 	* @brief Gets a component from an entity
 	* @param entity The entity to get the component from
-	* @param len The length of the components
-	* @return Pointer to the list of componentIds
+	* @param iterator An iterator that is called for each component
 	* @note Caller is responsible for freeing the memory
 	*/
-	EXPORTED void ECS_GetAllComponents(uint64_t entity, void(*iterator)(uint64_t id, uint64_t typeId));
+	EXPORTED void ECS_GetAllComponents(
+		uint64_t entity, 
+		uint64_t index,
+		uint64_t* typeId,
+		const void** data
+	);
 
 	/**
 	* @brief Registers a component type

@@ -1,6 +1,6 @@
 {
-"type": "MaterialComponent",
-"fields": {
-{ "index": 0, "name:": "material",  "type" : "i64" }
-}
+ "type": "MaterialComponent",
+ "fields": [
+   { "index": 0, "name": "material",  "type" : "i64" } 
+]
 }

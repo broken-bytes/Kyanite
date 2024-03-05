@@ -33,4 +33,8 @@ public class _ComponentRegistry {
         
         return component.id
     }
+
+    public func _get(_ id: UInt64) -> (any Component.Type)? {
+        return components.first { $0.value.id == id }?.value.type
+    }
 }

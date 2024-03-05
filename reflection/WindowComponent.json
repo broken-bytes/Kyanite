@@ -1,7 +1,7 @@
 {
-"type": "WindowComponent",
-"fields": {
-{ "index": 0,"name:": "isOpen",  "type" : "bool" },
-{ "index": 1, "name:": "id",  "type" : "i64" }
-}
+ "type": "WindowComponent",
+ "fields": [
+   { "index": 0,"name": "isOpen",  "type" : "bool" },
+   { "index": 1, "name": "id",  "type" : "i64" } 
+]
 }

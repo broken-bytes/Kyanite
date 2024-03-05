@@ -22,10 +22,8 @@ public struct Entity {
         return Entity(id: id)
     }
 
-    public var components: [any Component] {
-        let componentIds = NativeECS.shared.getAllComponents(entity: self.id)
-        OutputDebugStringA("Components: \(componentIds)\n")
-        return []
+    public var components: ComponentList {
+        ComponentList(entity: self)
     }
 
     // Used by the engine for creating non-world entities

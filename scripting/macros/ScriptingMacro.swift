@@ -97,43 +97,44 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
                     // Builtin types are always allowed
                 case "Int":
                     metadata += "   \(name) :- {i64}\n"
-                    jsonReflectionFields.append("{ \"index\": \(memberIndex), \"name:\": \"\(name)\",  \"type\" : \"i64\" }")
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex), \"name\": \"\(name)\",  \"type\" : \"i64\" }")
                     break
                 case "Int8":
                     metadata += "   \(name) :- {i8}\n"
-                    jsonReflectionFields.append("{ \"index\": \(memberIndex),\"name:\": \"\(name)\",  \"type\" : \"i8\" }")
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex),\"name\": \"\(name)\",  \"type\" : \"i8\" }")
                     break
                 case "Int16":
                     metadata += "   \(name) :- {i16}\n"
-                    jsonReflectionFields.append("{ \"index\": \(memberIndex),\"name:\": \"\(name)\",  \"type\" : \"i16\" }")
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex),\"name\": \"\(name)\",  \"type\" : \"i16\" }")
                     break
                 case "Int32":
                     metadata += "   \(name) :- {i32}\n"
-                    jsonReflectionFields.append("{ \"index\": \(memberIndex),\"name:\": \"\(name)\",  \"type\" : \"i32\" }")
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex),\"name\": \"\(name)\",  \"type\" : \"i32\" }")
                     break
                 case "Int64":
                     metadata += "   \(name) :- {i64}\n"
-                    jsonReflectionFields.append("{ \"index\": \(memberIndex),\"name:\": \"\(name)\",  \"type\" : \"i64\" }")
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex),\"name\": \"\(name)\",  \"type\" : \"i64\" }")
                     break
                 case "Float":
                     metadata += "   \(name) :- {f32}\n"
-                    jsonReflectionFields.append("{ \"index\": \(memberIndex),\"name:\": \"\(name)\",  \"type\" : \"f32\" }")
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex),\"name\": \"\(name)\",  \"type\" : \"f32\" }")
                     break
                 case "Double":
                     metadata += "   \(name) :- {f64}\n"
-                    jsonReflectionFields.append("{ \"index\": \(memberIndex),\"name:\": \"\(name)\",  \"type\" : \"f64\" }")
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex),\"name\": \"\(name)\",  \"type\" : \"f64\" }")
                     break
                 case "Bool":
                     metadata += "   \(name) :- {bool}\n"
-                    jsonReflectionFields.append("{ \"index\": \(memberIndex),\"name:\": \"\(name)\",  \"type\" : \"bool\" }")
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex),\"name\": \"\(name)\",  \"type\" : \"bool\" }")
                     break
                 case "UUID":
                     metadata += "   \(name) :- {string}\n"
-                    jsonReflectionFields.append("{ \"index\": \(memberIndex),\"name:\": \"\(name)\",  \"type\" : \"string\" }")
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex),\"name\": \"\(name)\",  \"type\" : \"string\" }")
                     break
                 default:
                     // We just assume that the type is valid because we can't check it
                     metadata += "   \(name) :- {\(fixedType)}\n"
+                    jsonReflectionFields.append("   { \"index\": \(memberIndex),\"name\": \"\(name)\",  \"type\" : \"\(fixedType)\" }")
                 }
 
                 memberIndex += 1
@@ -147,10 +148,10 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
         try? metadata.write(to: filename, atomically: true, encoding: String.Encoding.utf8)
 
         let jsonReflection = "{\n"
-            + "\"type\": \"\(structDecl.name.text)\",\n"
-            + "\"fields\": {\n" 
+            + " \"type\": \"\(structDecl.name.text)\",\n"
+            + " \"fields\": [\n" 
             + jsonReflectionFields.joined(separator: ",\n") 
-            + "\n}"
+            + " \n]"
             + "\n}"
         let jsonFilename = URL(fileURLWithPath: "./reflection/\(structDecl.name.text).json")
         OutputDebugStringA("Writing to \(jsonFilename)\n")

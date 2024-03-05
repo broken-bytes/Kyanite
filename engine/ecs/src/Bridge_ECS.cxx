@@ -49,8 +49,13 @@ NativePointer ECS_GetComponent(uint64_t entity, uint64_t component) {
 	return const_cast<NativePointer*>(native);
 }
 
-void ECS_GetAllComponents(uint64_t entity, void(*iterator)(uint64_t id, uint64_t typeId)) {
-	ecs::EntityRegistry::GetEntityComponents(entity, iterator);
+void ECS_GetAllComponents(
+	uint64_t entity, 
+	uint64_t index,
+	uint64_t* typeId,
+	const void** data
+) {
+	ecs::EntityRegistry::GetEntityComponents(entity, index, typeId, data);
 }
 
 uint64_t ECS_RegisterComponent(const char* name, size_t size, size_t alignment) {

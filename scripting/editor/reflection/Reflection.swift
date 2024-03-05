@@ -1,20 +1,16 @@
 import KyaniteEngine
 
-public class Reflection: Decodable {
+public struct Reflection: Decodable {
     struct Property: Decodable {
         let index: Int
         let name: String
         let type: PropertyType
     }
 
-    internal let type: String = ""
-    internal let fields: [Property] = []
+    internal let type: String
+    internal let fields: [Property]
 
-    init() {
-        
-    }
-
-    func getProperties<T: Component>(of type: T) -> [Property] {
+    internal func getProperties<T: Component>(of type: T.Type) -> [Property] {
         fields
     } 
 
@@ -32,6 +28,14 @@ public class Reflection: Decodable {
             return MemoryLayout<Float>.size
         case .double:
             return MemoryLayout<Double>.size
+        case .vector2:
+            return MemoryLayout<Vector2>.size
+        case .vector3:
+            return MemoryLayout<Vector3>.size
+        case .vector4:
+            return MemoryLayout<Vector4>.size
+        case .quaternion:
+            return MemoryLayout<Quaternion>.size
         default:
             return 0
         }
@@ -55,5 +59,12 @@ public class Reflection: Decodable {
         }
 
         return offset
+    }
+
+    internal func value<T>(for property: Property, from buffer: UnsafeRawPointer) -> T {
+        // Get the offset of the property
+        let offset = self.offset(of: property.name)
+        // Now read the value from the buffer
+        return buffer.advanced(by: offset).assumingMemoryBound(to: T.self).pointee
     }
 }

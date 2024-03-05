@@ -89,10 +89,15 @@ namespace ecs::EntityRegistry {
 	/**
 	* @brief Gets all the components of an entity
 	* @param entity The entity to get the components of
-	* @return The components
+	* @param An iterator that is called for each component
 	* @note This function is slow and should be used sparingly
 	*/
-	auto GetEntityComponents(ecs_entity_t entity, void(*iterator)(uint64_t id, uint64_t data)) -> void;
+	auto GetEntityComponents(
+		ecs_entity_t entity, 
+		uint64_t index,
+		uint64_t* typeId,
+		const void** data
+	) -> void;
 
 	/**
 	* @brief Advances the ecs world by delta time

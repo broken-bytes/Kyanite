@@ -1,4 +1,5 @@
 import Foundation
+import WinSDK
 
 class ReflectionManager {
     static let shared = ReflectionManager()
@@ -8,16 +9,28 @@ class ReflectionManager {
     private init() {
         // Load all files in the Reflections folder
         let fileManager = FileManager.default
-        let path = URL(fileURLWithPath: "./reflections")
-        for file in try! fileManager.contentsOfDirectory(at: path, includingPropertiesForKeys: nil) {
-            let data = try! Data(contentsOf: file)
-            let reflection = try! JSONDecoder().decode(Reflection.self, from: data)
-
-            self.reflections.append(reflection)
+        let path = fileManager.currentDirectoryPath.appendingPathComponent("reflection")
+        OutputDebugStringA("Loading reflections from \(path)\n")
+        
+        do {
+            let files = try fileManager.contentsOfDirectory(atPath: path)
+            // For each file, load the reflection from json
+            for file in files {
+                let url = URL(fileURLWithPath: path.appendingPathComponent(file))
+                guard let data = FileManager.default.contents(atPath: url.path) else {
+                    OutputDebugStringA("Failed to load reflection from \(url)\n")
+                    continue
+                }
+                OutputDebugStringA("Data \(String(data: data, encoding: .utf8) ?? "")\n")
+                let reflection = try JSONDecoder().decode(Reflection.self, from: data)
+                reflections.append(reflection)
+            }
+        } catch {
+            OutputDebugStringA("Failed to load reflections: \(error)\n")
         }
     }
     
-    func reflection<T>(for type: T.Type) -> Reflection? {
-        return reflections.first { $0.type == String(describing: type) }
+    func reflection(for type: Any.Type) -> Reflection? {
+        reflections.first { $0.type == String(describing: type) }
     }
 }
