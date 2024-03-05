@@ -11,7 +11,7 @@ public func kyanitemain(isDebug: Bool = false) {
 // Macros
 @attached(member, names: named(init))
 @attached(memberAttribute)
-@attached(extension, conformances: Hashable)
+@attached(extension, conformances: Component, Hashable, Equatable)
 public macro Component() = #externalMacro(module: "Macros", type: "ComponentMacro")
 
 @attached(member, names: arbitrary)

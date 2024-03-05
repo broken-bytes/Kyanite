@@ -92,7 +92,7 @@ namespace ecs::EntityRegistry {
 	* @return The components
 	* @note This function is slow and should be used sparingly
 	*/
-	auto GetEntityComponents(ecs_entity_t entity) -> std::vector<ecs_entity_t>;
+	auto GetEntityComponents(ecs_entity_t entity, void(*iterator)(uint64_t id, uint64_t data)) -> void;
 
 	/**
 	* @brief Advances the ecs world by delta time

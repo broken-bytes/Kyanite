@@ -77,7 +77,7 @@ extern "C" {
 	* @return Pointer to the list of componentIds
 	* @note Caller is responsible for freeing the memory
 	*/
-	EXPORTED uint64_t* ECS_GetAllComponents(uint64_t entity, size_t* len);
+	EXPORTED void ECS_GetAllComponents(uint64_t entity, void(*iterator)(uint64_t id, uint64_t typeId));
 
 	/**
 	* @brief Registers a component type

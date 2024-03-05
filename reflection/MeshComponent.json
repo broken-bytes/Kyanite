@@ -1,0 +1,6 @@
+{
+"type": "MeshComponent",
+"fields": {
+{ "index": 0, "name:": "mesh",  "type" : "i64" }
+}
+}

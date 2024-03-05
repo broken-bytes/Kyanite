@@ -54,13 +54,21 @@ public class NativeECS {
         return component.assumingMemoryBound(to: T.self)
     }
 
+    public func getComponentAsUnknown(entity: UInt64, componentId: UInt64) -> UnsafeMutableRawPointer? {
+        guard let component = ECS_GetComponent(entity, componentId) else {
+            return nil
+        }
+
+        return component
+    }
+
     public func getAllComponents(entity: UInt64) -> [UInt64] {
-        var numComponents: Int = 0
-        let components = ECS_GetAllComponents(entity, &numComponents)
+        var ids: [UInt64] = []
+        ECS_GetAllComponents(entity) { (id, typeId) in
+            OutputDebugStringA("Component: \(id) Type id: \(typeId)\n")
+        }
 
-        let array = Array(UnsafeBufferPointer(start: components, count: numComponents))
-
-        return array
+        return ids
     }
 
     public func sizeOfIterator(iterator: UnsafeMutableRawPointer) -> Int {

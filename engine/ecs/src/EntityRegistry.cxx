@@ -104,14 +104,14 @@ namespace ecs::EntityRegistry {
 		return world.entity(entity).get(component);
 	}
 
-	auto GetEntityComponents(ecs_entity_t entity) -> std::vector<ecs_entity_t> {
+	auto GetEntityComponents(ecs_entity_t entity, void(*iterator)(uint64_t id, uint64_t typeId)) -> void {
 		std::shared_lock<std::shared_mutex> lock { readLock };
-		std::vector<ecs_entity_t> components;
-		world.entity(entity).each([&components](flecs::id& e) {
-			components.push_back(e);
-		});
 
-		return components;
+		world.entity(entity).each([iterator](flecs::id& e) {
+			uint64_t id = e;
+			uint64_t typeId = e.type_id();
+			iterator(id, typeId);
+		});
 	}
 
 	auto Update(float delta) -> void {

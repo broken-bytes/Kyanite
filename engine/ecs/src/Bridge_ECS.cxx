@@ -49,15 +49,8 @@ NativePointer ECS_GetComponent(uint64_t entity, uint64_t component) {
 	return const_cast<NativePointer*>(native);
 }
 
-uint64_t* ECS_GetAllComponents(uint64_t entity, size_t* len) {
-	auto components = ecs::EntityRegistry::GetEntityComponents(entity);
-	*len = components.size();
-
-	// Copy the vector to a new array and return it
-	auto componentIds = new uint64_t[components.size()];
-	std::copy(components.begin(), components.end(), componentIds);
-
-	return componentIds;
+void ECS_GetAllComponents(uint64_t entity, void(*iterator)(uint64_t id, uint64_t typeId)) {
+	ecs::EntityRegistry::GetEntityComponents(entity, iterator);
 }
 
 uint64_t ECS_RegisterComponent(const char* name, size_t size, size_t alignment) {

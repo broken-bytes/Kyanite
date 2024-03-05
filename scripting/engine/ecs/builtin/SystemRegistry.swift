@@ -7,7 +7,7 @@ public class _SystemRegistry {
 
     internal var systems: [Int: UInt64] = [:]
 
-    public func _register(name: String, components: [any Hashable.Type], runFunc: (@convention(c) (UnsafeMutableRawPointer?) -> Void)?) -> UInt64 {
+    public func _register(name: String, components: [any Component.Type], runFunc: (@convention(c) (UnsafeMutableRawPointer?) -> Void)?) -> UInt64 {
         var componentIds: [UInt64] = []
         
         for component in components {

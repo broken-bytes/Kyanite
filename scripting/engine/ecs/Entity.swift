@@ -22,16 +22,9 @@ public struct Entity {
         return Entity(id: id)
     }
 
-    public var components: [any Hashable] {
+    public var components: [any Component] {
         let componentIds = NativeECS.shared.getAllComponents(entity: self.id)
         OutputDebugStringA("Components: \(componentIds)\n")
-
-        componentIds.map { id in
-            // Get the type and cast the component to it
-            let type = _ComponentRegistry.shared._get(id: id)
-            OutputDebugStringA("Type: \(type)\n")
-        }
-
         return []
     }
 
@@ -56,18 +49,18 @@ public struct Entity {
         EventSystem.shared.emit(EntityLifetimeEvent(entity: self, isAlive: true))
     }
 
-    public func addComponent<T: Hashable>(_ component: T.Type) {
+    public func addComponent<T: Component>(_ component: T.Type) {
         let componentId = _ComponentRegistry.shared._get(T.self)
         NativeECS.shared.addComponent(entity: self.id, componentId: componentId)
     }
 
-    public func setComponent<T: Hashable>(_ component: inout T) {
+    public func setComponent<T: Component>(_ component: inout T) {
         var componentId = _ComponentRegistry.shared._get(T.self)
 
         NativeECS.shared.setComponent(entity: self.id, componentId: componentId, component: &component)
     }
 
-    public func getComponent<T: Hashable>(_ component: T.Type) -> UnsafeMutablePointer<T>? {
+    public func getComponent<T: Component>(_ component: T.Type) -> UnsafeMutablePointer<T>? {
         let componentId = _ComponentRegistry.shared._get(T.self)
         return NativeECS.shared.getComponent(entity: self.id, componentId: componentId)
     }
