@@ -30,6 +30,38 @@ public class EditorNativeCore {
         return EditorCore_Label(text)
     }
 
+    public func floatField(_ label: String, value: UnsafeMutablePointer<Float>) {
+        return EditorCore_FloatField(label, value)
+    }
+
+    public func float2Field(_ label: String, value: UnsafeMutablePointer<Float>) {
+        return EditorCore_Float2Field(label, value)
+    }
+
+    public func float3Field(_ label: String, value: UnsafeMutablePointer<Float>) {
+        return EditorCore_Float3Field(label, value)
+    }
+
+    public func float4Field(_ label: String, value: UnsafeMutablePointer<Float>) {
+        return EditorCore_Float4Field(label, value)
+    }
+
+    public func intField(_ label: String, value: UnsafeMutablePointer<Int32>) {
+        return EditorCore_IntField(label, value)
+    }
+
+    public func checkbox(_ label: String, value: UnsafeMutablePointer<Bool>) {
+        return EditorCore_Checkbox(label, value)
+    }
+
+    public func beginHGroup() {
+        return EditorCore_BeginHorizontal()
+    }
+
+    public func endHGroup() {
+        return EditorCore_EndHorizontal()
+    }
+
     public func drawDefaultImGuiDockspace() {
         EditorCore_DrawDefaultDocking()
     }

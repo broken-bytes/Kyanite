@@ -54,6 +54,71 @@ namespace kyanite::editor::core {
 	EXPORTED auto Label(std::string label) -> void;
 
 	/**
+	* @brief Draws a separator
+	*/
+	EXPORTED auto Separator() -> void;
+
+	/**
+	* @brief Draws a text field
+	* @param label The label to display
+	* @param buffer The buffer to store the text in
+	* @param bufferSize The size of the buffer
+	*/
+	EXPORTED auto TextField(const char* label, char* buffer, int bufferSize) -> void;
+
+	/**
+	* @brief Draws a float field
+	* @param label The label to display
+	* @param value The value to store the float in
+	*/
+	EXPORTED auto FloatField(const char* label, float* value) -> void;
+
+	/**
+	* @brief Draws a float2 field
+	* @param label The label to display
+	* @param value The value to store the float2 in
+	*/
+	EXPORTED auto Float2Field(const char* label, float* value) -> void;
+
+	/**
+	* @brief Draws a float3 field
+	* @param label The label to display
+	* @param value The value to store the float3 in
+	*/
+	EXPORTED auto Float3Field(const char* label, float* value) -> void;
+
+	/**
+	* @brief Draws a float4 field
+	* @param label The label to display
+	* @param value The value to store the float4 in
+	*/
+	EXPORTED auto Float4Field(const char* label, float* value) -> void;
+
+	/**
+	* @brief Draws an int field
+	* @param label The label to display
+	* @param value The value to store the int in
+	*/
+	EXPORTED auto IntField(const char* label, int* value) -> void;
+
+	/**
+	* @brief Draws a checkbox
+	* @param label The label to display
+	* @param value The value to store the bool in
+	*/
+	EXPORTED auto Checkbox(const char* label, bool* value) -> void;
+
+	/**
+	* @brief Begins a horizontal layout
+	*/
+	EXPORTED auto BeginHorizontal() -> void;
+
+	/**
+	* @brief Ends a horizontal layout
+	*/
+	EXPORTED auto EndHorizontal() -> void;
+
+	/**
 	* @brief Clears the window
 	* @param window The window to clear
 	*/

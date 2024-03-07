@@ -43,39 +43,18 @@ class Inspector: EditorWindow {
                 // Draw a label for the property
                 switch property.type {
                 case .vector3:
-                    drawVector3Field(
-                        property.name, 
-                        value: reflection.value(for: property, from: componentData)
-                    )
+                    Float3Field(label: property.name, buffer: reflection.buffer(for: property, from: componentData))
+                    .draw()
                 case .vector4:
-                    drawVector4Field(
-                        property.name, 
-                        value: reflection.value(for: property, from: componentData)
-                    )
+                    Float4Field(label: property.name, buffer: reflection.buffer(for: property, from: componentData))
+                    .draw()
                 case .quaternion:
-                    drawQuaternionField(
-                        property.name, 
-                        value: reflection.value(for: property, from: componentData)
-                    )
+                    Float4Field(label: property.name, buffer: reflection.buffer(for: property, from: componentData))
+                    .draw()
                 default:
                     break
                 }
             }
         }
-    }
-
-    private func drawVector3Field(_ name: String, value: Vector3) {
-        // Draw a label for the property
-        EditorNativeCore.shared.label("\(name): \(value.x), \(value.y), \(value.z)")
-    }
-
-    private func drawVector4Field(_ name: String, value: Vector4) {
-        // Draw a label for the property
-        EditorNativeCore.shared.label("\(name): \(value.x), \(value.y), \(value.z), \(value.w)")
-    }
-
-    private func drawQuaternionField(_ name: String, value: Quaternion) {
-        // Draw a label for the property
-        EditorNativeCore.shared.label("\(name): \(value.x), \(value.y), \(value.z), \(value.w)")
     }
 }

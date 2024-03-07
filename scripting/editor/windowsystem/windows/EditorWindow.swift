@@ -25,7 +25,7 @@ public class EditorWindow {
 
     public func hide() {
         // Run this on another thread in case the callback is run when the ecs write lock is held
-        var workerThread = Thread { [weak self] in
+        Thread { [weak self] in
             var windowComponent = WindowComponent()
             windowComponent.id = self.hashValue
             windowComponent.isOpen = false
@@ -35,6 +35,26 @@ public class EditorWindow {
 
     public func onDraw() {
 
+    }
+
+    public func floatField(_ label: String, value: UnsafeMutablePointer<Float>) {
+        EditorNativeCore.shared.floatField(label, value: value)
+    }
+
+    public func float2Field(_ label: String, value: UnsafeMutablePointer<Float>) {
+        EditorNativeCore.shared.float2Field(label, value: value)
+    }
+
+    public func float3Field(_ label: String, value: UnsafeMutablePointer<Float>) {
+        EditorNativeCore.shared.float3Field(label, value: value)
+    }
+
+    public func float4Field(_ label: String, value: UnsafeMutablePointer<Float>) {
+        EditorNativeCore.shared.float4Field(label, value: value)
+    }
+
+    public func intField(_ label: String, value: UnsafeMutablePointer<Int32>) {
+        EditorNativeCore.shared.intField(label, value: value)
     }
 
     internal func onBeginDraw() {

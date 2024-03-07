@@ -42,6 +42,46 @@ namespace kyanite::editor::core {
 		ImGui::Text(label.c_str());
 	}
 
+	auto Separator() -> void {
+		ImGui::Separator();
+	}
+
+	auto TextField(const char* label, char* buffer, int bufferSize) -> void {
+		ImGui::InputText(label, buffer, bufferSize);
+	}
+
+	auto FloatField(const char* label, float* value) -> void {
+		ImGui::InputFloat(label, value);
+	}
+
+	auto Float2Field(const char* label, float* value) -> void {
+		ImGui::InputFloat2(label, value);
+	}
+
+	auto Float3Field(const char* label, float* value) -> void {
+		ImGui::InputFloat3(label, value);
+	}
+
+	auto Float4Field(const char* label, float* value) -> void {
+		ImGui::InputFloat4(label, value);
+	}
+
+	auto IntField(const char* label, int* value) -> void {
+		ImGui::InputInt(label, value);
+	}
+
+	auto Checkbox(const char* label, bool* value) -> void {
+		ImGui::Checkbox(label, value);
+	}
+
+	auto BeginHorizontal() -> void {
+		ImGui::BeginGroup();
+	}
+
+	auto EndHorizontal() -> void {
+		ImGui::EndGroup();
+	}
+
 	auto Clear(NativePointer window) -> void {
 
 	}
