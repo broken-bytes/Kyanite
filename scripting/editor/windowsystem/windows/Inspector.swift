@@ -15,9 +15,6 @@ class Inspector: EditorWindow {
             }
 
             self.selectedObject = entity
-
-            var components = entity.components
-            //let reflection = ReflectionManager.shared.reflection(for: event.selectedObject)
         }
     }
 
@@ -39,6 +36,9 @@ class Inspector: EditorWindow {
                 return
             }
 
+            // Draw the component's name
+            EditorNativeCore.shared.label("\(componentType)")
+
             for property in reflection.fields {
                 // Draw a label for the property
                 switch property.type {
@@ -55,6 +55,8 @@ class Inspector: EditorWindow {
                     break
                 }
             }
+
+            EditorNativeCore.shared.separator()
         }
     }
 }

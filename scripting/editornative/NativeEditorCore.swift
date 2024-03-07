@@ -62,6 +62,10 @@ public class EditorNativeCore {
         return EditorCore_EndHorizontal()
     }
 
+    public func separator() {
+        return EditorCore_Separator()
+    }
+
     public func drawDefaultImGuiDockspace() {
         EditorCore_DrawDefaultDocking()
     }
