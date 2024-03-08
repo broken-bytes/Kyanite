@@ -2,7 +2,7 @@ import Foundation
 import Native
 import WinSDK
 
-public struct Entity {
+public final class Entity {
     public let id: UInt64
     public var name: String {
         NativeECS.shared.name(of: self.id)!

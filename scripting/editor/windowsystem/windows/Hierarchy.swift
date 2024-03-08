@@ -1,5 +1,4 @@
 import Native
-import EditorNative
 import KyaniteEngine
 import WinSDK
 
@@ -29,7 +28,7 @@ class Hierarchy: EditorWindow {
 
     override func onDraw() {
         for entity in entities {
-            if EditorNativeCore.shared.button(entity.name) {
+            if NativeImGui.shared.button(entity.name) {
                 EventSystem.shared.emit(EditorSelectionEvent(selectedObject: entity))
             }
         }

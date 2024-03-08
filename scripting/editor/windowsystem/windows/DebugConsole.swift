@@ -1,5 +1,4 @@
 import Native
-import EditorNative
 
 class DebugConsole: EditorWindow {
     public override var title: String { "Debug Console" }

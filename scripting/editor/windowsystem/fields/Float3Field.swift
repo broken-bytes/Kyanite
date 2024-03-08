@@ -1,4 +1,4 @@
-import EditorNative
+import Native
 
 public class Float3Field: InputField {
     var buffer: UnsafeMutableBufferPointer<Float>
@@ -14,6 +14,6 @@ public class Float3Field: InputField {
             return
         }
 
-        EditorNativeCore.shared.float3Field(label, value: base)
+        NativeImGui.shared.float3Field(label, value: base)
     }
 }

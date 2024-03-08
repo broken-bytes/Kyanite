@@ -1,5 +1,4 @@
 import KyaniteEngine
-import EditorNative
 import Native
 import WinSDK
 
@@ -13,8 +12,7 @@ class Editor {
         // Create the editor environment
         EditorEnvironment.shared.configure()
         // Create the editor parent entity
-        let imGuiContext = NativeCore.shared.getImGuiContext()
-        EditorNativeCore.shared.start(imGuiContext: imGuiContext)
+        let imGuiContext = NativeImGui.shared.getContext()
         _ComponentRegistry.shared._register(WindowComponent.self)
         windowSystem =  WindowSystem()
         WindowManager.shared.windows.append(Hierarchy())

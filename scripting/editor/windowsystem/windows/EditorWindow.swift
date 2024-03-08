@@ -1,6 +1,5 @@
 import Foundation
 import Native
-import EditorNative
 import KyaniteEngine
 import WinSDK
 
@@ -38,27 +37,27 @@ public class EditorWindow {
     }
 
     public func floatField(_ label: String, value: UnsafeMutablePointer<Float>) {
-        EditorNativeCore.shared.floatField(label, value: value)
+        NativeImGui.shared.floatField(label, value: value)
     }
 
     public func float2Field(_ label: String, value: UnsafeMutablePointer<Float>) {
-        EditorNativeCore.shared.float2Field(label, value: value)
+        NativeImGui.shared.float2Field(label, value: value)
     }
 
     public func float3Field(_ label: String, value: UnsafeMutablePointer<Float>) {
-        EditorNativeCore.shared.float3Field(label, value: value)
+        NativeImGui.shared.float3Field(label, value: value)
     }
 
     public func float4Field(_ label: String, value: UnsafeMutablePointer<Float>) {
-        EditorNativeCore.shared.float4Field(label, value: value)
+        NativeImGui.shared.float4Field(label, value: value)
     }
 
     public func intField(_ label: String, value: UnsafeMutablePointer<Int32>) {
-        EditorNativeCore.shared.intField(label, value: value)
+        NativeImGui.shared.intField(label, value: value)
     }
 
     internal func onBeginDraw() {
-        EditorNativeCore.shared.beginWindow(title: title, flags: 0, id: Int64(self.hashValue)) { id in 
+        NativeImGui.shared.beginWindow(title: title, flags: 0, id: Int64(self.hashValue)) { id in 
             guard 
                 let window = WindowManager.shared.windows.first(
                     where: { $0.hashValue == id }
@@ -72,7 +71,7 @@ public class EditorWindow {
     }
     
     internal func onEndDraw() {
-        EditorNativeCore.shared.endWindow()     
+        NativeImGui.shared.endWindow()     
     }
 }
 

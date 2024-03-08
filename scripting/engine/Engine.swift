@@ -8,19 +8,9 @@ public class Engine {
     public init(isDebug: Bool = false) {
         // Initialize all subsystems
         // Initialize the core
-        NativeCore.shared.start()
-        var imGui = NativeCore.shared.createImGuiContext()
+        var imGui = NativeImGui.shared.createContext()
+        NativeImGui.shared.setContext(imGui)
         // Initialize the window
-        window = NativeCore.shared.createWindow(
-            "Game", 
-            posX: nil, 
-            posY: nil, 
-            width: 1920, 
-            height: 1080, 
-            flags: 0, 
-            backend: 0, 
-            silent: false
-        )
         NativeAudio.shared.start()
         NativeInput.shared.start(imGui: imGui)
         NativeECS.shared.start(debug: isDebug)

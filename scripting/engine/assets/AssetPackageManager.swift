@@ -12,6 +12,6 @@ class AssetPackageManager {
         guard var appDir = URL(string: FileManager.default.currentDirectoryPath) else { fatalError("Failed to get app directory") }
         appDir.appendPathComponent(AssetPackageManager.packagePath)
 
-        self.packages = NativeAssetPackages.shared.loadAssetPackages(appDir.absoluteString).map { AssetPackage(native: $0) }
+        packages = []
     }
 }

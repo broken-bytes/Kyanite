@@ -1,15 +1,13 @@
 import Foundation
 import Native
 
-public class Material: Asset<NativeMaterial> {
+public class Material {
     public var name: String
     public var shader: Shader?
     public var properties: [String: Any] = [:]
 
-    required init(name: String, uuid: String, native: NativeMaterial) {
+    required init(name: String, uuid: String) {
         self.name = name
-
-        super.init(uuid: uuid, native: native)
     }
 
     public func setFloat(name: String, value: Float) {

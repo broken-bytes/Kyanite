@@ -1,0 +1,2 @@
+add_subdirectory(assetpipeline)
+add_subdirectory(app)

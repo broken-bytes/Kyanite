@@ -1,0 +1,10 @@
+add_subdirectory(logger)
+add_subdirectory(shared)
+add_subdirectory(io)
+add_subdirectory(imgui)
+add_subdirectory(math)
+add_subdirectory(audio)
+add_subdirectory(input)
+add_subdirectory(rendering)
+add_subdirectory(ecs)
+

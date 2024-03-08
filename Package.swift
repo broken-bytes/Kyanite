@@ -21,7 +21,7 @@ let package = Package(
     ],
     dependencies: [
         // Depend on the Swift 5.9 release of SwiftSyntax
-        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.1.1"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.1.1")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -35,17 +35,33 @@ let package = Package(
             ],
             path: "scripting/macros"
         ),
+        // The shared targets
+        .target(
+            name: "SceneManagement",
+            dependencies: [],
+            path: "scripting/shared/scenemanagement"
+        ),
  
         .target(
             name: "KyaniteEngine", 
-            dependencies: ["Macros", "Native"],
-            path: "scripting/engine"
+            dependencies: ["Macros", "Native", "SceneManagement"],
+            path: "scripting/engine",
+            swiftSettings: [
+                .unsafeFlags(["-enable-library-evolution"])
+            ]
         ),
 
         .target(
             name: "KyaniteEditor", 
-            dependencies: ["KyaniteEngine", "EditorNative", "Native"],
-            path: "scripting/editor"
+            dependencies: [
+                "KyaniteEngine", 
+                "Native", 
+                "SceneManagement"
+            ],
+            path: "scripting/editor",
+            swiftSettings: [
+                .unsafeFlags(["-enable-library-evolution"])
+            ]
         ),
 
         .target(
@@ -57,12 +73,6 @@ let package = Package(
             name: "Native",
             dependencies: ["Bridge"],
             path: "scripting/native"
-        ),
-
-        .target(
-            name: "EditorNative",
-            dependencies: ["Bridge"],
-            path: "scripting/editornative"
         )
     ]
 )

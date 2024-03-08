@@ -1,5 +1,4 @@
 import KyaniteEngine
-import EditorNative
 import Native
 import WinSDK
 
@@ -32,12 +31,12 @@ class Inspector: EditorWindow {
             // Use reflection to draw the inspector for the component
             guard let reflection = ReflectionManager.shared.reflection(for: componentType) else {
                 // Draw a message saying that the component doesn't have a reflection
-                EditorNativeCore.shared.label("Component \(componentType) doesn't have a reflection")
+                NativeImGui.shared.label("Component \(componentType) doesn't have a reflection")
                 return
             }
 
             // Draw the component's name
-            EditorNativeCore.shared.label("\(componentType)")
+            NativeImGui.shared.label("\(componentType)")
 
             for property in reflection.fields {
                 // Draw a label for the property
@@ -56,7 +55,7 @@ class Inspector: EditorWindow {
                 }
             }
 
-            EditorNativeCore.shared.separator()
+            NativeImGui.shared.separator()
         }
     }
 }
