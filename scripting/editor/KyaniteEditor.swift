@@ -3,12 +3,10 @@ import Foundation
 import KyaniteEngine
 
 @_cdecl("kyaniteeditormain")
-public func kyaniteeditormain() {
-    let engineThread = Thread {
-        let engine = Engine(isDebug: true)
-        engine.start()
-    }.start()
-
+public func kyaniteeditormain(window: UnsafeMutableRawPointer?) {
+    let engine = Engine(window: window, isDebug: true)
+    
     let editor = Editor()
     editor.start()
+    engine.start()
 }

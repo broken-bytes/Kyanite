@@ -2,10 +2,9 @@ import Foundation
 import Native
 
 public class Engine {
-    private var window: NativeWindow? = nil
     var time: Float = 0
     
-    public init(isDebug: Bool = false) {
+    public init(window: UnsafeMutableRawPointer?, isDebug: Bool = false) {
         // Initialize all subsystems
         // Initialize the core
         var imGui = NativeImGui.shared.createContext()
@@ -14,7 +13,7 @@ public class Engine {
         NativeAudio.shared.start()
         NativeInput.shared.start(imGui: imGui)
         NativeECS.shared.start(debug: isDebug)
-        guard let window = window else {
+        guard let window else {
             fatalError("Failed to create window")
         }
         NativeRendering.shared.start(window: window, imGui: imGui)
