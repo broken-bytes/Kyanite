@@ -8,6 +8,7 @@ let package = Package(
     name: "scripting",
     platforms: [.macOS(.v13), .iOS(.v17), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13)],
     products: [
+        .executable(name: "KyaniteEditorApp", targets: ["KyaniteEditorApp"]),
         .library(
             name: "KyaniteEngine",
             type: .dynamic, 
@@ -41,6 +42,14 @@ let package = Package(
             dependencies: [],
             path: "scripting/shared/scenemanagement"
         ),
+
+        .executableTarget(
+            name: "KyaniteEditorApp", 
+            dependencies: [
+                "KyaniteEditor"
+            ], 
+            path: "scripting/editorapp"
+        ),
  
         .target(
             name: "KyaniteEngine", 
@@ -56,7 +65,7 @@ let package = Package(
             dependencies: [
                 "KyaniteEngine", 
                 "Native", 
-                "SceneManagement"
+                "SceneManagement",
             ],
             path: "scripting/editor",
             swiftSettings: [

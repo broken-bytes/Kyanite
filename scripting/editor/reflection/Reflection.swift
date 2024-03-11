@@ -1,5 +1,4 @@
 import KyaniteEngine
-import WinSDK
 
 public struct Reflection: Decodable {
     struct Property: Decodable {
@@ -65,20 +64,15 @@ public struct Reflection: Decodable {
     internal func value<T>(for property: Property, from buffer: UnsafeRawPointer) -> T {
         // Get the offset of the property
         let offset = self.offset(of: property.name)
-        OutputDebugStringA("Property: \(property.name)\n")
-        OutputDebugStringA("Offset: \(offset)\n")
-        OutputDebugStringA("Value Buffer: \(buffer)\n")
         // Now read the value from the buffer
         return buffer.advanced(by: offset).assumingMemoryBound(to: T.self).pointee
     }
 
     internal func buffer<T>(for property: Property, from buffer: UnsafeRawPointer) -> UnsafeMutablePointer<T> {
         let offset = self.offset(of: property.name)
-        OutputDebugStringA("Property: \(property.name)\n")
-        OutputDebugStringA("Pointer Buffer: \(buffer)\n")
         // Now read the value from the buffer
         let mutableBuffer = UnsafeMutablePointer(mutating: buffer.advanced(by: offset).assumingMemoryBound(to: T.self))
-        OutputDebugStringA("Mutable buffer: \(mutableBuffer)\n")
+        ("Mutable buffer: \(mutableBuffer)\n")
         return mutableBuffer
     }
 }

@@ -1,4 +1,4 @@
-import Native
+@_implementationOnly import Native
 
 public class _SystemRegistry {
     public static let shared = _SystemRegistry()

@@ -1,6 +1,5 @@
 import KyaniteEngine
-import Native
-import WinSDK
+@_implementationOnly import Native
 
 class Inspector: EditorWindow {
     public override var title: String { "Inspector" }

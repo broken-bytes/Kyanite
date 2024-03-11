@@ -1,4 +1,4 @@
-import Native
+@_implementationOnly import Native
 
 class EngineEnvironment {
     static let shared = EngineEnvironment()

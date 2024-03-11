@@ -1,6 +1,5 @@
 import Foundation
-import Native
-import WinSDK
+@_implementationOnly import Native
 
 public final class Entity {
     public let id: UInt64

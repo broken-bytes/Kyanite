@@ -1,4 +1,4 @@
-import Native
+@_implementationOnly import Native
 
 public class Float3Field: InputField {
     var buffer: UnsafeMutableBufferPointer<Float>

@@ -59,7 +59,7 @@ extern "C" {
 	* @param buffer The buffer to store the text in
 	* @param bufferSize The size of the buffer
 	*/
-	EXPORTED void ImGui_TextField(const char* label, char* buffer, int bufferSize);
+	EXPORTED bool ImGui_TextField(const char* label, char* buffer, int bufferSize);
 
 	/**
 	* @brief Draw a float field
@@ -113,7 +113,18 @@ extern "C" {
 	*/
 	EXPORTED void ImGui_EndHorizontal();
 
-    
+	/**
+	* @brief Shows a tree node
+	* @param label The label of the tree node
+	* @return True if the tree node is open
+	*/
+	EXPORTED bool ImGui_TreeNode(const char* label);
+
+	/**
+	* @brief Ends a tree node
+	*/
+	EXPORTED void ImGui_TreePop();
+
 	/**
 	 * @brief Creates an ImGui context
 	 * @return NativePointer Returns a pointer to the context

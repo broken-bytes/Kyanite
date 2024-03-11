@@ -1,7 +1,6 @@
 import Foundation
-import Native
+@_implementationOnly import Native
 import KyaniteEngine
-import WinSDK
 
 public class EditorWindow {
     public var title: String { "Editor" }
@@ -10,7 +9,7 @@ public class EditorWindow {
 
     internal init() {
         open = true
-        entity = Entity(name: "Window \(title)", parent: EditorEnvironment.shared.editorParent)
+        entity = Entity(name: "Window \(title)", parent: EditorEnvironment.default.editorParent)
         entity?.addComponent(WindowComponent.self)
         show()
     }

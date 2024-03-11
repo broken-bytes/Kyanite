@@ -1,6 +1,5 @@
 import Foundation
-import Native
-import WinSDK
+@_implementationOnly import Native
 
 public class _ComponentRegistry {
     struct ComponentEntry {

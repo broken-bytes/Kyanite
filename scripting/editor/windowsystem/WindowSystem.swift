@@ -1,5 +1,5 @@
 import KyaniteEngine
-import Native
+@_implementationOnly import Native
 
 @System
 class WindowSystem {

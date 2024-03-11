@@ -41,8 +41,8 @@ namespace kyanite::engine::imgui {
 		ImGui::Separator();
 	}
 
-	auto TextField(const char* label, char* buffer, int bufferSize) -> void {
-		ImGui::InputText(label, buffer, bufferSize);
+	auto TextField(const char* label, char* buffer, int bufferSize) -> bool {
+		return ImGui::InputText(label, buffer, bufferSize, ImGuiInputTextFlags_EnterReturnsTrue);
 	}
 
 	auto FloatField(const char* label, float* value) -> void {
@@ -75,6 +75,14 @@ namespace kyanite::engine::imgui {
 
 	auto EndHorizontal() -> void {
 		ImGui::EndGroup();
+	}
+
+	auto TreeNode(const char* label) -> bool {
+		return ImGui::TreeNode(label);
+	}
+
+	auto EndTreeNode() -> void {
+		ImGui::TreePop();
 	}
 
 	auto Clear(NativePointer window) -> void {
@@ -132,6 +140,7 @@ namespace kyanite::engine::imgui {
 			ImGui::DockBuilderDockWindow("Inspector", dockRight);
 			ImGui::DockBuilderDockWindow("Content Browser", dockDown);
 			ImGui::DockBuilderDockWindow("Debug Console", dockDown);
+			ImGui::DockBuilderDockWindow("Terminal", dockDown);
 
 			ImGui::DockBuilderFinish(dockId);
 		}
@@ -179,13 +188,31 @@ namespace kyanite::engine::imgui {
 		colors[ImGuiCol_ButtonActive] = ImVec4(0.4f, 0.4f, 0.4f, 1.0f);
 		colors[ImGuiCol_Header] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-		auto ttfPath = std::filesystem::current_path() / "assets/fonts/RobotoCondensed-VariableFont_wght.ttf";
+		// Add the Roboto font
+		auto robotoFont = std::filesystem::current_path() / "assets/fonts/RobotoCondensed-VariableFont_wght.ttf";
 		ImGui::GetIO().Fonts->AddFontFromFileTTF(
-			ttfPath.string().c_str(),
+			robotoFont.string().c_str(),
 			20.0f,
 			nullptr,
 			ImGui::GetIO().Fonts->GetGlyphRangesDefault()
 		);
+
+		// Add the Open Font Icon font
+		auto openIconFont = std::filesystem::current_path() / "assets/fonts/OpenFontIcons.ttf";
+		// Merge with the default font
+		ImFontConfig config;
+		config.MergeMode = true;
+		config.PixelSnapH = true;
+		static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 }; // Will not be copied by AddFont* so keep in scope.
+
+		ImGui::GetIO().Fonts->AddFontFromFileTTF(
+			openIconFont.string().c_str(),
+			48.0f,
+			&config,
+			icons_ranges
+		);
+
+		ImGui::GetIO().Fonts->Build();
 
 		ImGui::GetIO().ConfigFlags |=
 			ImGuiConfigFlags_ViewportsEnable |

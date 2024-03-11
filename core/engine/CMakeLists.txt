@@ -7,4 +7,5 @@ add_subdirectory(audio)
 add_subdirectory(input)
 add_subdirectory(rendering)
 add_subdirectory(ecs)
+add_subdirectory(system)
 

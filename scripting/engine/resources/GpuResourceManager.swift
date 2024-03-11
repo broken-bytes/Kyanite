@@ -1,4 +1,4 @@
-import Native
+@_implementationOnly import Native
 
 internal class GpuResourceManager {
     /// A struct that represents a GPU resource.

@@ -1,10 +1,10 @@
 import Foundation
-import Native
+@_implementationOnly import Native
 
 public class Engine {
     var time: Float = 0
     
-    public init(window: UnsafeMutableRawPointer?, isDebug: Bool = false) {
+    public init(isDebug: Bool = false) {
         // Initialize all subsystems
         // Initialize the core
         var imGui = NativeImGui.shared.createContext()
@@ -13,7 +13,15 @@ public class Engine {
         NativeAudio.shared.start()
         NativeInput.shared.start(imGui: imGui)
         NativeECS.shared.start(debug: isDebug)
-        guard let window else {
+        NativeSystem.shared.start()
+        guard let window = NativeSystem.shared.createWindow(
+            title: "Kyanite Editor", 
+            posx: 100, 
+            posY: 100, 
+            width: 1920, 
+            height: 1080
+        ) else {
+            print("Failed to create window")
             fatalError("Failed to create window")
         }
         NativeRendering.shared.start(window: window, imGui: imGui)

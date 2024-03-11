@@ -1,4 +1,4 @@
-import Native
+@_implementationOnly import Native
 
 class DebugConsole: EditorWindow {
     public override var title: String { "Debug Console" }

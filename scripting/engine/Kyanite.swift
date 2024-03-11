@@ -3,8 +3,8 @@
 import Macros
 
 @_cdecl("kyanitemain")
-public func kyanitemain(window: UnsafeMutableRawPointer, isDebug: Bool = false) {
-    let engine = Engine(window: window, isDebug: isDebug)
+public func kyanitemain(isDebug: Bool = false) {
+    let engine = Engine(isDebug: isDebug)
     engine.start()
 }
 

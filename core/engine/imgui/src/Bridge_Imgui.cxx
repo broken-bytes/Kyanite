@@ -36,8 +36,8 @@ void ImGui_Separator() {
 	kyanite::engine::imgui::Separator();
 }
 
-void ImGui_TextField(const char* label, char* buffer, int bufferSize) {
-	kyanite::engine::imgui::TextField(label, buffer, bufferSize);
+bool ImGui_TextField(const char* label, char* buffer, int bufferSize) {
+	return kyanite::engine::imgui::TextField(label, buffer, bufferSize);
 }
 
 void ImGui_FloatField(const char* label, float* value) {
@@ -72,6 +72,13 @@ void ImGui_EndHorizontal() {
 	kyanite::engine::imgui::EndHorizontal();
 }
 
+bool ImGui_TreeNode(const char* label) {
+	return kyanite::engine::imgui::TreeNode(label);
+}
+
+void ImGui_TreePop() {
+	kyanite::engine::imgui::EndTreeNode();
+}
 
 NativePointer ImGui_CreateImGuiContext() {
 	return kyanite::engine::imgui::CreateImGuiContext();

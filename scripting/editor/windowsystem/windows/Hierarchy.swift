@@ -1,6 +1,5 @@
-import Native
+@_implementationOnly import Native
 import KyaniteEngine
-import WinSDK
 
 class Hierarchy: EditorWindow {
     public override var title: String { "Hierarchy" }
@@ -17,7 +16,7 @@ class Hierarchy: EditorWindow {
                 }
 
                 // We don't want editor entities to be shown in the hierarchy
-                if parent != EditorEnvironment.shared.editorParent {
+                if parent != EditorEnvironment.default.editorParent {
                     self.entities.append(event.entity)
                 }
             } else {

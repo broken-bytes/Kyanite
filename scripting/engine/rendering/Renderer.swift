@@ -1,4 +1,4 @@
-import Native
+@_implementationOnly import Native
 
 public class Renderer {
     public static let shared = Renderer()

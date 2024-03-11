@@ -1,4 +1,4 @@
-import Native
+@_implementationOnly import Native
 
 public class Input {
     public static let shared = Input()

@@ -1,6 +1,5 @@
 import Foundation
-import Native
-import WinSDK
+@_implementationOnly import Native
 
 public class ComponentList: IteratorProtocol, Sequence {
     public typealias Element = (type: any Component.Type, data: UnsafeRawPointer)

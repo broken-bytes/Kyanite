@@ -1,4 +1,4 @@
-import Bridge
+@_implementationOnly import Bridge
 
 public class NativeImGui {
     public static let shared = NativeImGui()
@@ -32,6 +32,10 @@ public class NativeImGui {
 
     public func label(_ text: String) {
         return ImGui_Label(text)
+    }
+
+    public func text(_ label: String, text: UnsafeMutableBufferPointer<UInt8>) -> Bool {
+        ImGui_TextField(label, text.baseAddress, Int32(text.count))
     }
 
     public func floatField(_ label: String, value: UnsafeMutablePointer<Float>) {
@@ -68,6 +72,14 @@ public class NativeImGui {
 
     public func separator() {
         return ImGui_Separator()
+    }
+
+    public func treeNode(_ label: String) -> Bool {
+        return ImGui_TreeNode(label)
+    }
+
+    public func treePop() {
+        return ImGui_TreePop()
     }
 
     public func drawDefaultImGuiDockspace() {

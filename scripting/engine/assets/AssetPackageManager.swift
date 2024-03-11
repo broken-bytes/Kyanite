@@ -1,5 +1,5 @@
 import Foundation
-import Native
+@_implementationOnly import Native
 
 class AssetPackageManager {
     static let shared = AssetPackageManager()

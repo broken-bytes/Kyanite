@@ -1,5 +1,4 @@
 @_implementationOnly import Bridge
-import WinSDK
 
 public class NativeECS {
     public static let shared = NativeECS()
@@ -24,8 +23,6 @@ public class NativeECS {
 
     public func parent(of entity: UInt64) -> UInt64? {
         let parentId = ECS_GetParent(entity)
-
-        OutputDebugStringA("Parent: \(parentId)\n")
         
         return parentId == 0 ? nil : parentId
     }
@@ -78,7 +75,6 @@ public class NativeECS {
     public func get<T>(iterator: UnsafeMutableRawPointer, index: UInt8) -> UnsafeMutableBufferPointer<T> {
         // Flecs uses 1-based indexing
         guard let buffer = ECS_GetComponentsFromIterator(iterator, index + 1, MemoryLayout<T>.size) else {
-            OutputDebugStringA("Failed to get components from iterator\n")
             fatalError("Failed to get components from iterator")
         }
 

@@ -1,5 +1,5 @@
 import Foundation
-import Native
+@_implementationOnly import Native
 
 public class Texture {
     required internal init(uuid: String) {

@@ -1,5 +1,4 @@
 import Foundation
-import WinSDK
 
 class ReflectionManager {
     static let shared = ReflectionManager()
@@ -10,7 +9,6 @@ class ReflectionManager {
         // Load all files in the Reflections folder
         let fileManager = FileManager.default
         let path = fileManager.currentDirectoryPath.appendingPathComponent("reflection")
-        OutputDebugStringA("Loading reflections from \(path)\n")
         
         do {
             let files = try fileManager.contentsOfDirectory(atPath: path)
@@ -18,15 +16,12 @@ class ReflectionManager {
             for file in files {
                 let url = URL(fileURLWithPath: path.appendingPathComponent(file))
                 guard let data = FileManager.default.contents(atPath: url.path) else {
-                    OutputDebugStringA("Failed to load reflection from \(url)\n")
                     continue
                 }
-                OutputDebugStringA("Data \(String(data: data, encoding: .utf8) ?? "")\n")
                 let reflection = try JSONDecoder().decode(Reflection.self, from: data)
                 reflections.append(reflection)
             }
         } catch {
-            OutputDebugStringA("Failed to load reflections: \(error)\n")
         }
     }
     

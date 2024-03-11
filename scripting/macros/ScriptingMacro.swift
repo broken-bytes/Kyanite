@@ -3,7 +3,6 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import Foundation
-import WinSDK
 
 public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro {
     public static func expansion(
@@ -154,7 +153,6 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
             + " \n]"
             + "\n}"
         let jsonFilename = URL(fileURLWithPath: "./reflection/\(structDecl.name.text).json")
-        OutputDebugStringA("Writing to \(jsonFilename)\n")
         try? jsonReflection.write(to: jsonFilename, atomically: true, encoding: String.Encoding.utf8)
 
         return [

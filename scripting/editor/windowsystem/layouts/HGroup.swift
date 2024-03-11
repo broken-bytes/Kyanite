@@ -1,4 +1,4 @@
-import Native
+@_implementationOnly import Native
 
 public class HGroup {
     public init(_ block: @escaping () -> Void) {

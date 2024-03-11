@@ -28,6 +28,7 @@
         "libsodium",
         "libvorbis",
         "libzip",
+        "nativefiledialog",
         "nlohmann-json",
         "openal-soft",
         "openfbx",

@@ -62,7 +62,7 @@ namespace kyanite::engine::imgui {
 	* @param buffer The buffer to store the text in
 	* @param bufferSize The size of the buffer
 	*/
-	EXPORTED auto TextField(const char* label, char* buffer, int bufferSize) -> void;
+	EXPORTED auto TextField(const char* label, char* buffer, int bufferSize) -> bool;
 
 	/**
 	* @brief Draws a float field
@@ -123,19 +123,31 @@ namespace kyanite::engine::imgui {
 	EXPORTED auto Clear(NativePointer window) -> void;
 
 	/**
+	* @brief Draws a tree node
+	* @param label The label to display
+	* @return Whether the node is open
+	*/
+	EXPORTED auto TreeNode(const char* label) -> bool;
+
+	/**
+	* @brief Ends a tree node
+	*/
+	EXPORTED auto EndTreeNode() -> void;
+
+	/**
 	* @brief Draws the editor default docking
 	*/
 	EXPORTED auto DrawDefaultImGuiDocking() -> void;
 
-    /**
-    * @brief Creates an ImGui context
-    * @return The created ImGui context
-    */
-    EXPORTED auto CreateImGuiContext() -> ImGuiContext*;
+	/**
+	* @brief Creates an ImGui context
+	* @return The created ImGui context
+	*/
+	EXPORTED auto CreateImGuiContext() -> ImGuiContext*;
 
-    /**
-    * @brief Gets the ImGui context
-    * @return The ImGui context
-    */
-    EXPORTED auto GetImGuiContext() -> ImGuiContext*;
+	/**
+	* @brief Gets the ImGui context
+	* @return The ImGui context
+	*/
+	EXPORTED auto GetImGuiContext() -> ImGuiContext*;
 }

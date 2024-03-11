@@ -1,4 +1,4 @@
-import Native
+@_implementationOnly import Native
 
 public class SystemIterator {
     internal var native: UnsafeMutableRawPointer
