@@ -37,11 +37,6 @@ let package = Package(
             path: "scripting/macros"
         ),
         // The shared targets
-        .target(
-            name: "SceneManagement",
-            dependencies: [],
-            path: "scripting/shared/scenemanagement"
-        ),
 
         .executableTarget(
             name: "KyaniteEditorApp", 
@@ -53,7 +48,7 @@ let package = Package(
  
         .target(
             name: "KyaniteEngine", 
-            dependencies: ["Macros", "Native", "SceneManagement"],
+            dependencies: ["Macros", "Native"],
             path: "scripting/engine",
             swiftSettings: [
                 .unsafeFlags(["-enable-library-evolution"])
@@ -64,8 +59,7 @@ let package = Package(
             name: "KyaniteEditor", 
             dependencies: [
                 "KyaniteEngine", 
-                "Native", 
-                "SceneManagement",
+                "Native"
             ],
             path: "scripting/editor",
             swiftSettings: [
