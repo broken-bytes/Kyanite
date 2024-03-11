@@ -1,34 +1,34 @@
+#if os(Windows)
+import WinSDK
+#elseif os(macOS)
+import Darwin
+#else
+#endif
+
 public class CLI {
-    var commands: [CLICommand] = [ProjectCommand()]
+    public static let shared = CLI()
+
+    var repl = REPL()
     
     init() {
-
+        signal(SIGINT) { _ in
+            CLI.handleSigInt()
+            // Return to the REPL, don't exit the program
+        }
     }
 
     public func run(with args: [String]) {
-        // Log the args 
-        print(args)
+        while true {
+            repl.printDir()
 
-        guard args.count > 1 else {
-            fatalError("Missing command")
-        }
-
-        let command = args[1]
-
-        for cmd in commands {
-            if cmd.keyword == command {
-                do {
-                    let result = try cmd.execute(args: args)
-                    if result != 0 {
-                        fatalError("Command failed")
-                    }
-                } catch {
-                    fatalError("Command failed")
-                }
-                return
+            if let command = repl.takeInput() {
+                repl.eval(command: command)
             }
         }
+    }
 
-        fatalError("Unknown command")
+    static func handleSigInt() {
+        CLI.shared.repl.clear()
+        CLI.shared.repl.printDir()
     }
 }
