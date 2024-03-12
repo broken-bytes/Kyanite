@@ -38,7 +38,12 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
                     let type = variable.bindings.first?.typeAnnotation?.type.description,
                     let access = variable.modifiers?.first?.name.description
                 else {
-                    fatalError("Component member invalid")
+                    print(members._syntaxNode)
+                    // Only inits are allowed besides the members
+                    if let function = variable.as(InitializerDeclSyntax.self) {
+                        continue
+                    }
+                    fatalError("Component member invalid") 
                 }
 
                 decls.append(DeclSyntax("@Reference()"))
@@ -78,7 +83,14 @@ public struct ComponentMacro: MemberMacro, ExtensionMacro, MemberAttributeMacro 
                     let name = variable.bindings.first?.pattern.description,
                     let type = variable.bindings.first?.typeAnnotation?.type.description
                 else {
-                    fatalError("Component member invalid")
+                    // Check if this is an init block
+                    if let function = variable.as(InitializerDeclSyntax.self) {
+                        continue
+                    } else {
+                        print(members._syntaxNode)
+                        continue
+                        //fatalError("Component member invalid") 
+                    }
                 }
 
                 // Components may only have the following types:

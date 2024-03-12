@@ -1,5 +1,5 @@
 public class SceneManager {
-    public func loadScene(scene: some Scene) {
+    public func loadScene(scene: Scene) {
         
     }
 }

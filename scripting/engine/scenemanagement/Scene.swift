@@ -1,13 +1,11 @@
-public protocol Scene {
-    @SceneBuilder
-    var content: [Entity] { get }
-}
+public struct Scene {
+    public var entities: [Entity] = []
+    
+    init(entities: [Entity]) {
+        self.entities = entities
+    }
 
-
-struct MyScene: Scene {
-    var content: [Entity] {
-        Entity {
-            TransformComponent()
-        }
+    init(@SceneBuilder _ builder: () -> [Entity]) {
+        self.entities = builder()
     }
 }

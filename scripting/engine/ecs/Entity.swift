@@ -46,14 +46,16 @@ public final class Entity {
         EventSystem.shared.emit(EntityLifetimeEvent(entity: self, isAlive: true))
     }
 
-    public convenience init(_ name: String, parent: Entity?, @EntityBuilder _ builder: () -> [any Component]) {
+    public convenience init(_ name: String, parent: Entity? = nil, @EntityBuilder _ builder: () -> [any Component]) {
         self.init(name: name, parent: parent)
-        let components = builder()
-        for component in components {
+        var components = builder()
+        for var component in components {
             // Find the component type and add it to the entity
-            let componentId: UInt64 = _ComponentRegistry.shared._get(type(of: component))
+            let componentType = type(of: component)
+            let componentId = _ComponentRegistry.shared._get(componentType)
+            NativeECS.shared.addComponent(entity: self.id, componentId: componentId)
+            NativeECS.shared.setComponent(entity: self.id, componentId: componentId, component: &component)
         }
-
     }
 
     public func addComponent<T: Component>(_ component: T.Type) {
