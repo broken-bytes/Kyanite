@@ -20,14 +20,34 @@ extern "C" {
 		uint32_t indexCount;
 	} typedef MeshData;
 
+    EXPORTED struct AnimationClipData {
+        const char* name;
+        const char* takeName;
+        int startFrame;
+        int endFrame;
+        float frameRate;
+    } typedef AnimationClipData;
+
+    EXPORTED struct AnimationData {
+		AnimationClipData* clips;
+		size_t clipCount;
+    } typedef AnimationData;
+
+	EXPORTED struct ModelData {
+		const char* name;
+		MeshData* meshes;
+		size_t meshCount;
+		AnimationData* animations;
+	} typedef ModelData;
+
 	/**
 	* @brief Initialize the asset pipeline
 	*/
 	EXPORTED void AssetPipeline_Init();
 
 	/**
-	* @brief Load a mesh from a file
-	* @param path The path to the file
+	* @brief Load a mesh from a buffer
+	* @param path The buffet to load from
 	* @param meshData The mesh data to load into
 	* @param len The length of the mesh data
 	*/

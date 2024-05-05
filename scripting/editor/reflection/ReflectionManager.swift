@@ -4,12 +4,12 @@ class ReflectionManager {
     static let shared = ReflectionManager()
 
     private var reflections: [Reflection] = []
-    
+
     private init() {
         // Load all files in the Reflections folder
         let fileManager = FileManager.default
         let path = fileManager.currentDirectoryPath.appendingPathComponent("reflection")
-        
+
         do {
             let files = try fileManager.contentsOfDirectory(atPath: path)
             // For each file, load the reflection from json
@@ -24,7 +24,7 @@ class ReflectionManager {
         } catch {
         }
     }
-    
+
     func reflection(for type: Any.Type) -> Reflection? {
         reflections.first { $0.type == String(describing: type) }
     }

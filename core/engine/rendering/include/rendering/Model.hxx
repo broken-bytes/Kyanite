@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Mesh.hxx"
-#include <core/VendorSerializers/GlmSerializers.hxx>
 
 #include <cereal/access.hpp>
 #include <cereal/types/vector.hpp>

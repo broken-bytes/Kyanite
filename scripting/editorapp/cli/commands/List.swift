@@ -10,8 +10,12 @@ import Foundation
 class List: Command {
     public let keyword = "ls"
     var subcommands: [Command] = []
+    let shortDescription: String = "List the contents of the current directory"
+    let longDescription: String = "List the contents of the current directory"
 
     public func run(input: [String]) -> DataStructure {
+        guard !help(input: input) else { return EmptyData() }
+
         let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
         guard 
             let pathPtr = _getcwd(ptr, 1024),

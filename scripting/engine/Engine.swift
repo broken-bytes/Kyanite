@@ -26,6 +26,7 @@ public class Engine {
         }
         NativeRendering.shared.start(window: window, imGui: imGui)
         _ComponentRegistry.shared._register(TransformComponent.self)
+        _ComponentRegistry.shared._register(MeshComponent.self)
     }
 
     public func start() {

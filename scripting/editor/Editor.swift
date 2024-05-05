@@ -36,5 +36,8 @@ class Editor {
 
         contentManager.watch()
         sourceManager.watch()
+
+        // Load the scene
+        SceneManager.default.loadScene(scene: TestScene())
     }
 }

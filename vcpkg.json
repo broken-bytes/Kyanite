@@ -1,46 +1,54 @@
 {
-    "name": "kyanite",
-    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-    "version": "0.0.1",
-    "builtin-baseline": "27fb19bdcc1f6ddb1261cffb5372724ac1d63a93",
-    "dependencies": [
-        "assimp",
-        "atomic-queue",
-        "audiofile",
-        "cereal",
-        "concurrentqueue",
-        "directx-dxc",
-        "fastgltf",
-        "flecs",
-        "freealut",
-        "freeimage",
-        "gamenetworkingsockets",
-        "glad",
-        "glm",
-        "gtest",
-        {
-            "name": "imgui",
-            "features": ["dx12-binding", "vulkan-binding", "opengl3-binding", "sdl2-binding", "docking-experimental"]
-        },
-        "joltphysics",
-        "libjpeg-turbo",
-        "libpng",
-        "libsodium",
-        "libvorbis",
-        "libzip",
-        "nativefiledialog",
-        "nlohmann-json",
-        "openal-soft",
-        "openfbx",
-        "protobuf",
-        "rmlui",
-        {
-            "name": "sdl2",
-            "features": ["vulkan"]
-        },
-        "spdlog",
-        "sqlite3",
-        "stduuid",
-        "tinygltf"
-    ]
+  "name": "kyanite",
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "version": "0.0.1",
+  "builtin-baseline": "326d8b43e365352ba3ccadf388d989082fe0f2a6",
+  "dependencies": [
+    "assimp",
+    "atomic-queue",
+    "audiofile",
+    "cereal",
+    "concurrentqueue",
+    "directx-dxc",
+    "fastgltf",
+    "flecs",
+    "freealut",
+    "freeimage",
+    "gamenetworkingsockets",
+    "glad",
+    "glm",
+    "gtest",
+    {
+      "name": "imgui",
+      "features": [
+        "dx12-binding",
+        "vulkan-binding",
+        "opengl3-binding",
+        "sdl2-binding",
+        "docking-experimental"
+      ]
+    },
+    "joltphysics",
+    "libjpeg-turbo",
+    "libpng",
+    "libsodium",
+    "libvorbis",
+    "libzip",
+    "nativefiledialog",
+    "nlohmann-json",
+    "openal-soft",
+    "openfbx",
+    "protobuf",
+    "rmlui",
+    {
+      "name": "sdl2",
+      "features": [
+        "vulkan"
+      ]
+    },
+    "spdlog",
+    "sqlite3",
+    "stduuid",
+    "tinygltf"
+  ]
 }

@@ -16,5 +16,4 @@
 #include "Bridge_Input.h"
 #include "Bridge_Rendering.h"
 #include "Bridge_Audio.h"
-#include "Bridge_EditorCore.h"
 #include "Bridge_AssetDatabase.h"

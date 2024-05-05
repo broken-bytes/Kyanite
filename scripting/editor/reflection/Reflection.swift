@@ -12,7 +12,7 @@ public struct Reflection: Decodable {
 
     internal func getProperties<T: Component>(of type: T.Type) -> [Property] {
         fields
-    } 
+    }
 
     internal static func size(of type: PropertyType) -> Int {
         switch type {
@@ -44,9 +44,9 @@ public struct Reflection: Decodable {
     internal func offset(of property: String) -> Int {
         // We need to get the offset of the property in the buffer.
         // For that, we loop over the fields and sum the size of the types.
-        
+
         // Get the property index
-        guard 
+        guard
             let index = fields.first(where: { $0.name == property })?.index
         else {
             return -1

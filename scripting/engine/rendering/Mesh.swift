@@ -2,6 +2,20 @@ import Foundation
 @_implementationOnly import Native
 
 public class Mesh {
+    public static var box: Mesh {
+        return Mesh(uuid: "box")
+    }
+
+    public static var sphere: Mesh {
+        return Mesh(uuid: "sphere")
+    }
+
+    public static var plane: Mesh {
+        return Mesh(uuid: "plane")
+    }
+
+    internal var uuid: String
+
     public var vertices: [Vertex] {
         get {
             return []
@@ -9,6 +23,18 @@ public class Mesh {
             // TODO: Create a new buffer with the new vertices and update the vertex buffer.
         }
     }
+
     required internal init(uuid: String) {
+        self.uuid = uuid
+    }
+}
+
+extension Mesh: Hashable, Equatable {
+    public static func == (lhs: Mesh, rhs: Mesh) -> Bool {
+        return lhs.uuid == rhs.uuid
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
     }
 }

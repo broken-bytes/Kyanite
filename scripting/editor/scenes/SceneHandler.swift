@@ -6,10 +6,3 @@ class SceneHandler {
 
     }
 }
-
-fileprivate extension SceneHandler {
-    func loadLastScene() -> Scene? {
-        // Load the last scene
-        return nil
-    }
-}

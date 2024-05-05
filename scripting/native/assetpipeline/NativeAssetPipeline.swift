@@ -13,7 +13,7 @@ public struct NativeMesh {
 }
 
 public class NativeMeshList {
-    var meshews: [NativeMesh] = []
+    var meshes: [NativeMesh] = []
 
     init(with: UnsafeMutablePointer<MeshData>, count: Int) {
         for x in 0..<count {
@@ -21,7 +21,7 @@ public class NativeMeshList {
             let vertices = Array(UnsafeBufferPointer(start: mesh.vertices, count: Int(mesh.vertexCount)))
             let indices = Array(UnsafeBufferPointer(start: mesh.indices, count: Int(mesh.indexCount)))
 
-            meshews.append(
+            meshes.append(
                 NativeMesh(
                     vertices: vertices.map { NativeVertex(position: $0.position, normal: $0.position, uv: $0.texCoord)}, 
                     indices: indices
@@ -31,6 +31,8 @@ public class NativeMeshList {
     }
 }
 
+// TODO: Load the whole model instead of just the meshes.
+// See: core/editor/assetpipeline/include/loaders/FbxLoader.hxx
 public class NativeAssetPipeline {
     public static let shared = NativeAssetPipeline()
 

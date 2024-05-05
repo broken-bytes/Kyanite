@@ -11,7 +11,9 @@ namespace kyanite::editor::assetpipeline::loaders {
 	FbxLoader::~FbxLoader() {
 	}
 
-	auto FbxLoader::LoadFromBuffer(std::vector<uint8_t> buffer) -> std::vector<kyanite::engine::rendering::MeshData> {
+	auto FbxLoader::LoadFromBuffer(
+		std::vector<uint8_t> buffer
+	) -> std::vector<kyanite::engine::rendering::MeshData> {
 		std::vector<engine::rendering::MeshData> meshes = {};
 
 		Assimp::Importer importer;
@@ -23,6 +25,21 @@ namespace kyanite::editor::assetpipeline::loaders {
 
 		std::vector<engine::rendering::Vertex> vertices;
 		std::vector<uint32_t> indices;
+
+		// Process animations
+		for (int x = 0; x < scene->mNumAnimations; x++) {
+			aiAnimation* animation = scene->mAnimations[x];
+			// Process channels
+			for (int i = 0; i < animation->mNumChannels; i++) {
+				aiNodeAnim* channel = animation->mChannels[i];
+				// Process keyframes
+				for (int j = 0; j < channel->mNumPositionKeys; j++) {
+					aiVectorKey key = channel->mPositionKeys[j];
+					// Process keyframe
+				}
+			}
+		}
+
 		for (int x = 0; x < scene->mNumMeshes; x++) {
 			// Process mesh
 			aiMesh* mesh = scene->mMeshes[x];
