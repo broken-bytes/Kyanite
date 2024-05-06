@@ -1,8 +1,12 @@
 @_implementationOnly import Native
 import Foundation
+import KyaniteEngine
 
 #if os(Windows)
 import WinSDK
+#elseif os(macOS)
+import Darwin
+#else
 #endif
 
 class ContentManager {
@@ -66,11 +70,11 @@ class ContentManager {
         let contentPath = path.appending("/content")
         self.assetDatabase = database
         self.path = contentPath
-        
+
         contentWatchdog = FilesystemWatchdog(at: contentPath) { (file, change) in
             switch change {
             case .added:
-                self.handleFileAdded(file: file)
+                try? self.handleFileAdded(file: file)
             case .modified:
                 self.handleFileModified(file: file)
             case .removed:
@@ -87,11 +91,9 @@ class ContentManager {
         contentWatchdog?.watch()
     }
 
-    private func handleFileAdded(file: FilesystemWatchdog.File) {
+    private func handleFileAdded(file: FilesystemWatchdog.File) throws {
         // Check if the file is already in the database
-        let uuid = assetDatabase.getUUID(path: file.path) 
-        OutputDebugStringA("path: \(file.path)\n")
-        OutputDebugStringA("uuid: \(uuid)\n")
+        let uuid = assetDatabase.getUUID(path: file.path)
 
         // The file is already in the database, check if it was modified
         if uuid != "" {
@@ -112,7 +114,7 @@ class ContentManager {
         case .image:
             handleImage(file: file)
         case .model:
-            handleModel(file: file)
+            try? handleModel(file: file)
         case .audio:
             handleAudio(file: file)
         case .shader:
@@ -128,16 +130,52 @@ class ContentManager {
     private func handleFileRemoved(file: FilesystemWatchdog.File) {
     }
 
-    private func handleModel(file: FilesystemWatchdog.File) {
-        let meshList = NativeAssetPipeline.shared.loadModel(at: file.path)
+    private func handleModel(file: FilesystemWatchdog.File) throws {
+        // Load the raw mesh data and write it to the blobs folder
+        guard let meshList = NativeAssetPipeline.shared.loadModel(at: file.path) else {
+            throw ContentType.ContentTypeError.unknownFileType("Failed to load model")
+        }
+
         // Add the mesh list to the database
-        assetDatabase.addAsset(
-            uuid: UUID().uuidString, 
-            name: file.path, 
-            path: file.path, 
-            type: ContentType.model.rawValue, 
+        let uuid = try assetDatabase.addAsset(
+            uuid: UUID().uuidString,
+            name: file.path,
+            path: file.path,
+            type: ContentType.model.rawValue,
             time: Int64(Date().timeIntervalSince1970)
-        ) 
+        )
+
+        // Take the first two characters of the UUID and create a folder with that name
+        let file = EditorEnvironment.default.blobsFolder.appending("/\(uuid.prefix(2))/\(uuid)")
+
+        let meshes: [MeshData] = meshList.meshes.map { mesh in
+            let vertices = mesh.vertices.map { vertex in
+                Vertex(
+                    position: Vector3(x: vertex.position.0, y: vertex.position.1, z: vertex.position.2),
+                    normal: Vector3(x: vertex.normal.0, y: vertex.normal.1, z: vertex.normal.2),
+                    uv: Vector2(x: vertex.uv.0, y: vertex.uv.1)
+                )
+            }
+
+            return MeshData(
+                vertices: StorableCollection<Vertex>(elements: vertices),
+                indices: StorableCollection<UInt32>(elements: mesh.indices)
+            )
+        }
+
+        let modelData = ModelData(
+            meshes: StorableCollection<MeshData>(elements: meshes)
+        )
+
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(modelData) else {
+            print("Failed to encode model data")
+            throw ContentType.ContentTypeError.unknownFileType("Failed to encode model data")
+        }
+
+        print(String(data: data, encoding: .utf8))
+
+        FileManager.default.createFile(atPath: file, contents: data, attributes: nil)
     }
 
     private func handleSound(file: FilesystemWatchdog.File) {
@@ -172,7 +210,7 @@ class ContentManager {
 
             // Convert FILETIME to time_t (UNIX timestamp)
             let unixTimestamp = Int64((uli.QuadPart - 116444736000000000) / 10000000)
-            
+
             return unixTimestamp
         } else {
             return 0

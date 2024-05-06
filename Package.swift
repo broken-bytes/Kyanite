@@ -11,11 +11,11 @@ let package = Package(
         .executable(name: "KyaniteEditorApp", targets: ["KyaniteEditorApp"]),
         .library(
             name: "KyaniteEngine",
-            type: .dynamic, 
+            type: .dynamic,
             targets: ["KyaniteEngine"]
         ),
         .library(
-            name: "KyaniteEditor", 
+            name: "KyaniteEditor",
             type: .dynamic,
             targets: ["KyaniteEditor"]
         )
@@ -39,15 +39,15 @@ let package = Package(
         // The shared targets
 
         .executableTarget(
-            name: "KyaniteEditorApp", 
+            name: "KyaniteEditorApp",
             dependencies: [
                 "KyaniteEditor"
-            ], 
+            ],
             path: "scripting/editorapp"
         ),
- 
+
         .target(
-            name: "KyaniteEngine", 
+            name: "KyaniteEngine",
             dependencies: ["Macros", "Native"],
             path: "scripting/engine",
             swiftSettings: [
@@ -56,10 +56,10 @@ let package = Package(
         ),
 
         .target(
-            name: "KyaniteEditor", 
+            name: "KyaniteEditor",
             dependencies: [
-                "KyaniteEngine", 
-                "Native"
+                "KyaniteEngine",
+                "Native",
             ],
             path: "scripting/editor",
             swiftSettings: [

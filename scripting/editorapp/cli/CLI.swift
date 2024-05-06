@@ -9,9 +9,15 @@ public class CLI {
     public static let shared = CLI()
 
     var repl = REPL()
-    
+
     init() {
+        SetUnhandledExceptionFilter { exception in
+            print("Unhandled exception: \(exception)")
+            return EXCEPTION_CONTINUE_SEARCH
+        }
+
         signal(SIGINT) { _ in
+            print("SIGINT")
             CLI.handleSigInt()
             // Return to the REPL, don't exit the program
         }

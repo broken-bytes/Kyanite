@@ -1,4 +1,4 @@
-public struct Vec3<T> where T: Hashable, T: Comparable, T: Numeric {
+public struct Vec3<T>: Codable where T: Hashable, T: Comparable, T: Numeric, T: Codable {
     public var x: T
     public var y: T
     public var z: T
@@ -9,6 +9,18 @@ public struct Vec3<T> where T: Hashable, T: Comparable, T: Numeric {
         self.x = x
         self.y = y
         self.z = z
+    }
+
+    public init(_ x: T) {
+        self.x = x
+        self.y = x
+        self.z = x
+    }
+
+    public init(_ value: (T, T, T)) {
+        self.x = value.0
+        self.y = value.1
+        self.z = value.2
     }
 }
 

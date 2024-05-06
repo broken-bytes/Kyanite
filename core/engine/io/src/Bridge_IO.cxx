@@ -4,7 +4,6 @@
 #include <shared/NativePointer.hxx>
 
 #include <SDL2/SDL.h>
-#include <Windows.h>
 #include <iostream>
 
 int8_t IO_CreateArchive(const char* path) {

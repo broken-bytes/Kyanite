@@ -5,9 +5,6 @@
 #include <future>
 #include <glad/glad.h>
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 #include <sstream>
 
 namespace kyanite::engine::rendering::opengl {
@@ -23,7 +20,7 @@ namespace kyanite::engine::rendering::opengl {
 				if (error != GL_NO_ERROR) {
 					std::stringstream ss;
 					ss << "OpenGL error: " << error << std::endl;
-					OutputDebugStringA(ss.str().c_str());
+					std::cerr << ss.str();
 				}
 			}
 		}

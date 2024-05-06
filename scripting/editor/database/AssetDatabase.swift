@@ -1,24 +1,28 @@
 @_implementationOnly import Native
-import WinSDK
 
-public class AssetDatabase {    
+public class AssetDatabase {
+    enum AssetDatabaseError: Error {
+        case failedToAddAsset(String)
+    }
+
     private var database: UnsafeMutableRawPointer?
 
-    public init(path: String) { 
+    public init(path: String) {
         database = NativeAssetDatabase.shared.open(at: path)
     }
-    
+
     public func close() {
         NativeAssetDatabase.shared.close(database!)
     }
 
-    public func addAsset(uuid: String, name: String, path: String, type: String, time: Int64)  {
-        OutputDebugStringA("Adding asset: uuid: \(uuid) \(name) path: \(path) time: \(time)\n")
-        
-        let result = NativeAssetDatabase.shared.addAsset(database!, uuid: uuid, name: name, path: path, type: type, time: time) 
+    public func addAsset(uuid: String, name: String, path: String, type: String, time: Int64) throws -> String {
+        let result = NativeAssetDatabase.shared.addAsset(database!, uuid: uuid, name: name, path: path, type: type, time: time)
         if result != 0 {
-            OutputDebugStringA("Failed to add asset: uuid: \(uuid) \(name) path: \(path) time: \(time) result: \(result)\n")
+            print("Failed to add asset: uuid: \(uuid) \(name) path: \(path) time: \(time) result: \(result)")
+            throw AssetDatabaseError.failedToAddAsset("Failed to add asset: uuid: \(uuid) \(name) path: \(path) time: \(time) result: \(result)")
         }
+
+        return uuid
     }
 
     public func updateAsset(uuid: String, time: Int64) {

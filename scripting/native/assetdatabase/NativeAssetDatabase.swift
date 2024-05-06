@@ -1,5 +1,4 @@
 @_implementationOnly import Bridge
-import WinSDK
 
 public class NativeAssetDatabase {
     public enum NativeAssetDatabaseError: Error {
@@ -22,10 +21,10 @@ public class NativeAssetDatabase {
     }
 
     public func addAsset(
-        _ database: UnsafeMutableRawPointer, 
-        uuid: String, 
+        _ database: UnsafeMutableRawPointer,
+        uuid: String,
         name: String,
-        path: String, 
+        path: String,
         type: String,
         time: Int64
     ) -> Int32 {
@@ -33,8 +32,8 @@ public class NativeAssetDatabase {
     }
 
     public func updateAsset(
-        _ database: UnsafeMutableRawPointer, 
-        uuid: String, 
+        _ database: UnsafeMutableRawPointer,
+        uuid: String,
         time: Int64
     ) {
         AssetDatabase_UpdateAsset(database, uuid, time)
@@ -49,7 +48,6 @@ public class NativeAssetDatabase {
         AssetDatabase_GetUuidForPath(database, path, &uuidPtr)
 
         guard let uuid = uuidPtr else {
-            OutputDebugStringA("UUID for path: \(path) is nil\n")
             return ""
         }
 

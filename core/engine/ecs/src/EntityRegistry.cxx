@@ -19,7 +19,6 @@
 #include <memory>
 #include <shared_mutex>
 #include <mutex>
-#include <Windows.h>
 #include <vector>
 
 namespace ecs::EntityRegistry {

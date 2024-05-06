@@ -1,4 +1,4 @@
-public struct Vec2<T> where T: Hashable, T: Comparable, T: Numeric {
+public struct Vec2<T>: Codable where T: Hashable, T: Comparable, T: Numeric, T: Codable {
     public var x: T
     public var y: T
 
@@ -7,6 +7,16 @@ public struct Vec2<T> where T: Hashable, T: Comparable, T: Numeric {
     public init(x: T, y: T) {
         self.x = x
         self.y = y
+    }
+
+    public init(_ x: T) {
+        self.x = x
+        self.y = x
+    }
+
+    public init(_ value: (T, T)) {
+        self.x = value.0
+        self.y = value.1
     }
 }
 

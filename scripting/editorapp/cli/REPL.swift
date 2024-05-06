@@ -9,10 +9,10 @@ import Foundation
 
 public class REPL {
     public let commands: [Command] = [
-        Clear(), 
-        PrintWorkingDirectory(), 
-        ChangeDirectory(), 
-        Exit(), 
+        Clear(),
+        PrintWorkingDirectory(),
+        ChangeDirectory(),
+        Exit(),
         List(),
         ProjectCommand()
     ]
@@ -23,7 +23,7 @@ public class REPL {
         Console.default.print(
             color: .brightMagenta,
             background: .black,
-            str: 
+            str:
 """
 💎 Welcome to Kyanite Editor Shell. 💎\n\n
 """

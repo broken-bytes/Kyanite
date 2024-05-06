@@ -13,7 +13,7 @@ public struct NativeMesh {
 }
 
 public class NativeMeshList {
-    var meshes: [NativeMesh] = []
+    public var meshes: [NativeMesh] = []
 
     init(with: UnsafeMutablePointer<MeshData>, count: Int) {
         for x in 0..<count {
@@ -23,7 +23,7 @@ public class NativeMeshList {
 
             meshes.append(
                 NativeMesh(
-                    vertices: vertices.map { NativeVertex(position: $0.position, normal: $0.position, uv: $0.texCoord)}, 
+                    vertices: vertices.map { NativeVertex(position: $0.position, normal: $0.position, uv: $0.texCoord)},
                     indices: indices
                 )
             )
@@ -44,6 +44,7 @@ public class NativeAssetPipeline {
 
     public func loadModel(at path: String) -> NativeMeshList? {
         guard let data = FileManager.default.contents(atPath: path) else {
+            print("Failed to load model at \(path)")
             return nil
         }
 
@@ -52,6 +53,8 @@ public class NativeAssetPipeline {
             var count: Int = 0
 
             AssetPipeline_LoadMeshes($0, data.count, meshes, &count)
+
+            print("Loaded \(count) meshes")
 
             return NativeMeshList(with: meshes!, count: count)
         }

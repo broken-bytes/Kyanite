@@ -35,7 +35,6 @@ class FilesystemWatchdog {
 
         // Call the onChange callback for all the files in the directory at the start
         for file in files {
-            print(file)
             onChange(file, .added)
         }
     }
@@ -90,13 +89,13 @@ class FilesystemWatchdog {
         print(fileURLs)
 
         for fileURL in fileURLs {
-            guard 
+            guard
                 let attributes = try? fileManager.attributesOfFileSystem(forPath: fileURL.absoluteString)
             else {
                 continue
             }
             let date = attributes[FileAttributeKey.modificationDate] as? Date ?? Date()
-            files.append(File(path: fileURL.absoluteString, date: date, isDirectory: fileURL.hasDirectoryPath))
+            files.append(File(path: fileURL.path, date: date, isDirectory: fileURL.hasDirectoryPath))
         }
         return files
     }

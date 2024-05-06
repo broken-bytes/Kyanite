@@ -29,7 +29,7 @@ class ProjectManager {
     private var srcFolder: String {
         return "\(projectFolder)/src"
     }
-    
+
     func createProject(name: String, path: String) throws {
         let projectFile = ProjectFile(name: name, version: "1.0.0", icon: "icon.png", scenes: [])
         guard let projectFileData = try? JSONEncoder().encode(projectFile) else {

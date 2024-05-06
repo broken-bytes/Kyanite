@@ -1,10 +1,3 @@
-#if os(Windows)
-import WinSDK
-#elseif os(macOS)
-import Darwin
-#else
-#endif
-
 import Foundation
 
 class List: Command {
@@ -17,7 +10,7 @@ class List: Command {
         guard !help(input: input) else { return EmptyData() }
 
         let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
-        guard 
+        guard
             let pathPtr = _getcwd(ptr, 1024),
             let path = String(cString: pathPtr, encoding: .utf8)
         else {

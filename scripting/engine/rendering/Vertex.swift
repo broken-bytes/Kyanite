@@ -1,4 +1,6 @@
-public struct Vertex {
+import Foundation
+
+public struct Vertex: Codable {
     public let position: Vector3
     public let normal: Vector3
     public let uv: Vector2

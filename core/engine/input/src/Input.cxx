@@ -13,7 +13,6 @@
 #include <array>
 #include <map>
 #include <vector>
-#include <Windows.h>
 #include <imgui_impl_sdl2.h>
 
 namespace kyanite::engine::input {
