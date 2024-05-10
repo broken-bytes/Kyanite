@@ -10,12 +10,12 @@
 namespace rendering = kyanite::engine::rendering;
 
 auto kyanite::editor::assetpipeline::mappers::ModelMapper::MapFbx(
-	std::vector<uint8_t> data
+	const char* path
 ) -> std::vector<kyanite::engine::rendering::MeshData> {
 	auto loader = kyanite::editor::assetpipeline::loaders::FbxLoader();
 
 	try {
-		return loader.LoadFromBuffer(data);
+		return loader.LoadFromFile(path);
 	} catch (const std::exception& e) {
 		kyanite::engine::logging::logger::Error(e.what());
 		return {};

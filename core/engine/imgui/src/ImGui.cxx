@@ -8,6 +8,9 @@
 #include <vector>
 
 namespace kyanite::engine::imgui {
+	ImFont* RobotoFont;
+	ImFont* OpenIconFont;
+
 	EXPORTED auto Init(ImGuiContext* context) -> void {
 		ImGui::SetCurrentContext(context);
 	}
@@ -16,7 +19,7 @@ namespace kyanite::engine::imgui {
 		bool isOpen = true;
 		ImGui::Begin(title.c_str(), &isOpen);
 
-		if(!isOpen) {
+		if (!isOpen) {
 			callback(id);
 		}
 	}
@@ -25,16 +28,112 @@ namespace kyanite::engine::imgui {
 		ImGui::End();
 	}
 
+	bool BeginPopupContextWindow() {
+		return ImGui::BeginPopupContextWindow();
+	}
+
+	void EndPopup() {
+		ImGui::EndPopup();
+	}
+
+	bool BeginMenu(const char* label) {
+		return ImGui::BeginMenu(label);
+	}
+
+	void EndMenu() {
+		ImGui::EndMenu();
+	}
+
+	bool MenuItem(const char* label) {
+		return ImGui::MenuItem(label);
+	}
+
+	void GetCursorPos(float* y) {
+		ImVec2 pos = ImGui::GetCursorPos();
+		*y = pos.y;
+	}
+
+	void SetCursorPos(float y) {
+		ImGui::SetCursorPosY(y);
+	}
+
+	void SameLine() {
+		ImGui::SameLine();
+	}
+
+	void Dummy(float width, float height) {
+		ImGui::Dummy(ImVec2(width, height));
+	}
+
 	auto DrawReferenceSelector(NativePointer window, std::string label, std::function<void(std::string)> onReferenceSet) -> void {
 
 	}
 
-	auto Button(std::string_view label) -> bool {
-		return ImGui::Button(label.data());
+	auto Button(std::string_view label, float* width, float* height) -> bool {
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+		ImVec2* size = nullptr;
+
+		if (width != nullptr && height != nullptr) {
+			size = new ImVec2(*width, *height);
+		}
+
+		if (size != nullptr) {
+			auto btn = ImGui::Button(label.data(), *size);
+			delete size;
+			ImGui::PopStyleColor(3);
+			return btn;
+		}
+		else {
+			auto btn = ImGui::Button(label.data());
+			ImGui::PopStyleColor(3);
+			return btn;
+		}
 	}
 
 	auto Label(std::string label) -> void {
 		ImGui::Text(label.c_str());
+	}
+
+	bool BeginTable(const char* name, int32_t count, int32_t flags) {
+		return ImGui::BeginTable(name, count, flags);
+	}
+
+	void EndTable() {
+		ImGui::EndTable();
+	}
+
+	void SetupColumn(const char* label) {
+		ImGui::TableSetupColumn(label);
+	}
+
+	void TableNextRow() {
+		ImGui::TableNextRow();
+	}
+
+	void TableSetColumnIndex(int32_t index) {
+		ImGui::TableSetColumnIndex(index);
+	}
+
+	void Columns(int count) {
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, ImGui::GetStyle().ItemSpacing.y)); // Remove horizontal spacing
+		ImGui::Columns(count, nullptr, ImGuiOldColumnFlags_NoResize | ImGuiOldColumnFlags_NoBorder);
+	}
+
+	void NextColumn() {
+		ImGui::NextColumn();
+	}
+
+	auto Icon(std::string icon) -> void {
+		ImGui::PushFont(OpenIconFont);
+		ImGui::TextUnformatted(icon.c_str());
+		ImGui::PopFont();
+	}
+
+	auto GetAvailableWidth() -> float {
+		return ImGui::GetContentRegionAvail().x;
 	}
 
 	auto Separator() -> void {
@@ -190,7 +289,7 @@ namespace kyanite::engine::imgui {
 
 		// Add the Roboto font
 		auto robotoFont = std::filesystem::current_path() / "assets/fonts/RobotoCondensed-VariableFont_wght.ttf";
-		ImGui::GetIO().Fonts->AddFontFromFileTTF(
+		RobotoFont = ImGui::GetIO().Fonts->AddFontFromFileTTF(
 			robotoFont.string().c_str(),
 			20.0f,
 			nullptr,
@@ -201,11 +300,10 @@ namespace kyanite::engine::imgui {
 		auto openIconFont = std::filesystem::current_path() / "assets/fonts/OpenFontIcons.ttf";
 		// Merge with the default font
 		ImFontConfig config;
-		config.MergeMode = true;
 		config.PixelSnapH = true;
-		static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 }; // Will not be copied by AddFont* so keep in scope.
+		static const ImWchar icons_ranges[] = { 0xE000, 0xE0FE, 0 }; // Will not be copied by AddFont* so keep in scope.
 
-		ImGui::GetIO().Fonts->AddFontFromFileTTF(
+		OpenIconFont = ImGui::GetIO().Fonts->AddFontFromFileTTF(
 			openIconFont.string().c_str(),
 			48.0f,
 			&config,

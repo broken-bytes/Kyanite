@@ -12,8 +12,8 @@ void ImGui_DrawDefaultDocking() {
 }
 
 void ImGui_BeginWindow(
-	const char* title, 
-	int flags, 
+	const char* title,
+	int flags,
 	int64_t id,
 	void (*callback)(int64_t)
 ) {
@@ -24,12 +24,86 @@ void ImGui_EndWindow() {
 	kyanite::engine::imgui::EndWindow();
 }
 
-bool ImGui_Button(const char* label) {
-	return kyanite::engine::imgui::Button(label);
+bool ImGui_BeginPopupContextWindow() {
+	return kyanite::engine::imgui::BeginPopupContextWindow();
+}
+
+void ImGui_EndPopup() {
+	kyanite::engine::imgui::EndPopup();
+}
+
+bool ImGui_BeginMenu(const char* label) {
+	return kyanite::engine::imgui::BeginMenu(label);
+}
+
+void ImGui_EndMenu() {
+	kyanite::engine::imgui::EndMenu();
+}
+
+bool ImGui_MenuItem(const char* label) {
+	return kyanite::engine::imgui::MenuItem(label);
+}
+
+void ImGui_GetCursorPos(float* y) {
+	kyanite::engine::imgui::GetCursorPos(y);
+}
+
+void ImGui_SetCursorPos(float y) {
+	kyanite::engine::imgui::SetCursorPos(y);
+}
+
+void ImGui_SameLine() {
+	kyanite::engine::imgui::SameLine();
+}
+
+void ImGui_Dummy(float width, float height) {
+	kyanite::engine::imgui::Dummy(width, height);
+}
+
+bool ImGui_Button(const char* label, float* width, float* height) {
+	return kyanite::engine::imgui::Button(label, width, height);
 }
 
 void ImGui_Label(const char* label) {
 	kyanite::engine::imgui::Label(label);
+}
+
+void ImGui_Icon(const char* icon) {
+	kyanite::engine::imgui::Icon(icon);
+}
+
+float ImGui_GetAvailableWidth() {
+	return kyanite::engine::imgui::GetAvailableWidth();
+}
+
+bool ImGui_BeginTable(const char* name, int32_t count, int32_t flags) {
+	return kyanite::engine::imgui::BeginTable(name, count, flags);
+}
+
+void ImGui_EndTable() {
+	kyanite::engine::imgui::EndTable();
+}
+
+void ImGui_SetupColumn(const char* label) {
+	kyanite::engine::imgui::SetupColumn(label);
+}
+
+
+void ImGui_TableNextRow() {
+	kyanite::engine::imgui::TableNextRow();
+}
+
+
+void ImGui_TableSetColumnIndex(int32_t index) {
+	kyanite::engine::imgui::TableSetColumnIndex(index);
+}
+
+void ImGui_Columns(int count) {
+	kyanite::engine::imgui::Columns(count);
+}
+
+void ImGui_NextColumn() {
+	kyanite::engine::imgui::NextColumn();
 }
 
 void ImGui_Separator() {

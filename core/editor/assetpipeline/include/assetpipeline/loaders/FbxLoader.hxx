@@ -10,6 +10,8 @@ namespace kyanite::editor::assetpipeline::loaders {
 	public:
 		FbxLoader();
 		~FbxLoader();
-		auto LoadFromBuffer(std::vector<uint8_t> buffer) -> std::vector<kyanite::engine::rendering::MeshData>;
+		auto LoadFromFile(
+			const char* path
+		) -> std::vector<kyanite::engine::rendering::MeshData>;
 	};
 }

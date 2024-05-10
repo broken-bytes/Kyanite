@@ -2,6 +2,7 @@
 
 #include <shared/Exported.hxx>
 #include <shared/NativePointer.hxx>
+#include <shared/Result.hxx>
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,13 +52,13 @@ extern "C" {
 	* @param meshData The mesh data to load into
 	* @param len The length of the mesh data
 	*/
-	EXPORTED void AssetPipeline_LoadMeshes(const uint8_t* buffer, size_t bufferLen, MeshData* meshData, size_t* len);
+	EXPORTED Result AssetPipeline_LoadMeshes(const char* path, struct MeshData** meshData, size_t* len);
 
 	/**
 	* @brief Free the mesh data
 	* @param meshData The mesh data to free
 	*/
-	EXPORTED void AssetPipeline_FreeMeshes(MeshData* meshData, size_t len);
+	EXPORTED void AssetPipeline_FreeMeshes(struct MeshData* meshData, size_t len);
 
 
 #ifdef __cplusplus

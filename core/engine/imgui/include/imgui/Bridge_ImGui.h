@@ -36,17 +36,117 @@ extern "C" {
 	EXPORTED void ImGui_EndWindow();
 
 	/**
+	* @brief Begin a menu window
+	* @param title The title of the window
+	* @param the mouse button to open the menu
+	*/
+	EXPORTED bool ImGui_BeginPopupContextWindow();
+
+	/**
+	* @brief End a menu window
+	*/
+	EXPORTED void ImGui_EndPopup();
+
+	/**
+	* @brief Begin a menu
+	* @param label The label of the menu
+	*/
+	EXPORTED bool ImGui_BeginMenu(const char* label);
+
+	/**
+	* @brief End a menu
+	*/
+	EXPORTED void ImGui_EndMenu();
+
+	/**
+	* @brief Begin a menu item
+	*/
+	EXPORTED bool ImGui_MenuItem(const char* label);
+
+	/**
+	* @brief Gets the cursor position
+	* @param y A pointer to the y position
+	*/
+	EXPORTED void ImGui_GetCursorPos(float* y);
+
+	/**
+	* @brief Set the cursor position to the given y
+	* @param y The y position to set the cursor to
+	*/
+	EXPORTED void ImGui_SetCursorPos(float y);
+
+	/**
+	* @brief Makes the same line
+	*/
+	EXPORTED void ImGui_SameLine();
+
+	/**
+	* @brief Draw a dummy
+	* @param width The width of the dummy
+	* @param height The height of the dummy
+	*/
+	EXPORTED void ImGui_Dummy(float width, float height);
+
+	/**
 	* @brief Draw a button
 	* @param label The label of the button
+	* @param width The width of the button
+	* @param height The height of the button
 	* @return True if the button was clicked
 	*/
-	EXPORTED bool ImGui_Button(const char* label);
+	EXPORTED bool ImGui_Button(const char* label, float* width, float* height);
 
 	/**
 	* @brief Draw a label
 	* @param label The label to draw
 	*/
 	EXPORTED void ImGui_Label(const char* label);
+
+	/**
+	* @brief Draw an icon
+	* @param icon The icon to draw
+	*/
+	EXPORTED void ImGui_Icon(const char* icon);
+
+	/**
+	* @brief Gets the available width
+	* @return The available width
+	*/
+	EXPORTED float ImGui_GetAvailableWidth();
+
+	/**
+	* @brief Creates a table
+	* @param name The name of the table
+	* @param count The number of columns
+	* @param flags The flags to use
+	*/
+	EXPORTED bool ImGui_BeginTable(const char* name, int32_t count, int32_t flags);
+
+	/**
+	* @brief Ends a table
+	*/
+	EXPORTED void ImGui_EndTable();
+
+	/**
+	* @brief Creates a table column
+	*/
+	EXPORTED void ImGui_SetupColumn(const char* label);
+
+	/**
+	* @brief Goes to the next row
+	*/
+	EXPORTED void ImGui_TableNextRow();
+
+	/**
+	* @brief Sets the column index
+	* @param index The index of the column
+	*/
+	EXPORTED void ImGui_TableSetColumnIndex(int32_t index);
+
+	/**
+	* @brief Sets the next column
+	*/
+	EXPORTED void ImGui_NextColumn();
 
 	/**
 	* @brief Draws a separator

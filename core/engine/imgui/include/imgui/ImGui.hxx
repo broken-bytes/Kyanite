@@ -29,6 +29,58 @@ namespace kyanite::engine::imgui {
 	EXPORTED auto EndWindow() -> void;
 
 	/**
+	* @brief Begin a menu window
+	* @param title The title of the window
+	* @param the mouse button to open the menu
+	*/
+	EXPORTED bool BeginPopupContextWindow();
+
+	/**
+	* @brief End a menu window
+	*/
+	EXPORTED void EndPopup();
+
+	/**
+	* @brief Begin a menu
+	* @param label The label of the menu
+	*/
+	EXPORTED bool BeginMenu(const char* label);
+
+	/**
+	* @brief End a menu
+	*/
+	EXPORTED void EndMenu();
+
+	/**
+	* @brief Begin a menu item
+	*/
+	EXPORTED bool MenuItem(const char* label);
+
+	/**
+	* @brief Gets the cursor position
+	* @param y The y position of the cursor
+	*/
+	EXPORTED void GetCursorPos(float* y);
+
+	/**
+	* @brief Set the cursor position to the given y
+	* @param y The y position to set the cursor to
+	*/
+	EXPORTED void SetCursorPos(float y);
+
+	/**
+	* @brief Makes the same line
+	*/
+	EXPORTED void SameLine();
+
+	/**
+	* @brief Draw a dummy
+	* @param width The width of the dummy
+	* @param height The height of the dummy
+	*/
+	EXPORTED void Dummy(float width, float height);
+
+	/**
 	* @brief Draws a reference selector
 	* @param window The window to draw the selector in
 	* @param label The label to display
@@ -40,9 +92,10 @@ namespace kyanite::engine::imgui {
 	* @brief Draws a button
 	* @param window The window to draw the button in
 	* @param label The label to display
-	* @param action The callback to call when the button is pressed
+	* @param width The width of the button
+	* @param height The height of the button
 	*/
-	EXPORTED auto Button(std::string_view label) -> bool;
+	EXPORTED auto Button(std::string_view label, float* width, float* height) -> bool;
 
 	/**
 	* @brief Draws a label
@@ -50,6 +103,58 @@ namespace kyanite::engine::imgui {
 	* @param label The label to display
 	*/
 	EXPORTED auto Label(std::string label) -> void;
+
+	/**
+	* @brief Creates a table
+	* @param name The name of the table
+	* @param count The number of columns
+	* @param flags The flags to use
+	*/
+	bool BeginTable(const char* name, int32_t count, int32_t flags);
+
+	/**
+	* @brief Ends a table
+	*/
+	void EndTable();
+
+	/**
+	* @brief Creates a table column
+	*/
+	void SetupColumn(const char* label);
+
+	/**
+	* @brief Goes to the next row
+	*/
+	void TableNextRow();
+
+	/**
+	* @brief Sets the column index
+	* @param index The index of the column
+	*/
+	void TableSetColumnIndex(int32_t index);
+
+	/**
+	* @brief Sets a number of columns
+	* @param count The number of columns
+	*/
+	EXPORTED void Columns(int count);
+
+	/**
+	* @brief Sets the next column
+	*/
+	EXPORTED void NextColumn();
+
+	/**
+	* @brief Draws an icon
+	* @param icon The icon to display
+	*/
+	EXPORTED auto Icon(std::string icon) -> void;
+
+	/**
+	* @brief Gets the available width
+	* @return The available width
+	*/
+	EXPORTED float GetAvailableWidth();
 
 	/**
 	* @brief Draws a separator

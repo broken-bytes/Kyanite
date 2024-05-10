@@ -11,20 +11,21 @@ namespace kyanite::editor::assetpipeline::loaders {
 	FbxLoader::~FbxLoader() {
 	}
 
-	auto FbxLoader::LoadFromBuffer(
-		std::vector<uint8_t> buffer
+	auto FbxLoader::LoadFromFile(
+		const char* path
 	) -> std::vector<kyanite::engine::rendering::MeshData> {
 		std::vector<engine::rendering::MeshData> meshes = {};
 
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFileFromMemory(buffer.data(), buffer.size(), 0, nullptr);
+		const aiScene* scene = importer.ReadFile(path, 0);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			throw std::runtime_error("Failed to load model");
+			auto err = importer.GetErrorString();
+			throw std::runtime_error(err);
 		}
 
 		std::vector<engine::rendering::Vertex> vertices;
-		std::vector<uint32_t> indices;
+		std::vector<uint32_t> indices = {};
 
 		// Process animations
 		for (int x = 0; x < scene->mNumAnimations; x++) {

@@ -132,8 +132,10 @@ class ContentManager {
 
     private func handleModel(file: FilesystemWatchdog.File) throws {
         // Load the raw mesh data and write it to the blobs folder
-        guard let meshList = NativeAssetPipeline.shared.loadModel(at: file.path) else {
-            throw ContentType.ContentTypeError.unknownFileType("Failed to load model")
+        let meshList = NativeAssetPipeline.shared.loadModel(at: file.path)
+
+        guard case let .success(meshList) = meshList else {
+            throw ContentType.ContentTypeError.unknownFileType("Failed to load model data")
         }
 
         // Add the mesh list to the database
@@ -146,7 +148,9 @@ class ContentManager {
         )
 
         // Take the first two characters of the UUID and create a folder with that name
-        let file = EditorEnvironment.default.blobsFolder.appending("/\(uuid.prefix(2))/\(uuid)")
+        let blobPath = URL(fileURLWithPath: EditorEnvironment.default.blobsFolder, isDirectory: true)
+        let directory = blobPath.appendingPathComponent(String(uuid.prefix(2)))
+        let file = directory.appendingPathComponent(uuid).appendingPathExtension("blob").path
 
         let meshes: [MeshData] = meshList.meshes.map { mesh in
             let vertices = mesh.vertices.map { vertex in
@@ -173,8 +177,8 @@ class ContentManager {
             throw ContentType.ContentTypeError.unknownFileType("Failed to encode model data")
         }
 
-        print(String(data: data, encoding: .utf8))
-
+        print(file)
+        try? FileManager.default.createDirectory(atPath: directory.path, withIntermediateDirectories: true, attributes: nil)
         FileManager.default.createFile(atPath: file, contents: data, attributes: nil)
     }
 

@@ -32,7 +32,6 @@ class Editor {
         WindowManager.shared.windows.append(Hierarchy())
         WindowManager.shared.windows.append(Inspector())
         WindowManager.shared.windows.append(ContentBrowser(contentManager: contentManager))
-        WindowManager.shared.windows.append(Terminal())
 
         contentManager.watch()
         sourceManager.watch()

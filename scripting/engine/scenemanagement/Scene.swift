@@ -1,7 +1,7 @@
 public protocol Scene {
     associatedtype Body: SceneNode
     @SceneBuilder var content: Body { get }
-    
+
     func onDidLoad()
 }
 

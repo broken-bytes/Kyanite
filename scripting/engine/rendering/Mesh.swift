@@ -1,7 +1,7 @@
 import Foundation
 @_implementationOnly import Native
 
-public class Mesh {
+public final class Mesh {
     public static var box: Mesh {
         return Mesh(uuid: "box")
     }
@@ -14,7 +14,7 @@ public class Mesh {
         return Mesh(uuid: "plane")
     }
 
-    internal var uuid: String
+    internal let uuid: String
 
     public var vertices: [Vertex] {
         get {
@@ -29,7 +29,7 @@ public class Mesh {
     }
 }
 
-extension Mesh: Hashable, Equatable {
+extension Mesh: Hashable, Equatable, Codable {
     public static func == (lhs: Mesh, rhs: Mesh) -> Bool {
         return lhs.uuid == rhs.uuid
     }

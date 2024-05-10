@@ -65,3 +65,8 @@ set_target_properties(Math PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DI
 set_target_properties(Rendering PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set_target_properties(System PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
+
+add_executable(TestApp test.cxx)
+target_link_libraries(TestApp PRIVATE AssetDatabase AssetPipeline Audio EntityComponentSystem ImGui Input IO Logger Math Rendering System)
+target_include_directories(TestApp PRIVATE core/engine/shared/include)
+target_include_directories(TestApp PRIVATE core)

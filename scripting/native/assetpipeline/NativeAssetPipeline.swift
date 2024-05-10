@@ -1,6 +1,11 @@
 @_implementationOnly import Bridge
 import Foundation
 
+public enum NativeAssetPipelineError: Error {
+    case internalLibraryError(String)
+    case emptyResult
+}
+
 public struct NativeVertex {
     public var position: (Float, Float, Float)
     public var normal: (Float, Float, Float)
@@ -42,21 +47,20 @@ public class NativeAssetPipeline {
         return 0
     }
 
-    public func loadModel(at path: String) -> NativeMeshList? {
-        guard let data = FileManager.default.contents(atPath: path) else {
-            print("Failed to load model at \(path)")
-            return nil
+    public func loadModel(at path: String) -> Swift.Result<NativeMeshList, NativeAssetPipelineError> {
+        var meshData: UnsafeMutablePointer<MeshData>? = nil
+        var len: Int = -1
+
+        let result = AssetPipeline_LoadMeshes(path, &meshData, &len)
+
+        guard len > 0 else {
+            return .failure(.emptyResult)
         }
 
-        return withUnsafePointer(to: data) {
-            let meshes: UnsafeMutablePointer<MeshData>? = nil
-            var count: Int = 0
-
-            AssetPipeline_LoadMeshes($0, data.count, meshes, &count)
-
-            print("Loaded \(count) meshes")
-
-            return NativeMeshList(with: meshes!, count: count)
+        guard result.error == nil else {
+            return .failure(.internalLibraryError(String(cString: result.error!)))
         }
+
+        return .success(NativeMeshList(with: meshData!, count: len))
     }
 }

@@ -2,17 +2,18 @@
 
 #include <shared/Exported.hxx>
 #include <shared/NativePointer.hxx>
+#include <shared/Result.hxx>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-	struct Vertex {
+	EXPORTED struct Vertex {
 		float position[3];
 		float normal[3];
 		float texCoord[2];
 	} typedef Vertex;
 
-	struct MeshData {
+	EXPORTED struct MeshData {
 		const char* name;
 		Vertex* vertices;
 		uint32_t vertexCount;
@@ -20,24 +21,44 @@ extern "C" {
 		uint32_t indexCount;
 	} typedef MeshData;
 
+    EXPORTED struct AnimationClipData {
+        const char* name;
+        const char* takeName;
+        int startFrame;
+        int endFrame;
+        float frameRate;
+    } typedef AnimationClipData;
+
+    EXPORTED struct AnimationData {
+		AnimationClipData* clips;
+		size_t clipCount;
+    } typedef AnimationData;
+
+	EXPORTED struct ModelData {
+		const char* name;
+		MeshData* meshes;
+		size_t meshCount;
+		AnimationData* animations;
+	} typedef ModelData;
+
 	/**
 	* @brief Initialize the asset pipeline
 	*/
 	EXPORTED void AssetPipeline_Init();
 
 	/**
-	* @brief Load a mesh from a file
-	* @param path The path to the file
+	* @brief Load a mesh from a buffer
+	* @param path The buffet to load from
 	* @param meshData The mesh data to load into
 	* @param len The length of the mesh data
 	*/
-	EXPORTED void AssetPipeline_LoadMeshes(const uint8_t* buffer, size_t bufferLen, MeshData* meshData, size_t* len);
+	EXPORTED Result AssetPipeline_LoadMeshes(const char* path, struct MeshData** meshData, size_t* len);
 
 	/**
 	* @brief Free the mesh data
 	* @param meshData The mesh data to free
 	*/
-	EXPORTED void AssetPipeline_FreeMeshes(MeshData* meshData, size_t len);
+	EXPORTED void AssetPipeline_FreeMeshes(struct MeshData* meshData, size_t len);
 
 
 #ifdef __cplusplus

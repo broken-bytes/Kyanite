@@ -15,7 +15,7 @@ namespace kyanite::editor::assetpipeline::mappers {
 		ModelMapper() = default;
 
 		auto MapFbx(
-			std::vector<uint8_t> data
+			const char* path
 		) -> std::vector<kyanite::engine::rendering::MeshData>;
 	};
 }
